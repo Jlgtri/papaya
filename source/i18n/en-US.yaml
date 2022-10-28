@@ -1,0 +1,269 @@
+
+alert:
+  exit:
+    title: Are you sure you want to exit?
+    approve: Yes, have a good day
+    deny: No, I want to stay
+  location_denied:
+    title: Permission denied
+    body: You denied location permission multiple times.
+      Now you need to provide this permission in the app settings.
+    approve: Open Settings
+    deny: Cancel
+  location_disabled:
+    title: Location Services Disabled
+    body: The location services on your device are disabled.
+      Enable them in the settings.
+    approve: Open Settings
+    deny: Cancel
+  clear_cart:
+    title: Remove all items
+    body: Are you sure you want to delete all items from the cart?
+    approve: Confirm
+    deny: Cancel
+
+onboarding:
+  skip: Skip
+  next: Next
+  get_started: Get Started
+  '1':
+    title: Plant-Forward Dining Delivered.
+    description: It is an exciting time for non-meat eaters.
+  '2':
+    title: Let us help you choose dinner tonight.
+    description: Try something new once a week.
+  '3':
+    title: We Curate. We Deliver. You Enjoy.
+    description: That's our story and we're sticking to it.
+
+auth:
+  title: Order In.\nEat plants.\nWin Win.
+  sign_up: Sign Up
+  sign_in: Log In
+
+map:
+  back: Back
+  title: Choose Your Address
+  hint: Enter your location
+  confirm: Confirm
+
+home:
+  address_hint: Choose Your Address
+  search_hint: Search
+  view_detail: View Detail
+  stores_view_all: View All
+  stores_all: All Restaurants
+  stores_nearby: Restaurants Nearby
+
+  menu:
+    home: Home
+    cart: Cart
+    orders: Orders
+    profile: Profile
+
+  search_not_found:
+    title: Restaurant not found
+    description: We couldn't find any restaurants near you that we currently deliver
+      from.
+    change_delivery_adress: Change Delivery Address
+    switch_to_pickup: Switch to Pickup
+    join_waiting_list: Join Waiting List
+    join_waiting_list_title: Join Our Waiting List
+    join_waiting_list_description: If you want to get on our waiting list for when we get to your area, fill out this form and we will notify you at once
+
+stores_all:
+  back: Back
+  title: All Restaurants
+
+store:
+  back: Back
+  limited_time: Limited Time Only!
+  vegan: Vegan
+  country: Country
+  additional_info: Additional Info
+
+  delivery: Delivery
+  delivery_time(final int min, final int max): $min-$max min
+
+  pickup: Pickup
+  pickup_time(final int min, final int max): $min-$max min
+
+  product_card:
+    add_to_cart: Add to Cart
+    remove_from_cart: Remove from Cart
+
+  product_screen:
+    add_to_cart: Add to Cart
+    remove_from_cart: Remove from Cart
+    additional_info: More info
+
+  info:
+    open_until(final String until): Open until $until
+    open_at(final String at): Open at $at
+
+delivery:
+  back: Back
+  title: Select Order Details
+  delivery_tab: Delivery
+  pickup_tab: Pickup
+  where_to: Where to?
+  add_address: Add New Address
+  done: Done
+
+
+cart:
+  title: Your Cart
+  empty: Your cart is empty.
+
+
+checkout:
+  back: Back
+  title: Checkout
+  store_name: Store Name
+  delivery: Delivery in 20-30 mins
+  delivery_time: 'Delivery time:'
+  time: Time
+  dietary_restrictions: Any dietary Restrictions?
+  note: Leave us a Note
+  bill:
+    subtotal: Subtotal
+    delivery_tax: Delivery
+    sales_tax: Sales Tax
+    total: Total
+  customer_info:
+    one: '1'
+    title: Customer Info
+    description: Create Papaya account to speed up check-out. Already have an account?
+    first_name: First Name
+    hint_first_name: Enter your first name
+    last_name: Last Name
+    hint_last_name: Enter your last name
+    email: Email
+    phone: Phone
+    create_account_btn: Create Account & Continue
+    continue_asguest: Continue as a Guest
+  order_details:
+    two: '2'
+    title: Order Details
+    deliver_tab: Delivery
+    pickup_tab: Pickup
+    estimated_delivery: Estimated delivery time - 30-40 mins
+    estimated_pick_up: Estimated pickup time - 10-20 mins
+    delivery_adress: Delivery Adress
+    hint_delivery_adress: Enter your  Adress
+    change: Change
+    apartment: Apartment
+    hint_apartment: " Apartment number"
+    delivery_instructions: Delivery Instructions
+    hint_delivery_instructions: Any Notes to the Driver?
+    continue_to_payment: Continue to Payment
+  payment:
+    three: '3'
+    title: Payment
+    quick_tip: Quick Tip
+    tip:
+      tip_five: "$5"
+      tip_ten: "$10"
+      tip_fifteen: "$15"
+      tip_twenty: "$20"
+      custom_tip: Custom Tip
+    payment_method: Choose payment method
+    apple: Apple Pay
+    google: Google Pay
+    card: Or pay with credit card
+    add_payment: Add Payment Method
+    card_number: Card Number
+    hint_card_number: Enter your card number
+    expiration_date: Expiry Date
+    hint_expiration_date: MM/YY
+    cvv: CVV
+    hint_cvv: Enter Code
+    dicount: Do you have Discount Code?
+    apply: Apply Here
+    apply_btn: Apply
+    change: Change
+    pay_btn: Pay $
+
+profile:
+  title: Profile
+  logout: Logout
+  address:
+    title: Delivery Address
+    add_new: Add New Address
+    card:
+      title: Delivery Adress
+      instructions: Delivery Instructions
+
+  payment:
+    title: Payment Methods
+    add_new: Add Payment Method
+
+  edit_info:
+    title: Edit Info
+    first_name: First Name
+    hint_first_name: Enter your first name
+    last_name: Last Name
+    hint_last_name: Enter your last name
+    email: Email
+    phone: Phone
+    save_btn: Save
+
+  add_adress:
+    title: Add Address
+    delivery_adress: Delivery Adress
+    hint_adress: Enter your Adress
+    apartment: Apartment
+    hint_apartment: " Apartment number"
+    delivery_instructions: Delivery Instructions
+    hint_delivery_instructions: Any Notes to the Driver?
+    save_btn: Save
+    cancel_btn: Cancel
+
+  edit_adress:
+    title: Edit Adress
+    delivery_adress: Delivery Adress
+    hint_adress: Enter your Adress
+    apartment: Apartment
+    hint_apartment: " Apartment number"
+    save_btn: Save
+    cancel_btn: Cancel
+
+  first_name: First Name
+  last_name: Last Name
+  phone: Phone
+  email: Email
+  change_password: Change Password
+  current_password: Current Password
+  hint_current_password: Enter your current password
+  new_password: New Password
+  hint_new_password: Enter your new password
+  confirm_password: Confirm Password
+  hint_confirm_password: Confirm your new password
+  save_password: Save Password
+
+
+orders:
+  title: Orders
+  current: Current
+  more: More
+  purchase_history: Purchase History
+  less: Less
+  title_of_order: 'Title '
+  price_of_order: Price
+  order_number: Order Number
+  contact_support_btn: Contact Support
+  repeat_order_btn: Repeat Order
+  add_tip_btn: Add a Tip
+
+order_history:
+  title: Order History
+  order_number: Order Number
+  date: Date
+  status: Status
+  total: Total
+  view: View
+  cancel: Cancel
+  cancel_order: Cancel Order
+  cancel_order_confirm: Are you sure you want to cancel this order?
+  cancel_order_confirm_btn: Cancel Order
+  cancel_order_cancel_btn: Cancel

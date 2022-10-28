@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=./build.yaml
+targets:
+  $default:
+    sources:
+      include:
+        - '**'
+        - $package$
+      exclude:
+        - lib/$lib$
+        - .dart_tool/**
+        - build/**
+
+    builders:
+      generators|assets:
+        enabled: true
+        options:
+          import_path: source/assets
+          export_path: lib/src/generated/assets.g.dart
+
+      generators|i18n:
+        enabled: true
+        options:
+          import_path: source/i18n
+          export_path: lib/src/generated/i18n.g.dart
+
+      generators|models:
+        enabled: true
+        options:
+          import_path: source/models.json
+          export_path: lib/src/generated/models.g.dart
+          convert_class_names: false
+          include_null_fields: false
+
+      generators|icons:
+        enabled: true
+        options:
+          import_path: source/icons
+          export_path: lib/src/generated/icons.g.dart
+          font_export_path: source/icons.ttf
+          height: 32

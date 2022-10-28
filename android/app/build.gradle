@@ -1,0 +1,79 @@
+def properties = new Properties()
+def loadProperties = { reader -> properties.load(reader) }
+rootProject.file('local.properties').withReader('UTF-8'), loadProperties
+file('key.properties').withReader('UTF-8'), loadProperties
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "${properties['flutter.sdk']}/packages/flutter_tools/gradle/flutter.gradle"
+
+
+android {
+    compileSdkVersion 33
+    defaultConfig {
+        multiDexEnabled true
+        resConfigs 'en'
+        applicationId 'com.fluttercrew.papaya'
+        minSdkVersion 20
+        targetSdkVersion 33
+        versionCode properties['flutter.versionCode']?.toInteger() ?: 1
+        versionName properties['flutter.versionName'] ?: '1.0'
+        manifestPlaceholders += [
+            'appAuthRedirectScheme': 'com.fluttercrew.papaya'
+        ]
+    }
+
+    signingConfigs {
+        release {
+            keyAlias properties['key.alias']
+            keyPassword properties['key.password']
+            storePassword properties['store.password']
+            storeFile file(properties['store.file'])
+
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
+    buildTypes {
+        debug {
+            proguardFiles {
+                'proguard-rules.pro'
+                getDefaultProguardFile('proguard-android-optimize.txt')
+            }
+        }
+
+        release {
+            signingConfig signingConfigs.release
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles {
+                'proguard-rules.pro'
+                getDefaultProguardFile('proguard-android-optimize.txt')
+            }
+        }
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a'
+            universalApk true
+        }
+    }
+
+    kotlinOptions { jvmTarget = '1.8' }
+    sourceSets { main.java.srcDirs += 'src/main/kotlin' }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+flutter { source '../..' }
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.multidex:multidex:2.0.1'
+}
