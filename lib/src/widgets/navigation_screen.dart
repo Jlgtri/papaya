@@ -12,6 +12,7 @@ import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
 import '../generated/models.g.dart';
+import '../hooks/sync_callback_hook.dart';
 import '../hooks/widget_state_hook.dart';
 import '../models/search_entry.dart';
 import '../providers/api_providers.dart';
@@ -46,149 +47,162 @@ class NavigationScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
     final bool searchActive = ref.watch(
       SearchField.provider.select((final _) => _ != null),
     );
+    final SyncCallback syncCallback = useSyncCallback();
     return WillPopScope(
       onWillPop: () async {
         ref.read(willPopCompleterProvider).complete();
         ref.refresh(willPopCompleterProvider);
         return navigator.canPop();
       },
-      child: KeyboardDismissOnTap(
-        child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: theme.colorScheme.onBackground,
-            systemOverlayStyle: SystemUiOverlayStyle(
-              systemNavigationBarIconBrightness: Brightness.dark,
-              systemNavigationBarColor: theme.colorScheme.surface,
-              statusBarColor: theme.colorScheme.onBackground,
-              statusBarIconBrightness: Brightness.light,
-              statusBarBrightness: Brightness.dark,
-            ),
-            toolbarHeight: searchActive ? searchAppBarHeight : appBarHeight,
-            titleSpacing: 0,
-            title: searchActive
-                ? const Padding(
-                    padding: EdgeInsets.only(left: 24),
-                    child: SizedBox(height: 40, child: SearchField()),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: theme.colorScheme.surface,
-                        textStyle: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: theme.colorScheme.onBackground,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+          systemNavigationBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: theme.colorScheme.surface,
+        ),
+        child: KeyboardDismissOnTap(
+          child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: theme.colorScheme.onBackground,
+              systemOverlayStyle: SystemUiOverlayStyle(
+                statusBarColor: theme.colorScheme.onBackground,
+                statusBarIconBrightness: Brightness.light,
+                statusBarBrightness: Brightness.dark,
+                systemNavigationBarIconBrightness: Brightness.dark,
+                systemNavigationBarColor: theme.colorScheme.surface,
+              ),
+              toolbarHeight: searchActive ? searchAppBarHeight : appBarHeight,
+              titleSpacing: 0,
+              title: searchActive
+                  ? const Padding(
+                      padding: EdgeInsets.only(left: 24),
+                      child: SizedBox(height: 40, child: SearchField()),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: theme.colorScheme.surface,
+                          textStyle: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      onPressed: () async =>
-                          Routes.delivery.push(navigator, ref),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
+                        onPressed: () async => syncCallback(
+                          () => Routes.delivery.push(navigator, container),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Icon(icons.delivery, size: 16),
-                            const SizedBox(width: 24),
-                            Flexible(
-                              child: Text(
-                                $.home.addressHint,
-                                maxLines: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Icon(icons.delivery, size: 16),
+                              const SizedBox(width: 24),
+                              Flexible(
+                                child: Text(
+                                  $.home.addressHint,
+                                  maxLines: 1,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 11),
-                            Icon(icons.misc.arrowDown, size: 10),
-                          ],
+                              const SizedBox(width: 11),
+                              Icon(icons.misc.arrowDown, size: 10),
+                            ],
+                          ),
                         ),
                       ),
                     ),
+              actions: <Widget>[
+                Align(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: !searchActive
+                        ? IconButton(
+                            style: IconButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              foregroundColor: theme.colorScheme.primary,
+                            ),
+                            icon: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(icons.misc.search, size: 24),
+                            ),
+                            onPressed: () => ref
+                                .read(SearchField.provider.notifier)
+                                .state = '',
+                          )
+                        : IconButton(
+                            style: IconButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              foregroundColor: theme.colorScheme.surface,
+                            ),
+                            icon: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(icons.cancel, size: 16),
+                            ),
+                            onPressed: () {
+                              ref.refresh(SearchField.suggestions.notifier);
+                              ref.read(SearchField.provider.notifier).state =
+                                  null;
+                            },
+                          ),
                   ),
-            actions: <Widget>[
-              Align(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: !searchActive
-                      ? IconButton(
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            foregroundColor: theme.colorScheme.primary,
-                          ),
-                          icon: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(icons.misc.search, size: 24),
-                          ),
-                          onPressed: () => ref
-                              .read(SearchField.provider.notifier)
-                              .state = '',
-                        )
-                      : IconButton(
-                          style: IconButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            foregroundColor: theme.colorScheme.surface,
-                          ),
-                          icon: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(icons.cancel, size: 16),
-                          ),
-                          onPressed: () {
-                            ref.refresh(SearchField.suggestions.notifier);
-                            ref.read(SearchField.provider.notifier).state =
-                                null;
-                          },
-                        ),
                 ),
-              ),
-            ],
-          ),
-          body: PersistentTabView(
-            context,
-            navBarHeight: navBarHeight,
-            navBarStyle: NavBarStyle.simple,
-            screens: const <Widget>[
-              HomeScreen(),
-              CartScreen(),
-              Placeholder(),
-              ProfileScreen(),
-            ],
-            screenTransitionAnimation: const ScreenTransitionAnimation(
-              animateTabTransition: true,
-              duration: Duration(milliseconds: 500),
+              ],
             ),
-            items: <PersistentBottomNavBarItem>[
-              PersistentBottomNavBarItem(
-                iconSize: 24,
-                icon: Icon(icons.menu.home),
-                title: $.home.menu.home,
-                activeColorPrimary: theme.colorScheme.primary,
-                inactiveColorPrimary: theme.colorScheme.outline,
+            body: PersistentTabView(
+              context,
+              navBarHeight: navBarHeight,
+              navBarStyle: NavBarStyle.simple,
+              screens: const <Widget>[
+                HomeScreen(),
+                CartScreen(),
+                Placeholder(),
+                ProfileScreen(),
+              ],
+              screenTransitionAnimation: const ScreenTransitionAnimation(
+                animateTabTransition: true,
+                duration: Duration(milliseconds: 500),
               ),
-              PersistentBottomNavBarItem(
-                iconSize: 24,
-                icon: Icon(icons.menu.cart),
-                title: $.home.menu.cart,
-                activeColorPrimary: theme.colorScheme.primary,
-                inactiveColorPrimary: theme.colorScheme.outline,
-              ),
-              PersistentBottomNavBarItem(
-                iconSize: 24,
-                icon: Icon(icons.menu.orders),
-                title: $.home.menu.orders,
-                activeColorPrimary: theme.colorScheme.primary,
-                inactiveColorPrimary: theme.colorScheme.outline,
-              ),
-              PersistentBottomNavBarItem(
-                iconSize: 24,
-                icon: Icon(icons.menu.profile),
-                title: $.home.menu.profile,
-                activeColorPrimary: theme.colorScheme.primary,
-                inactiveColorPrimary: theme.colorScheme.outline,
-              ),
-            ],
+              items: <PersistentBottomNavBarItem>[
+                PersistentBottomNavBarItem(
+                  iconSize: 24,
+                  icon: Icon(icons.menu.home),
+                  title: $.home.menu.home,
+                  activeColorPrimary: theme.colorScheme.primary,
+                  inactiveColorPrimary: theme.colorScheme.outline,
+                ),
+                PersistentBottomNavBarItem(
+                  iconSize: 24,
+                  icon: Icon(icons.menu.cart),
+                  title: $.home.menu.cart,
+                  activeColorPrimary: theme.colorScheme.primary,
+                  inactiveColorPrimary: theme.colorScheme.outline,
+                ),
+                PersistentBottomNavBarItem(
+                  iconSize: 24,
+                  icon: Icon(icons.menu.orders),
+                  title: $.home.menu.orders,
+                  activeColorPrimary: theme.colorScheme.primary,
+                  inactiveColorPrimary: theme.colorScheme.outline,
+                ),
+                PersistentBottomNavBarItem(
+                  iconSize: 24,
+                  icon: Icon(icons.menu.profile),
+                  title: $.home.menu.profile,
+                  activeColorPrimary: theme.colorScheme.primary,
+                  inactiveColorPrimary: theme.colorScheme.outline,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -220,6 +234,7 @@ class SearchField extends HookConsumerWidget {
 
     useMemoized(() => ref.refresh(suggestions));
     final IsMounted isMounted = useIsMounted();
+    final SyncCallback syncCallback = useSyncCallback();
     final ObjectRef<bool> pickedSuggestion = useRef(false);
     final GlobalKey searchKey = useMemoized(GlobalKey.new);
     final FocusNode focusNode = useFocusNode();
@@ -261,32 +276,31 @@ class SearchField extends HookConsumerWidget {
                 link: layerLink,
                 offset: Offset(0, textFieldRenderBox.size.height),
                 child: SearchFieldSuggestions(
-                  onTap: (final String suggestion) async {
-                    if (isMounted()) {
-                      ref.refresh(suggestions);
-                      focusNode.unfocus();
-                      final String inputText = controller.text.trim();
-                      controller
-                        ..text = suggestion
-                        ..selection = TextSelection.fromPosition(
-                          TextPosition(offset: suggestion.length),
-                        );
-                      ref.read(suggestions.notifier).state = <String>{
-                        'diki',
-                        'flex'
-                      };
-                      if (inputText.isNotEmpty) {
-                        final Isar isar = await ref.read(isarProvider.future);
-                        await isar.writeTxn(
-                          () => isar.searchEntrys.put(
-                            SearchEntry()
-                              ..value = inputText
-                              ..timestamp = ref.read(serverTimeProvider),
-                          ),
-                        );
-                      }
+                  onTap: (final String suggestion) async =>
+                      syncCallback(() async {
+                    ref.refresh(suggestions);
+                    focusNode.unfocus();
+                    final String inputText = controller.text.trim();
+                    controller
+                      ..text = suggestion
+                      ..selection = TextSelection.fromPosition(
+                        TextPosition(offset: suggestion.length),
+                      );
+                    ref.read(suggestions.notifier).state = <String>{
+                      'diki',
+                      'flex'
+                    };
+                    if (inputText.isNotEmpty) {
+                      final Isar isar = await ref.read(isarProvider.future);
+                      await isar.writeTxn(
+                        () => isar.searchEntrys.put(
+                          SearchEntry()
+                            ..value = inputText
+                            ..timestamp = ref.read(serverTimeProvider),
+                        ),
+                      );
                     }
-                  },
+                  }),
                 ),
               ),
             ),
@@ -296,15 +310,15 @@ class SearchField extends HookConsumerWidget {
     );
 
     useMemoized(
-      () => WidgetsBinding.instance.addPostFrameCallback((final _) async {
-        if (isMounted()) {
+      () => WidgetsBinding.instance.addPostFrameCallback(
+        (final _) async => syncCallback(() async {
           final Iterable<String> isarSuggestions =
               await ref.read(searchEntriesProvider.future);
           if (isMounted()) {
             ref.read(suggestions.notifier).state = isarSuggestions.toSet();
           }
-        }
-      }),
+        }),
+      ),
     );
 
     final BorderRadius borderRadius = ref.watch(showSuggestions) &&
@@ -354,33 +368,29 @@ class SearchField extends HookConsumerWidget {
                 borderSide: BorderSide.none,
               ),
             ),
-            onChanged: (final String value) async {
-              if (isMounted()) {
-                final StateController<String?> notifier =
-                    ref.read(provider.notifier);
-                if (notifier.state != value) {
-                  notifier.state = value;
-                  ref.read(suggestions.select((final _) => _.isEmpty))
-                      ? WidgetsBinding.instance.addPostFrameCallback(
-                          (final _) => isMounted()
-                              ? pickedSuggestion.value = false
-                              : null,
-                        )
-                      : pickedSuggestion.value = false;
-                }
-                if (value.isEmpty) {
-                  final Iterable<String> isarSuggestions =
-                      await ref.read(searchEntriesProvider.future);
-                  ref.read(suggestions.notifier).state =
-                      isarSuggestions.toSet();
-                } else {
-                  ref.read(suggestions.notifier).state =
-                      (await ref.read(filteredStoresProvider.future))
-                          .map((final StoreModel store) => store.name!)
-                          .toSet();
-                }
+            onChanged: (final String value) async => syncCallback(() async {
+              final StateController<String?> notifier =
+                  ref.read(provider.notifier);
+              if (notifier.state != value) {
+                notifier.state = value;
+                ref.read(suggestions.select((final _) => _.isEmpty))
+                    ? WidgetsBinding.instance.addPostFrameCallback(
+                        (final _) =>
+                            isMounted() ? pickedSuggestion.value = false : null,
+                      )
+                    : pickedSuggestion.value = false;
               }
-            },
+              if (value.isEmpty) {
+                final Iterable<String> isarSuggestions =
+                    await ref.read(searchEntriesProvider.future);
+                ref.read(suggestions.notifier).state = isarSuggestions.toSet();
+              } else {
+                ref.read(suggestions.notifier).state =
+                    (await ref.read(filteredStoresProvider.future))
+                        .map((final StoreModel store) => store.name!)
+                        .toSet();
+              }
+            }),
           ),
         ),
       ),

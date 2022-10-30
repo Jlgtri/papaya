@@ -13,6 +13,7 @@ import 'package:latlong2/latlong.dart';
 import '../../const.dart';
 import '../../generated/i18n.g.dart';
 import '../../generated/icons.g.dart';
+import '../../hooks/sync_callback_hook.dart';
 import '../../hooks/widget_state_hook.dart';
 import '../../providers/location_providers.dart';
 import '../../routes.dart';
@@ -30,9 +31,11 @@ class MapScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
-    final ObjectRef<bool> isLoading = useRef(false);
     final IsMounted isMounted = useIsMounted();
+    final SyncCallback syncCallback = useSyncCallback();
     final TextEditingController addressController = useTextEditingController();
     final ValueNotifier<LatLng?> customLatLng = useState<LatLng?>(null);
     final MapController controller = useMemoized(MapController.new);
@@ -163,7 +166,7 @@ class MapScreen extends HookConsumerWidget {
                       style: TextButton.styleFrom(
                         minimumSize: const Size.fromHeight(0),
                       ),
-                      onPressed: navigator.maybePop,
+                      onPressed: () async => syncCallback(navigator.maybePop),
                       child: Text(
                         $.alert.locationDenied.deny,
                         style: theme.textTheme.titleSmall?.copyWith(
@@ -178,6 +181,9 @@ class MapScreen extends HookConsumerWidget {
           ).show();
         }
       } on LocationServiceDisabledException catch (_) {
+        if (!isMounted()) {
+          return null;
+        }
         // ignore: use_build_context_synchronously
         await FlashController<Object?>(
           context,
@@ -222,7 +228,7 @@ class MapScreen extends HookConsumerWidget {
                   padding: const EdgeInsets.all(8),
                   child: TextButton(
                     style: theme.textButtonTheme.style,
-                    onPressed: navigator.maybePop,
+                    onPressed: () async => syncCallback(navigator.maybePop),
                     child: Text(
                       $.alert.locationDisabled.deny,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -261,7 +267,12 @@ class MapScreen extends HookConsumerWidget {
         if (navigator.canPop()) {
           return true;
         }
-        await Routes.navigation.pushReplacement(navigator, ref);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (final _) => syncCallback(
+            () async => (await Routes.current(container))
+                .pushReplacement(navigator, container),
+          ),
+        );
         return false;
       },
       child: Scaffold(
@@ -279,7 +290,7 @@ class MapScreen extends HookConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 12),
               child: TextButton(
-                onPressed: navigator.maybePop,
+                onPressed: () async => syncCallback(navigator.maybePop),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -371,14 +382,14 @@ class MapScreen extends HookConsumerWidget {
                           backgroundColor: theme.colorScheme.primary,
                           shape: const CircleBorder(),
                         ),
-                        onPressed: () async {
+                        onPressed: () async => syncCallback(() async {
                           customLatLng.value = null;
                           final LatLng? currentLocation =
                               await getCurrentLocation();
                           if (currentLocation != null) {
                             animateStream.add(currentLocation);
                           }
-                        },
+                        }),
                       ),
                     ),
                   ),
@@ -401,7 +412,7 @@ class MapScreen extends HookConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(0),
                 ),
-                onPressed: navigator.maybePop,
+                onPressed: () async => syncCallback(navigator.maybePop),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Text($.map.confirm),

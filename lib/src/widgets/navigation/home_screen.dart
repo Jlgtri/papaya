@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../generated/i18n.g.dart';
 import '../../generated/icons.g.dart';
 import '../../generated/models.g.dart';
+import '../../hooks/sync_callback_hook.dart';
 import '../../providers/api_providers.dart';
 import '../../routes.dart';
 import '../navigation_screen.dart';
@@ -35,7 +36,10 @@ class HomeScreen extends HookConsumerWidget {
     final NavigatorState rootNavigator =
         Navigator.of(context, rootNavigator: true);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
+    final SyncCallback syncCallback = useSyncCallback();
     final PageController pageController = usePageController();
     final ValueNotifier<int> pageIndex = useState(0);
 
@@ -161,8 +165,9 @@ class HomeScreen extends HookConsumerWidget {
                           foregroundColor: theme.colorScheme.primary,
                           textStyle: theme.textTheme.titleMedium,
                         ),
-                        onPressed: () async =>
-                            Routes.stores.push(rootNavigator, ref),
+                        onPressed: () async => syncCallback(
+                          () => Routes.stores.push(rootNavigator, container),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,

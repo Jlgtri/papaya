@@ -1,12 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../generated/i18n.g.dart';
 import '../../generated/icons.g.dart';
 import '../../generated/models.g.dart';
+import '../../hooks/sync_callback_hook.dart';
+import '../../models/settings.dart';
 import '../../providers/api_providers.dart';
+import '../../providers/misc_providers.dart';
+import '../../routes.dart';
 
 class ProfileScreen extends HookConsumerWidget {
   const ProfileScreen({super.key});
@@ -15,8 +20,13 @@ class ProfileScreen extends HookConsumerWidget {
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final NavigatorState rootNavigator =
+        Navigator.of(context, rootNavigator: true);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
     final AsyncValue<Iterable<UserAddressesModel>> addresses =
         ref.watch(addressesProvider);
+    final SyncCallback syncCallback = useSyncCallback();
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -222,7 +232,17 @@ class ProfileScreen extends HookConsumerWidget {
                 foregroundColor: const Color(0xff484850),
                 side: const BorderSide(color: Color(0xff484850)),
               ),
-              onPressed: () {},
+              onPressed: () async => syncCallback(() async {
+                final Isar isar = await ref.read(isarProvider.future);
+                await isar.writeTxn(
+                  () async => isar.settings.put(
+                    (await ref.read(settingsProvider.future))
+                      ..tokens = <Token>[],
+                  ),
+                );
+                await (await Routes.current(container))
+                    .pushReplacement(rootNavigator, container);
+              }),
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

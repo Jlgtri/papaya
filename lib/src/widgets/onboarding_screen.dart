@@ -8,6 +8,7 @@ import 'package:isar/isar.dart';
 import '../generated/assets.g.dart';
 import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
+import '../hooks/sync_callback_hook.dart';
 import '../models/settings.dart';
 import '../providers/misc_providers.dart';
 import '../routes.dart';
@@ -61,8 +62,10 @@ class OnboardingScreen extends HookConsumerWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
-    final IsMounted isMounted = useIsMounted();
+    final SyncCallback syncCallback = useSyncCallback();
     final ValueNotifier<double> currentPage = useState(0);
     final Iterable<OnboardingPage> pages = <OnboardingPage>[
       OnboardingPage(
@@ -82,19 +85,17 @@ class OnboardingScreen extends HookConsumerWidget {
       ),
     ];
 
-    Future<void> getStarted() async {
-      if (isMounted()) {
-        final Isar isar = await ref.read(isarProvider.future);
-        await isar.writeTxn(
-          () async => isar.settings.put(
-            await ref.read(settingsProvider.future)
-              ..onboarding = false,
-          ),
-        );
-      }
-
-      await Routes.authorization.pushReplacement(navigator, ref);
-    }
+    Future<void> getStarted() async => syncCallback(() async {
+          final Isar isar = await ref.read(isarProvider.future);
+          await isar.writeTxn(
+            () async => isar.settings.put(
+              await ref.read(settingsProvider.future)
+                ..onboarding = false,
+            ),
+          );
+          await (await Routes.current(container))
+              .pushReplacement(navigator, container);
+        });
 
     final PageController pageController = usePageController();
     useMemoized(

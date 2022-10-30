@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../generated/i18n.g.dart';
 import '../../generated/icons.g.dart';
 import '../../generated/models.g.dart';
+import '../../hooks/sync_callback_hook.dart';
 import '../../models/settings.dart';
 import '../../providers/api_providers.dart';
 import '../../routes.dart';
@@ -24,32 +25,38 @@ class DeliveryScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
     final AsyncValue<Iterable<UserAddressesModel>> addresses =
         ref.watch(addressesProvider);
 
-    final IsMounted isMounted = useIsMounted();
+    final SyncCallback syncCallback = useSyncCallback();
     final ValueNotifier<DeliveryType> deliveryType =
         useState(this.deliveryType ?? Settings().deliveryType);
 
-    unawaited(
-      useMemoized(() async {
-        if (this.deliveryType == null) {
-          final DeliveryType $deliveryType =
-              await ref.read(deliveryTypeProvider.future);
-          if (isMounted()) {
-            deliveryType.value = $deliveryType;
-          }
-        }
-      }),
-    );
+    if (this.deliveryType == null) {
+      unawaited(
+        useMemoized(
+          () async => syncCallback(
+            () async => deliveryType.value =
+                await ref.read(deliveryTypeProvider.future),
+          ),
+        ),
+      );
+    }
 
     return WillPopScope(
       onWillPop: () async {
         if (navigator.canPop()) {
           return true;
         }
-        await Routes.navigation.pushReplacement(navigator, ref);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (final _) => syncCallback(
+            () async => (await Routes.current(container))
+                .pushReplacement(navigator, container),
+          ),
+        );
         return false;
       },
       child: Scaffold(
@@ -67,7 +74,7 @@ class DeliveryScreen extends HookConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 12),
               child: TextButton(
-                onPressed: navigator.maybePop,
+                onPressed: () async => syncCallback(navigator.maybePop),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -234,8 +241,9 @@ class DeliveryScreen extends HookConsumerWidget {
                                     foregroundColor: theme.colorScheme.primary,
                                     textStyle: theme.textTheme.titleMedium,
                                   ),
-                                  onPressed: () async =>
-                                      Routes.map.push(navigator, ref),
+                                  onPressed: () async => syncCallback(
+                                    () => Routes.map.push(navigator, container),
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
@@ -277,7 +285,7 @@ class DeliveryScreen extends HookConsumerWidget {
           padding:
               const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 8),
           child: ElevatedButton(
-            onPressed: navigator.maybePop,
+            onPressed: () async => syncCallback(navigator.maybePop),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text($.delivery.done),

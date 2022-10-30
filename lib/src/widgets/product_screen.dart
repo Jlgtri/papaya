@@ -8,6 +8,7 @@ import '../generated/assets.g.dart';
 import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
 import '../generated/models.g.dart';
+import '../hooks/sync_callback_hook.dart';
 import '../models/cart_store.dart';
 import '../providers/misc_providers.dart';
 import '../routes.dart';
@@ -33,8 +34,8 @@ class ProductScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final I18N $ = I18NLocalizations.of(context);
     final NavigatorState navigator = Navigator.of(context);
-
     final StoreMenuProductsModel? product = ref.watch(provider);
+    final SyncCallback syncCallback = useSyncCallback();
     return Material(
       clipBehavior: Clip.antiAlias,
       color: theme.colorScheme.surface,
@@ -74,7 +75,7 @@ class ProductScreen extends HookConsumerWidget {
                       ),
                       icon: Icon(icons.close, size: 13),
                       color: theme.colorScheme.primary,
-                      onPressed: navigator.maybePop,
+                      onPressed: () async => syncCallback(navigator.maybePop),
                     ),
                   ),
                 ),
@@ -206,62 +207,64 @@ class ProductScreen extends HookConsumerWidget {
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Consumer(
-              builder: (final _, final WidgetRef ref, final Widget? child) {
-                final bool productInCart = ref.watch(
-                  amountProvider.select((final _) => (_.valueOrNull ?? 0) != 0),
-                );
-                return ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(0),
-                  ),
-                  onPressed: () async {
-                    final StoreModel? store = ref.read(StoreScreen.provider);
-                    if ((product != null && product.id != null) &&
-                        (store != null && store.id != null)) {
-                      final Isar isar = await ref.read(isarProvider.future);
-                      await isar.writeTxn(() async {
-                        final CartStore cartStore =
-                            await isar.cartStores.get(store.id!) ??
-                                (CartStore()..id = store.id!);
-                        CartStoreProduct? $product;
-                        for ($product in cartStore.products) {
-                          if ($product.id != product.id) {
-                            $product = null;
-                            continue;
-                          }
+            child:
+                // Consumer(
+                //   builder: (final _, final WidgetRef ref, final Widget?
+                // child) {
+                //     final bool productInCart = ref.watch(
+                //       amountProvider.select((final _) => (_.valueOrNull ??
+                //0) != 0),
+                //     );
+                //     return
+                ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(0),
+              ),
+              onPressed: () async => syncCallback(() async {
+                final StoreModel? store = ref.read(StoreScreen.provider);
+                if ((product != null && product.id != null) &&
+                    (store != null && store.id != null)) {
+                  final Isar isar = await ref.read(isarProvider.future);
+                  await isar.writeTxn(() async {
+                    final CartStore cartStore =
+                        await isar.cartStores.get(store.id!) ??
+                            (CartStore()..id = store.id!);
+                    CartStoreProduct? $product;
+                    for ($product in cartStore.products) {
+                      if ($product.id != product.id) {
+                        $product = null;
+                        continue;
+                      }
 
-                          // if (productInCart) {
-                          //   cartStore.products = <CartStoreProduct>[
-                          //     for (final CartStoreProduct $product
-                          //         in cartStore.products)
-                          //       if ($product.id != product.id) $product
-                          //   ];
-                          // } else {
-                          $product.amount = ref.read(currentAmountProvider);
-                          // }
-                          break;
-                        }
-                        if ($product == null) {
-                          // if (!productInCart && $product == null) {
-                          cartStore.products = <CartStoreProduct>[
-                            ...cartStore.products,
-                            CartStoreProduct()
-                              ..id = product.id!
-                              ..amount = ref.read(currentAmountProvider),
-                          ];
-                        }
-                        await isar.cartStores.put(cartStore);
-                      });
+                      // if (productInCart) {
+                      //   cartStore.products = <CartStoreProduct>[
+                      //     for (final CartStoreProduct $product
+                      //         in cartStore.products)
+                      //       if ($product.id != product.id) $product
+                      //   ];
+                      // } else {
+                      $product.amount = ref.read(currentAmountProvider);
+                      // }
+                      break;
                     }
-                    await navigator.maybePop();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text($.store.productScreen.addToCart),
-                  ),
-                );
-              },
+                    if ($product == null) {
+                      // if (!productInCart && $product == null) {
+                      cartStore.products = <CartStoreProduct>[
+                        ...cartStore.products,
+                        CartStoreProduct()
+                          ..id = product.id!
+                          ..amount = ref.read(currentAmountProvider),
+                      ];
+                    }
+                    await isar.cartStores.put(cartStore);
+                  });
+                }
+                await navigator.maybePop();
+              }),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text($.store.productScreen.addToCart),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -387,6 +390,9 @@ class ProductCard extends HookConsumerWidget {
     final I18N $ = I18NLocalizations.of(context);
     final NavigatorState rootNavigator =
         Navigator.of(context, rootNavigator: true);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
+    final SyncCallback syncCallback = useSyncCallback();
     return DecoratedBox(
       decoration: BoxDecoration(boxShadow: <BoxShadow>[boxShadow(theme)]),
       child: Material(
@@ -496,8 +502,10 @@ class ProductCard extends HookConsumerWidget {
                             style: ElevatedButton.styleFrom(
                               textStyle: theme.textTheme.titleSmall,
                             ),
-                            onPressed: () async => Routes.product
-                                .push(rootNavigator, ref, product),
+                            onPressed: () async => syncCallback(
+                              () => Routes.product
+                                  .push(rootNavigator, container, product),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 vertical: 4,

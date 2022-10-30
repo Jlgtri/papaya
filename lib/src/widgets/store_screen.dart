@@ -19,6 +19,7 @@ import '../generated/assets.g.dart';
 import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
 import '../generated/models.g.dart';
+import '../hooks/sync_callback_hook.dart';
 import '../models/settings.dart';
 import '../providers/location_providers.dart';
 import '../routes.dart';
@@ -60,16 +61,25 @@ class StoreScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
     final Iterable<StoreMenuModel> menu = ref.watch(menuProvider);
     final String storeImg =
         ref.watch(provider.select((final _) => _?.imgUrl ?? ''));
+
+    final SyncCallback syncCallback = useSyncCallback();
     return WillPopScope(
       onWillPop: () async {
         if (navigator.canPop()) {
           return true;
         }
-        await Routes.navigation.pushReplacement(navigator, ref);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (final _) => syncCallback(
+            () async => (await Routes.current(container))
+                .pushReplacement(navigator, container),
+          ),
+        );
         return false;
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -145,7 +155,8 @@ class StoreScreen extends HookConsumerWidget {
                               style: TextButton.styleFrom(
                                 foregroundColor: theme.colorScheme.surface,
                               ),
-                              onPressed: navigator.maybePop,
+                              onPressed: () async =>
+                                  syncCallback(navigator.maybePop),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -278,26 +289,24 @@ class _StoreInformation extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
-    final IsMounted isMounted = useIsMounted();
+    final StoreModel? store = ref.watch(StoreScreen.provider);
+
+    final SyncCallback syncCallback = useSyncCallback();
     final ValueNotifier<DeliveryType> deliveryType =
         useState(this.deliveryType ?? Settings().deliveryType);
 
-    unawaited(
-      useMemoized(() async {
-        if (this.deliveryType == null) {
-          final DeliveryType $deliveryType =
-              await ref.read(deliveryTypeProvider.future);
-          if (isMounted()) {
-            deliveryType.value = $deliveryType;
-          }
-        }
-      }),
-    );
-
-    final StoreModel? store = ref.read(StoreScreen.provider);
-    if (store == null || store.name == null) {
-      return const SizedBox.shrink();
+    if (this.deliveryType == null) {
+      unawaited(
+        useMemoized(
+          () async => syncCallback(
+            () async => deliveryType.value =
+                await ref.read(deliveryTypeProvider.future),
+          ),
+        ),
+      );
     }
 
     return Padding(
@@ -339,7 +348,7 @@ class _StoreInformation extends HookConsumerWidget {
               /// Name
               Flexible(
                 child: Text(
-                  store.name!,
+                  store?.name ?? '',
                   style: theme.textTheme.displayLarge?.copyWith(
                     color: theme.colorScheme.surface,
                   ),
@@ -351,7 +360,7 @@ class _StoreInformation extends HookConsumerWidget {
               const SizedBox(height: 8),
               Flexible(
                 child: Text(
-                  store.description ?? '',
+                  store?.description ?? '',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: theme.colorScheme.surface,
@@ -382,8 +391,8 @@ class _StoreInformation extends HookConsumerWidget {
                         ),
                         maxLines: 1,
                       ),
-                      if ((store.cuisines?.isNotEmpty ?? false) &&
-                          store.cuisines?.first.cuisine != null) ...<Widget>[
+                      if ((store?.cuisines?.isNotEmpty ?? false) &&
+                          store?.cuisines?.first.cuisine != null) ...<Widget>[
                         const SizedBox(width: 48),
                         Icon(
                           icons.cuisine,
@@ -392,7 +401,7 @@ class _StoreInformation extends HookConsumerWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          store.cuisines?.first.cuisine ?? '',
+                          store?.cuisines?.first.cuisine ?? '',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                             color: theme.colorScheme.surface,
@@ -415,8 +424,10 @@ class _StoreInformation extends HookConsumerWidget {
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.surface,
                     ),
-                    onPressed: () async =>
-                        Routes.storeInformation.push(navigator, ref, store),
+                    onPressed: () async => syncCallback(
+                      () async => Routes.storeInformation
+                          .push(navigator, container, store),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -583,6 +594,9 @@ class StoreCard extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState rootNavigator =
         Navigator.of(context, rootNavigator: true);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
+    final SyncCallback syncCallback = useSyncCallback();
     return DecoratedBox(
       decoration: BoxDecoration(boxShadow: <BoxShadow>[boxShadow(theme)]),
       child: Material(
@@ -590,7 +604,9 @@ class StoreCard extends HookConsumerWidget {
         color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: InkWell(
-          onTap: () async => Routes.store.push(rootNavigator, ref, store),
+          onTap: () async => syncCallback(
+            () => Routes.store.push(rootNavigator, container, store),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -733,6 +749,7 @@ class StoreInformationScreen extends HookConsumerWidget {
     final NavigatorState navigator = Navigator.of(context);
 
     final StoreModel? store = ref.watch(StoreScreen.provider);
+    final SyncCallback syncCallback = useSyncCallback();
     final ValueNotifier<bool> viewWorkingHours = useState(false);
     final AnimationController animationController = useAnimationController(
       duration: const Duration(milliseconds: 350),
@@ -814,7 +831,7 @@ class StoreInformationScreen extends HookConsumerWidget {
                       ),
                       icon: Icon(icons.close, size: 13),
                       color: theme.colorScheme.primary,
-                      onPressed: navigator.maybePop,
+                      onPressed: () async => syncCallback(navigator.maybePop),
                     ),
                   ),
                 ),

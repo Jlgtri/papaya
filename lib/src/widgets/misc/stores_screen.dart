@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../generated/i18n.g.dart';
 import '../../generated/icons.g.dart';
 import '../../generated/models.g.dart';
+import '../../hooks/sync_callback_hook.dart';
 import '../../providers/api_providers.dart';
 import '../../routes.dart';
 import '../store_screen.dart';
@@ -18,15 +18,22 @@ class StoresScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
-    final ObjectRef<bool> isLoading = useRef(false);
+    final SyncCallback syncCallback = useSyncCallback();
     final AsyncValue<Iterable<StoreModel>> stores = ref.watch(storesProvider);
     return WillPopScope(
       onWillPop: () async {
         if (navigator.canPop()) {
           return true;
         }
-        await Routes.navigation.pushReplacement(navigator, ref);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (final _) => syncCallback(
+            () async => (await Routes.current(container))
+                .pushReplacement(navigator, container),
+          ),
+        );
         return false;
       },
       child: Scaffold(
@@ -44,7 +51,7 @@ class StoresScreen extends HookConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 12),
               child: TextButton(
-                onPressed: navigator.maybePop,
+                onPressed: () async => syncCallback(navigator.maybePop),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,

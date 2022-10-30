@@ -10,6 +10,7 @@ import 'package:isar/isar.dart';
 import '../../generated/assets.g.dart';
 import '../../generated/i18n.g.dart';
 import '../../generated/icons.g.dart';
+import '../../hooks/sync_callback_hook.dart';
 import '../../models/cart_store.dart';
 import '../../providers/misc_providers.dart';
 import '../navigation_screen.dart';
@@ -27,6 +28,7 @@ class CartScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final I18N $ = I18NLocalizations.of(context);
     final AsyncValue<Iterable<CartStore>> cart = ref.watch(cartProvider);
+    final SyncCallback syncCallback = useSyncCallback();
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -81,14 +83,14 @@ class CartScreen extends HookConsumerWidget {
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.all(12),
                               ),
-                              onPressed: () async {
+                              onPressed: () async => syncCallback(() async {
                                 final Isar isar =
                                     await ref.read(isarProvider.future);
                                 await isar.writeTxn(
                                   isar.cartStores.clear,
                                 );
                                 await controller.dismiss();
-                              },
+                              }),
                               child: Text($.alert.clearCart.approve),
                             ),
                             positiveActionBuilder: (

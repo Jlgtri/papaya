@@ -1,11 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../generated/assets.g.dart';
 import '../generated/i18n.g.dart';
+import '../hooks/sync_callback_hook.dart';
 import '../models/settings.dart';
 import '../routes.dart';
 
@@ -19,13 +19,16 @@ class AuthorizationScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final ProviderContainer container =
+        ProviderScope.containerOf(context, listen: false);
 
-    final IsMounted isMounted = useIsMounted();
-    Future<void> authorize() async {
-      if (isMounted() && await ref.read(authTokenProvider.future) != null) {
-        await Routes.map.pushReplacement(navigator, ref);
-      }
-    }
+    final SyncCallback syncCallback = useSyncCallback();
+    Future<void> authorize() async => syncCallback(() async {
+          if (await ref.read(authTokenProvider.future) != null) {
+            await (await Routes.current(container))
+                .pushReplacement(navigator, container);
+          }
+        });
 
     return Scaffold(
       extendBody: true,
