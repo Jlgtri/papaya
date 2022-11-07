@@ -14,13 +14,13 @@ targets:
       generators|assets:
         enabled: true
         options:
-          import_path: source/assets
+          import_path: source/assets/
           export_path: lib/src/generated/assets.g.dart
 
       generators|i18n:
         enabled: true
         options:
-          import_path: source/i18n
+          import_path: source/i18n/
           export_path: lib/src/generated/i18n.g.dart
 
       generators|models:
@@ -34,7 +34,7 @@ targets:
       generators|icons:
         enabled: true
         options:
-          import_path: source/icons
+          import_path: source/icons/
           export_path: lib/src/generated/icons.g.dart
           font_export_path: source/icons.ttf
           height: 32
