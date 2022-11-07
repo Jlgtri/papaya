@@ -1,130 +1,96 @@
-import 'package:catcher/catcher.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_transition/page_transition.dart';
 
-import 'generated/models.g.dart';
-import 'models/cart_store.dart';
 import 'models/settings.dart';
-import 'providers/api_providers.dart';
-import 'widgets/authorization_screen.dart';
-import 'widgets/misc/delivery_screen.dart';
-import 'widgets/misc/map_screen.dart';
-import 'widgets/misc/stores_screen.dart';
-import 'widgets/navigation_screen.dart';
-import 'widgets/onboarding_screen.dart';
-import 'widgets/product_screen.dart';
-import 'widgets/store_screen.dart';
+import 'providers/api.dart';
+import 'widgets/authorization.dart';
+import 'widgets/misc/delivery.dart';
+import 'widgets/misc/map.dart';
+import 'widgets/misc/stores.dart';
+import 'widgets/modal/product.dart';
+import 'widgets/modal/profile_edit.dart';
+import 'widgets/modal/store_information.dart';
+import 'widgets/navigation.dart';
+import 'widgets/onboarding.dart';
+import 'widgets/payment.dart';
+import 'widgets/store.dart';
 
+/// The route in the app.
 enum Routes {
-  onboarding,
-  authorization,
-  map,
-  navigation,
-  delivery,
-  stores,
-  store,
-  storeInformation,
-  product;
-
-  Future<T?> _push<T extends Object?>(
-    final NavigatorState navigator,
-    final ProviderContainer container, {
-    required final bool isReplacement,
-    final Object? argument,
-  }) async {
-    Future<T?> push(final String name) => isReplacement
-        ? navigator.pushReplacementNamed(name)
-        : navigator.pushNamed(name);
-
-    switch (this) {
-      case Routes.onboarding:
-      case Routes.authorization:
-      case Routes.map:
-      case Routes.navigation:
-      case Routes.stores:
-        return push(name);
-
-      case Routes.delivery:
-        return push(
-          <String>[
-            Routes.delivery.name,
-            (await container.read(deliveryTypeProvider.future)).name
-          ].join('/'),
-        );
-      case Routes.store:
-        assert(
-          argument is StoreModel,
-          'You must provide a StoreModel to push.',
-        );
-        final StoreModel store = argument! as StoreModel;
-        container.read(StoreScreen.provider.notifier).state = store;
-        container.read(StoreScreen.menuProvider.notifier).state =
-            await container.read(storeMenuProvider(store.id!).future);
-        container.read(StoreScreen.etaDeliveryProvider.notifier).state =
-            await container.read(storeEtaDeliveryProvider(store.id!).future);
-        container.read(StoreScreen.etaPickupProvider.notifier).state =
-            await container.read(storeEtaPickupProvider(store.id!).future);
-        return push(
-          <String>[
-            name,
-            (await container.read(deliveryTypeProvider.future)).name
-          ].join('/'),
-        );
-      case Routes.storeInformation:
-        assert(
-          argument is StoreModel,
-          'You must provide a StoreModel to push.',
-        );
-        final StoreModel store = argument! as StoreModel;
-        container.read(StoreScreen.provider.notifier).state = store;
-        container.read(StoreScreen.workingTimeProvider.notifier).state =
-            await container.read(storeWorkingTimeProvider(store.id!).future);
-        return push(name);
-      case Routes.product:
-        assert(
-          argument is StoreMenuProductsModel,
-          'You must provide a StoreMenuProductsModel to push.',
-        );
-        final StoreMenuProductsModel product =
-            argument! as StoreMenuProductsModel;
-        container.read(ProductScreen.provider.notifier).state = product;
-        container.read(ProductScreen.currentAmountProvider.notifier).state =
-            (await container.read(amountProvider.future)).clamp(1, 9);
-        return push(name);
-    }
-  }
-
-  /// Push this route via [navigator] with an [argument], if needed, using the
-  /// [container] state.
+  /// The greeting screen.
   ///
-  /// For more info see this route's description.
-  Future<T?> push<T extends Object?>(
-    final NavigatorState navigator,
-    final ProviderContainer container, [
-    final Object? argument,
-  ]) async =>
-      _push(navigator, container, argument: argument, isReplacement: false);
+  /// Can be provided with [OnboardingScreen] as an argument.
+  onboarding('onboarding'),
 
-  /// Replace the current route with this route via [navigator] with an
-  /// [argument], if needed, using the [container] state.
+  /// The screen that authorizes a user.
   ///
-  /// For more info see this route's description.
-  Future<T?> pushReplacement<T extends Object?>(
-    final NavigatorState navigator,
-    final ProviderContainer container, [
-    final Object? argument,
-  ]) async =>
-      _push(navigator, container, argument: argument, isReplacement: true);
+  /// Can be provided with [AuthorizationScreen] as an argument.
+  authorization('authorization'),
+
+  /// The screen that lets a user pick location.
+  ///
+  /// Can be provided with [MapScreen] as an argument.
+  map('/map'),
+
+  /// The main navigation screen.
+  ///
+  /// Can be provided with [NavigationScreen] as an argument.
+  navigation('/'),
+
+  /// The screen that lets a user to pick a [DeliveryType] or access [map].
+  ///
+  /// Can be provided with [DeliveryScreen] as an argument.
+  delivery('/delivery'),
+
+  /// The screen that shows all stores to user.
+  ///
+  /// Can be provided with [StoresScreen] as an argument.
+  stores('/stores'),
+
+  /// The screen that shows a particular store to user.
+  ///
+  /// Must be provided with [StoreScreen], [StoreInformationScreen] or
+  /// [ProductScreen] as an argument.
+  store('/store'),
+
+  /// The screen that shows information about a particular store to user.
+  ///
+  /// Must be provided with [StoreScreen] or [StoreInformationScreen] as an
+  /// argument.
+  storeInformation('/store/information'),
+
+  /// The screen that shows information about a particular product to user.
+  ///
+  /// Must be provided with [ProductScreen] as an argument.
+  product('/store/product'),
+
+  /// The screen that allows user to edit his profile information.
+  ///
+  /// Can be provided with [ProfileEditScreen] as an argument.
+  profileEdit('/profileEdit'),
+
+  /// The screen that allows user to proceed with payment.
+  ///
+  /// Can be provided with [PaymentScreen] as an argument.
+  payment('/payment');
+
+  /// The route in the app.
+  const Routes(this.name);
+
+  /// The path of this route.
+  final String name;
 
   /// Return the current route depending on app's state.
   static Future<Routes> current(final ProviderContainer container) async {
     if (await container.read(onboardingProvider.future)) {
       return onboarding;
-    } else if (await container.read(tokenProvider.future) == null) {
+    } else if (!await container.read(skippedAuthorizationProvider.future) &&
+        await container.read(tokenProvider.future) == null) {
       return authorization;
-    } else if (await container.read(activeAddressProvider.future) == null) {
+    } else if (!await container.read(skippedDefaultAddressProvider.future) &&
+        await container.read(activeAddressProvider.future) == null) {
       return map;
     } else {
       return navigation;
@@ -132,133 +98,143 @@ enum Routes {
   }
 
   /// Return the [Route] from [settings].
-  static Route<Object?> from(final RouteSettings settings) {
-    final BuildContext? rootContext = Catcher.navigatorKey?.currentContext;
-    final Iterable<String> parts = settings.name!.split('/');
-    switch (values.firstWhere((final Routes _) => _.name == parts.first)) {
+  static Route<T> from<T extends Object?>(final RouteSettings settings) {
+    final Object? arguments = settings.arguments;
+    switch (values.firstWhere((final Routes _) => _.name == settings.name)) {
       case onboarding:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           type: PageTransitionType.fade,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: const OnboardingScreen(),
+          child: arguments is OnboardingScreen
+              ? arguments
+              : const OnboardingScreen(),
         );
 
       case authorization:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           type: PageTransitionType.fade,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: const AuthorizationScreen(),
+          child: arguments is AuthorizationScreen
+              ? arguments
+              : const AuthorizationScreen(),
         );
 
       case map:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           type: PageTransitionType.fade,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: const MapScreen(),
+          child: arguments is MapScreen ? arguments : const MapScreen(),
         );
 
       case navigation:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           type: PageTransitionType.fade,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: const NavigationScreen(),
+          child: arguments is NavigationScreen
+              ? arguments
+              : const NavigationScreen(),
         );
 
       case delivery:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           alignment: Alignment.topLeft,
           type: PageTransitionType.scale,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: DeliveryScreen(
-            deliveryType: parts.length > 1
-                ? (DeliveryType.values.whereType<DeliveryType?>()).firstWhere(
-                    (final _) => _?.name == parts.elementAt(1),
-                    orElse: () => null,
-                  )
-                : null,
-          ),
+          child:
+              arguments is DeliveryScreen ? arguments : const DeliveryScreen(),
         );
 
       case stores:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           alignment: Alignment.centerRight,
           type: PageTransitionType.scale,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: const StoresScreen(),
+          child: arguments is StoresScreen ? arguments : const StoresScreen(),
         );
 
       case store:
-        return PageTransition<Object?>(
+        return PageTransition<T>(
           settings: settings,
-          ctx: rootContext,
-          inheritTheme: rootContext != null,
           alignment: Alignment.center,
           type: PageTransitionType.scale,
           duration: const Duration(milliseconds: 500),
           reverseDuration: const Duration(milliseconds: 500),
           curve: Curves.easeOutQuad,
-          child: StoreScreen(
-            deliveryType: parts.length > 1
-                ? (DeliveryType.values.whereType<DeliveryType?>()).firstWhere(
-                    (final _) => _?.name == parts.elementAt(1),
-                    orElse: () => null,
-                  )
-                : null,
-          ),
+          child: arguments is ProductScreen
+              ? StoreScreen(arguments.store)
+              : arguments is StoreInformationScreen
+                  ? StoreScreen(arguments.store)
+                  : arguments! as StoreScreen,
         );
 
       case storeInformation:
-        return CupertinoModalBottomSheetRoute<Object?>(
+        return CupertinoModalBottomSheetRoute<T>(
           settings: settings,
           topRadius: Radius.zero,
           expanded: false,
           bounce: false,
-          builder: (final _) => const StoreInformationScreen(),
+          builder: (final _) => arguments is StoreScreen
+              ? StoreInformationScreen(arguments.store)
+              : arguments! as StoreInformationScreen,
           duration: const Duration(milliseconds: 500),
           animationCurve: Curves.easeOutQuad,
         );
 
       case product:
-        return CupertinoModalBottomSheetRoute<Object?>(
+        return CupertinoModalBottomSheetRoute<T>(
           settings: settings,
           topRadius: Radius.zero,
           expanded: false,
           bounce: false,
           transitionBackgroundColor: Colors.transparent,
           modalBarrierColor: Colors.black26,
-          builder: (final _) => const ProductScreen(),
+          builder: (final _) => arguments! as ProductScreen,
           duration: const Duration(milliseconds: 500),
           animationCurve: Curves.easeOutQuad,
+        );
+
+      case profileEdit:
+        return CupertinoModalBottomSheetRoute<T>(
+          settings: settings,
+          topRadius: Radius.zero,
+          expanded: false,
+          bounce: false,
+          transitionBackgroundColor: Colors.transparent,
+          modalBarrierColor: Colors.black26,
+          builder: (final _) => arguments is ProfileEditScreen
+              ? arguments
+              : const ProfileEditScreen(),
+          duration: const Duration(milliseconds: 500),
+          animationCurve: Curves.easeOutQuad,
+        );
+
+      case payment:
+        return PageTransition<T>(
+          settings: settings,
+          alignment: Alignment.center,
+          type: PageTransitionType.bottomToTop,
+          duration: const Duration(milliseconds: 500),
+          reverseDuration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuad,
+          child: arguments is PaymentScreen ? arguments : const PaymentScreen(),
         );
     }
   }

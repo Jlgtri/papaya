@@ -16,11 +16,21 @@ alert:
       Enable them in the settings.
     approve: Open Settings
     deny: Cancel
-  clear_cart:
+  location_invalid:
+    title: Location Invalid
+    body: Could not use this location for an address.
+      Please try selecting the other one.
+    approve: Okay
+  cart_clear:
     title: Remove all items
     body: Are you sure you want to delete all items from the cart?
     approve: Confirm
     deny: Cancel
+  store_added:
+    title: Store already added
+    body: You can't add products from multiple stores at the moment.\nClear your cart and try again.
+    approve: Clear cart
+    deny: I understood
 
 onboarding:
   skip: Skip
@@ -49,6 +59,7 @@ map:
 
 home:
   address_hint: Choose Your Address
+  store_hint: Pick Your Store
   search_hint: Search
   view_detail: View Detail
   stores_view_all: View All
@@ -57,7 +68,9 @@ home:
 
   menu:
     home: Home
-    cart: Cart
+    String cart(final int count): |
+      return count > 0 ? 'Cart x$count' : 'Cart';
+    String cart_tooltip(final int count): $count Items
     orders: Orders
     profile: Profile
 
@@ -83,9 +96,11 @@ store:
   additional_info: Additional Info
 
   delivery: Delivery
+  delivery_unavailable: Unavailable
   delivery_time(final int min, final int max): $min-$max min
 
   pickup: Pickup
+  pickup_unavailable: Unavailable
   pickup_time(final int min, final int max): $min-$max min
 
   product_card:
@@ -104,11 +119,18 @@ store:
 delivery:
   back: Back
   title: Select Order Details
-  delivery_tab: Delivery
-  pickup_tab: Pickup
   where_to: Where to?
   add_address: Add New Address
   done: Done
+  delivery: Delivery
+  delivery_time(final int min, final int max): Delivery in $min-$max min
+  delivery_to_time(final int min, final int max, final String address):
+    Delivery in $min-$max min to $address
+
+  pickup: Pickup
+  pickup_time(final int min, final int max): Pickup in $min-$max min
+  pickup_from_time(final int min, final int max, final String address):
+    Pickup in $min-$max min from $address
 
 
 cart:
@@ -116,7 +138,7 @@ cart:
   empty: Your cart is empty.
 
 
-checkout:
+payment:
   back: Back
   title: Checkout
   store_name: Store Name
@@ -186,27 +208,31 @@ checkout:
 
 profile:
   title: Profile
+  login: Login
   logout: Logout
   address:
     title: Delivery Address
     add_new: Add New Address
     card:
-      title: Delivery Adress
+      title: Delivery Address
       instructions: Delivery Instructions
+      instructions_empty: None
 
   payment:
     title: Payment Methods
     add_new: Add Payment Method
 
-  edit_info:
+  edit:
     title: Edit Info
     first_name: First Name
-    hint_first_name: Enter your first name
+    first_name_hint: Enter First Name
     last_name: Last Name
-    hint_last_name: Enter your last name
+    last_name_hint: Enter Last Name
     email: Email
+    email_hint: Enter Email
     phone: Phone
-    save_btn: Save
+    phone_hint: Enter Phone
+    confirm: Save
 
   add_adress:
     title: Add Address

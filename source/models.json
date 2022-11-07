@@ -142,6 +142,12 @@
       "default": null,
       "nullable": true
     },
+    "apartment": {
+      "type": "string",
+      "doc": null,
+      "default": null,
+      "nullable": true
+    },
     "region": {
       "type": "string",
       "doc": "region name",
@@ -179,25 +185,25 @@
       "nullable": true
     },
     "state": {
-      "type": "UserAddressesStateModel[]",
+      "type": "UserAddressesStateModel",
       "doc": null,
       "default": null,
       "nullable": true
     },
     "country": {
-      "type": "UserAddressesCountryModel[]",
+      "type": "UserAddressesCountryModel",
       "doc": null,
       "default": null,
       "nullable": true
     },
     "lng": {
-      "type": "integer",
+      "type": "double",
       "doc": "Address longitude",
       "default": null,
       "nullable": true
     },
     "lat": {
-      "type": "integer",
+      "type": "double",
       "doc": "Address latitude",
       "default": null,
       "nullable": true
@@ -775,7 +781,7 @@
       "nullable": true
     },
     "address": {
-      "type": "StoreAddressModel[]",
+      "type": "StoreAddressModel",
       "doc": null,
       "default": null,
       "nullable": true

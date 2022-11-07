@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../providers/api_providers.dart';
-import '../../routes.dart';
-import '../store_screen.dart';
+import '../generated/i18n.g.dart';
+import '../generated/icons.g.dart';
+import '../hooks/sync_callback_hook.dart';
+import '../routes.dart';
 
-class StoresScreen extends HookConsumerWidget {
-  const StoresScreen({super.key});
+/// The screen used to process a payment.
+class PaymentScreen extends HookConsumerWidget {
+  /// The screen used to process a payment.
+  const PaymentScreen({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -22,7 +21,6 @@ class StoresScreen extends HookConsumerWidget {
         ProviderScope.containerOf(context, listen: false);
 
     final SyncCallback syncCallback = useSyncCallback();
-    final AsyncValue<Iterable<StoreModel>> stores = ref.watch(storesProvider);
     return WillPopScope(
       onWillPop: () async {
         if (navigator.canPop()) {
@@ -30,8 +28,9 @@ class StoresScreen extends HookConsumerWidget {
         }
         WidgetsBinding.instance.addPostFrameCallback(
           (final _) => syncCallback(
-            () async => (await Routes.current(container))
-                .pushReplacement(navigator, container),
+            () async => navigator.pushReplacementNamed(
+              (await Routes.current(container)).name,
+            ),
           ),
         );
         return false;
@@ -62,7 +61,7 @@ class StoresScreen extends HookConsumerWidget {
                     children: <Widget>[
                       Icon(icons.misc.arrowLeft, size: 14),
                       const SizedBox(width: 12),
-                      Flexible(child: Text($.store.back))
+                      Flexible(child: Text($.payment.back))
                     ],
                   ),
                 ),
@@ -70,33 +69,23 @@ class StoresScreen extends HookConsumerWidget {
             ),
           ),
         ),
-        body: CustomScrollView(
-          slivers: <Widget>[
-            /// Title
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16)
-                    .copyWith(bottom: 24, top: 8),
-                child: Text(
-                  $.storesAll.title,
-                  style: theme.textTheme.displayMedium,
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: Text(
+                    $.payment.title,
+                    style: theme.textTheme.displayMedium,
+                    maxLines: 1,
+                  ),
                 ),
               ),
-            ),
-
-            /// Stores
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (final _, final int index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16)
-                      .copyWith(bottom: 24),
-                  child: StoreCard(stores.value!.elementAt(index)),
-                ),
-                childCount: stores.value!.length,
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 69)),
-          ],
+            ],
+          ),
         ),
       ),
     );

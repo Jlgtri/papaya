@@ -166,6 +166,12 @@ extension CustomThemeData on ThemeData {
             statusBarBrightness: Brightness.light,
           ),
         ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: colorScheme.primary,
+          unselectedItemColor: colorScheme.outline,
+          selectedLabelStyle: textTheme.labelSmall,
+          unselectedLabelStyle: textTheme.labelSmall,
+        ),
         buttonBarTheme: const ButtonBarThemeData(
           buttonPadding: EdgeInsets.all(8),
           layoutBehavior: ButtonBarLayoutBehavior.padded,
@@ -196,7 +202,7 @@ extension CustomThemeData on ThemeData {
         ),
         iconTheme: IconThemeData(size: 24, color: colorScheme.onSurface),
         tooltipTheme: TooltipThemeData(
-          textStyle: textTheme.bodyMedium,
+          textStyle: textTheme.bodyMedium?.copyWith(color: colorScheme.surface),
           waitDuration: const Duration(seconds: 1),
           showDuration: const Duration(seconds: 5),
           decoration: BoxDecoration(

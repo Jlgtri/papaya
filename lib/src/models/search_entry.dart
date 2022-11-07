@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 
-import '../providers/misc_providers.dart';
+import '../providers/misc.dart';
 
 part 'search_entry.g.dart';
 
@@ -18,10 +18,11 @@ class SearchEntry {
   late DateTime timestamp;
 }
 
-final StreamProvider<Iterable<String>> searchEntriesProvider =
+/// The provider of the recent search entries.
+final StreamProvider<Iterable<String>> recentSearchEntriesProvider =
     StreamProvider<Iterable<String>>(
         (final StreamProviderRef<Iterable<String>> ref) async* {
-  final Isar isar = await ref.read(isarProvider.future);
+  final Isar isar = await ref.watch(isarProvider.future);
   yield* isar.searchEntrys
       .where(distinct: true)
       .sortByTimestampDesc()

@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ntp/ntp.dart';
 
 import 'src/generated/i18n.g.dart';
-import 'src/providers/misc_providers.dart';
+import 'src/providers/misc.dart';
 import 'src/routes.dart';
 import 'src/styles.dart';
 import 'src/utils/catcher.dart';
@@ -27,6 +27,8 @@ void main() {
       final WidgetsBinding widgetsBinding =
           WidgetsFlutterBinding.ensureInitialized();
       FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
       await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
@@ -116,7 +118,7 @@ class RootApp extends StatelessWidget {
         useInheritedMediaQuery: true,
         initialRoute: route.name,
         onGenerateRoute: (final RouteSettings settings) =>
-            settings.name != null ? Routes.from(settings) : null,
+            settings.name != null ? Routes.from<void>(settings) : null,
       );
 
   @override

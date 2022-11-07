@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,20 +8,22 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
-import 'package:persistent_bottom_nav_bar_v2/persistent-tab-view.dart';
 
 import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
 import '../generated/models.g.dart';
 import '../hooks/sync_callback_hook.dart';
 import '../hooks/widget_state_hook.dart';
+import '../models/cart_store.dart';
 import '../models/search_entry.dart';
-import '../providers/api_providers.dart';
-import '../providers/misc_providers.dart';
+import '../models/settings.dart';
+import '../providers/api.dart';
+import '../providers/misc.dart';
 import '../routes.dart';
-import 'navigation/cart_screen.dart';
-import 'navigation/home_screen.dart';
-import 'navigation/profile_screen.dart';
+import 'misc/delivery.dart';
+import 'navigation/cart.dart';
+import 'navigation/home.dart';
+import 'navigation/profile.dart';
 
 /// The main screen used for navigating the app.
 class NavigationScreen extends HookConsumerWidget {
@@ -33,8 +36,12 @@ class NavigationScreen extends HookConsumerWidget {
   /// The height of the [AppBar] while using search on this screen.
   static const double searchAppBarHeight = 80;
 
-  /// The height of the [PersistentTabView] on this screen.
+  /// The height of the [BottomNavigationBar] on this screen.
   static const double navBarHeight = 72;
+
+  /// If the [WillPopScope] on current screen will return true.
+  static final StateProvider<bool> canPopProvider =
+      StateProvider<bool>((final _) => true);
 
   /// The completer of [WillPopScope] on this screen.
   ///
@@ -45,19 +52,36 @@ class NavigationScreen extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final NavigatorState navigator = Navigator.of(context);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final I18N $ = I18NLocalizations.of(context);
-    final ProviderContainer container =
-        ProviderScope.containerOf(context, listen: false);
     final bool searchActive = ref.watch(
       SearchField.provider.select((final _) => _ != null),
     );
     final SyncCallback syncCallback = useSyncCallback();
+    final PageController pageController = usePageController();
+    final ValueNotifier<int> currentPage = useState(pageController.initialPage);
+    useMemoized(
+      () => pageController.addListener(
+        () => pageController.page != null
+            ? currentPage.value = pageController.page!.round()
+            : null,
+      ),
+    );
+    final int cartCount = ref.watch(
+      cartProvider.select(
+        (final _) =>
+            _.valueOrNull?.fold<int>(
+              0,
+              (final _, final CartStore store) => _ + store.products.length,
+            ) ??
+            0,
+      ),
+    );
     return WillPopScope(
       onWillPop: () async {
         ref.read(willPopCompleterProvider).complete();
         ref.refresh(willPopCompleterProvider);
-        return navigator.canPop();
+        return ref.read(canPopProvider);
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
@@ -65,10 +89,11 @@ class NavigationScreen extends HookConsumerWidget {
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
           systemNavigationBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: theme.colorScheme.surface,
+          systemNavigationBarColor: Colors.transparent,
         ),
         child: KeyboardDismissOnTap(
           child: Scaffold(
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: theme.colorScheme.onBackground,
@@ -86,41 +111,7 @@ class NavigationScreen extends HookConsumerWidget {
                       padding: EdgeInsets.only(left: 24),
                       child: SizedBox(height: 40, child: SearchField()),
                     )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.surface,
-                          textStyle: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onPressed: () async => syncCallback(
-                          () => Routes.delivery.push(navigator, container),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(icons.delivery, size: 16),
-                              const SizedBox(width: 24),
-                              Flexible(
-                                child: Text(
-                                  $.home.addressHint,
-                                  maxLines: 1,
-                                ),
-                              ),
-                              const SizedBox(width: 11),
-                              Icon(icons.misc.arrowDown, size: 10),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                  : const DeliveryPickerField(),
               actions: <Widget>[
                 Align(
                   child: Padding(
@@ -135,9 +126,19 @@ class NavigationScreen extends HookConsumerWidget {
                               padding: const EdgeInsets.all(12),
                               child: Icon(icons.misc.search, size: 24),
                             ),
-                            onPressed: () => ref
-                                .read(SearchField.provider.notifier)
-                                .state = '',
+                            onPressed: () async => syncCallback(() async {
+                              if ((pageController.page ?? 0) > 1 / 2) {
+                                await pageController.animateToPage(
+                                  0,
+                                  duration: Duration(
+                                    milliseconds: currentPage.value * 200,
+                                  ),
+                                  curve: Curves.ease,
+                                );
+                              }
+                              ref.read(SearchField.provider.notifier).state =
+                                  '';
+                            }),
                           )
                         : IconButton(
                             style: IconButton.styleFrom(
@@ -148,61 +149,214 @@ class NavigationScreen extends HookConsumerWidget {
                               padding: const EdgeInsets.all(12),
                               child: Icon(icons.cancel, size: 16),
                             ),
-                            onPressed: () {
-                              ref.refresh(SearchField.suggestions.notifier);
-                              ref.read(SearchField.provider.notifier).state =
-                                  null;
-                            },
+                            onPressed: () => ref
+                              ..refresh(SearchField.suggestions)
+                              ..refresh(SearchField.provider.notifier),
                           ),
                   ),
                 ),
               ],
             ),
-            body: PersistentTabView(
-              context,
-              navBarHeight: navBarHeight,
-              navBarStyle: NavBarStyle.simple,
-              screens: const <Widget>[
-                HomeScreen(),
-                CartScreen(),
-                Placeholder(),
-                ProfileScreen(),
-              ],
-              screenTransitionAnimation: const ScreenTransitionAnimation(
-                animateTabTransition: true,
-                duration: Duration(milliseconds: 500),
-              ),
-              items: <PersistentBottomNavBarItem>[
-                PersistentBottomNavBarItem(
-                  iconSize: 24,
-                  icon: Icon(icons.menu.home),
-                  title: $.home.menu.home,
-                  activeColorPrimary: theme.colorScheme.primary,
-                  inactiveColorPrimary: theme.colorScheme.outline,
-                ),
-                PersistentBottomNavBarItem(
-                  iconSize: 24,
-                  icon: Icon(icons.menu.cart),
-                  title: $.home.menu.cart,
-                  activeColorPrimary: theme.colorScheme.primary,
-                  inactiveColorPrimary: theme.colorScheme.outline,
-                ),
-                PersistentBottomNavBarItem(
-                  iconSize: 24,
-                  icon: Icon(icons.menu.orders),
-                  title: $.home.menu.orders,
-                  activeColorPrimary: theme.colorScheme.primary,
-                  inactiveColorPrimary: theme.colorScheme.outline,
-                ),
-                PersistentBottomNavBarItem(
-                  iconSize: 24,
-                  icon: Icon(icons.menu.profile),
-                  title: $.home.menu.profile,
-                  activeColorPrimary: theme.colorScheme.primary,
-                  inactiveColorPrimary: theme.colorScheme.outline,
-                ),
+            body: PageView(
+              controller: pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: const <Widget>[
+                HomeScreen(key: PageStorageKey<String>('HomeScreen')),
+                CartScreen(key: PageStorageKey<String>('CartScreen')),
+                Placeholder(key: PageStorageKey<String>('OrdersScreen')),
+                ProfileScreen(key: PageStorageKey<String>('ProfileScreen')),
               ],
             ),
+            bottomNavigationBar: Padding(
+              padding: EdgeInsets.only(bottom: mediaQuery.padding.bottom),
+              child: MediaQuery(
+                data: mediaQuery.removePadding(removeBottom: true),
+                child: SizedBox(
+                  height: navBarHeight,
+                  child: BottomNavigationBar(
+                    showSelectedLabels: true,
+                    showUnselectedLabels: true,
+                    selectedFontSize: theme.bottomNavigationBarTheme
+                            .selectedLabelStyle?.fontSize ??
+                        14,
+                    unselectedFontSize: theme.bottomNavigationBarTheme
+                            .unselectedLabelStyle?.fontSize ??
+                        12,
+                    type: BottomNavigationBarType.fixed,
+                    currentIndex: currentPage.value,
+                    onTap: (final int index) async =>
+                        pageController.animateToPage(
+                      index,
+                      duration: Duration(
+                        milliseconds: (currentPage.value - index).abs() * 233,
+                      ),
+                      curve: Curves.ease,
+                    ),
+                    items: <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Icon(icons.menu.home),
+                        ),
+                        label: $.home.menu.home,
+                        tooltip: '',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Icon(icons.menu.cart, size: 24),
+                        ),
+                        label: $.home.menu.cart(cartCount),
+                        tooltip: cartCount > 0
+                            ? $.home.menu.cartTooltip(cartCount)
+                            : '',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Icon(icons.menu.orders, size: 24),
+                        ),
+                        label: $.home.menu.orders,
+                        tooltip: '',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Icon(icons.menu.profile, size: 24),
+                        ),
+                        label: $.home.menu.profile,
+                        tooltip: '',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The widget used to navigate to [DeliveryScreen].
+class DeliveryPickerField extends HookConsumerWidget {
+  /// The widget used to navigate to [DeliveryScreen].
+  const DeliveryPickerField({super.key});
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final NavigatorState rootNavigator =
+        Navigator.of(context, rootNavigator: true);
+    final I18N $ = I18NLocalizations.of(context);
+
+    final AsyncValue<DeliveryType> deliveryType =
+        ref.watch(deliveryTypeProvider);
+    final AsyncValue<UserAddressesModel?> activeAddress =
+        ref.watch(activeAddressProvider);
+    final UserAddressesModel? prevActiveAddress =
+        usePrevious<UserAddressesModel?>(activeAddress.valueOrNull);
+    final UserAddressesModel? address =
+        activeAddress.valueOrNull ?? prevActiveAddress;
+
+    final StoreModel? store = ref.watch(
+      cartProvider.select(
+        (final _) =>
+            _.whenOrNull<StoreModel?>(data: (final _) => _.firstOrNull?.store),
+      ),
+    );
+
+    String? eta;
+    if (address == null) {
+      eta = $.home.addressHint;
+    } else if (store?.id == null) {
+      eta = $.home.storeHint;
+    }
+    final String? prevEta = usePrevious<String?>(eta);
+
+    if (deliveryType is! AsyncData || deliveryType.valueOrNull == null) {
+      eta ??= prevEta;
+    } else if (address != null && store?.id != null) {
+      switch (deliveryType.value!) {
+        case DeliveryType.delivery:
+          eta = ref.watch(
+            storeEtaDeliveryProvider(store!.id!).select(
+              (final _) =>
+                  _.whenOrNull<String?>(
+                    data: (final _) => _?.min != null && _?.max != null
+                        ? $.delivery.deliveryToTime(
+                            _!.min!,
+                            _.max!,
+                            address.displayLong!,
+                          )
+                        : null,
+                  ) ??
+                  $.home.storeHint,
+            ),
+          );
+          break;
+
+        case DeliveryType.pickup:
+          eta = ref.watch(
+            storeEtaPickupProvider(store!.id!).select(
+              (final _) =>
+                  _.whenOrNull<String?>(
+                    data: (final _) => _?.min != null && _?.max != null
+                        ? $.delivery.pickupFromTime(
+                            _!.min!,
+                            _.max!,
+                            address.displayLong!,
+                          )
+                        : null,
+                  ) ??
+                  $.home.storeHint,
+            ),
+          );
+      }
+    }
+
+    final SyncCallback syncCallback = useSyncCallback();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          foregroundColor: theme.colorScheme.surface,
+          textStyle: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onPressed: () async => syncCallback(
+          () async => rootNavigator.pushNamed(
+            Routes.delivery.name,
+            arguments: DeliveryScreen(
+              deliveryType: await ref.read(deliveryTypeProvider.future),
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Icon(icons.delivery, size: 16),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Text(
+                  eta ?? $.home.addressHint,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 11),
+              Icon(icons.misc.arrowDown, size: 10),
+            ],
           ),
         ),
       ),
@@ -220,19 +374,18 @@ class SearchField extends HookConsumerWidget {
       StateProvider<String?>((final _) => null);
 
   /// The provider of the current search value.
-  static final StateProvider<Set<String>> suggestions =
-      StateProvider<Set<String>>((final _) => const <String>{});
+  static final AutoDisposeStateProvider<Set<String>> suggestions =
+      StateProvider.autoDispose<Set<String>>((final _) => const <String>{});
 
   /// The provider that specifies if [suggestions] should be shown.
-  static final StateProvider<bool> showSuggestions =
-      StateProvider<bool>((final _) => true);
+  static final AutoDisposeStateProvider<bool> showSuggestions =
+      StateProvider.autoDispose<bool>((final _) => true);
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final I18N $ = I18NLocalizations.of(context);
 
-    useMemoized(() => ref.refresh(suggestions));
     final IsMounted isMounted = useIsMounted();
     final SyncCallback syncCallback = useSyncCallback();
     final ObjectRef<bool> pickedSuggestion = useRef(false);
@@ -313,7 +466,7 @@ class SearchField extends HookConsumerWidget {
       () => WidgetsBinding.instance.addPostFrameCallback(
         (final _) async => syncCallback(() async {
           final Iterable<String> isarSuggestions =
-              await ref.read(searchEntriesProvider.future);
+              await ref.read(recentSearchEntriesProvider.future);
           if (isMounted()) {
             ref.read(suggestions.notifier).state = isarSuggestions.toSet();
           }
@@ -382,7 +535,7 @@ class SearchField extends HookConsumerWidget {
               }
               if (value.isEmpty) {
                 final Iterable<String> isarSuggestions =
-                    await ref.read(searchEntriesProvider.future);
+                    await ref.read(recentSearchEntriesProvider.future);
                 ref.read(suggestions.notifier).state = isarSuggestions.toSet();
               } else {
                 ref.read(suggestions.notifier).state =
@@ -496,15 +649,14 @@ class SearchFieldSuggestions extends HookConsumerWidget {
   }
 
   @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(
-      properties
-        ..add(
-          ObjectFlagProperty<void Function(String suggestion)?>.has(
-            'onTap',
-            onTap,
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(
+            ObjectFlagProperty<void Function(String suggestion)?>.has(
+              'onTap',
+              onTap,
+            ),
           ),
-        ),
-    );
-  }
+      );
 }

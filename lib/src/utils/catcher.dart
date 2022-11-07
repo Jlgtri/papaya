@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 
-import '../providers/misc_providers.dart';
+import '../providers/misc.dart';
 
 /// The report mode that sends report to the [errorProvider].
 class RiverpodReportMode extends ReportMode {

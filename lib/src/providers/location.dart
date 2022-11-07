@@ -43,39 +43,3 @@ final FutureProviderFamily<Iterable<Placemark>, LatLng> placemarksProvider =
   (final FutureProviderRef<Iterable<Placemark>> ref, final LatLng latLng) =>
       placemarkFromCoordinates(latLng.latitude, latLng.longitude),
 );
-
-/// The [Provider] of the address for the specified [LatLng].
-final FutureProviderFamily<String?, LatLng> addressProvider =
-    FutureProvider.family<String?, LatLng>(
-  (final FutureProviderRef<String?> ref, final LatLng latLng) async =>
-      await ref.watch(
-    placemarksProvider(latLng)
-        .selectAsync((final Iterable<Placemark> placemarks) {
-      if (placemarks.isNotEmpty) {
-        final Placemark placemark = placemarks.first;
-        final String address = <String?>[
-          if (placemark.isoCountryCode == 'US') ...<String?>[
-            placemark.street,
-            placemark.locality,
-            placemark.administrativeArea,
-            placemark.postalCode,
-            placemark.isoCountryCode,
-          ] else ...<String?>[
-            placemark.street,
-            placemark.name
-          ]
-        ]
-            .whereType<String>()
-            .map((final _) => _.trim())
-            .where((final _) => _.isNotEmpty)
-            .toSet()
-            .join(', ');
-        if (address.isNotEmpty) {
-          return address;
-        }
-      }
-      return null;
-    }),
-  ),
-  dependencies: <ProviderOrFamily>[placemarksProvider],
-);

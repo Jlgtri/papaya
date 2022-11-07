@@ -3,11 +3,18 @@ import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../const.dart';
-import '../providers/misc_providers.dart';
+import '../providers/misc.dart';
 
 part 'settings.g.dart';
 
-enum DeliveryType { delivery, pickup }
+/// The delivery type to use in the app.
+enum DeliveryType {
+  /// Means the product will be delivered to user.
+  delivery,
+
+  /// Means the user will pick up the product.
+  pickup
+}
 
 /// The basic app's settings.
 @collection
@@ -18,12 +25,18 @@ class Settings {
   /// The state of the onboarding screen.
   bool onboarding = true;
 
+  /// If the user skipped authorization.
+  bool skippedAuthorization = false;
+
+  /// If the user skipped setting up a default address.
+  bool skippedDefaultAddress = false;
+
   /// The current picked delivery type.
   @enumerated
   DeliveryType deliveryType = DeliveryType.delivery;
 
-  /// The current active tokens.
-  List<Token> tokens = <Token>[];
+  /// The current active token.
+  Token? token;
 }
 
 @embedded
@@ -44,11 +57,13 @@ final StreamProvider<Settings> settingsProvider = StreamProvider<Settings>(
   (final StreamProviderRef<Settings> ref) async* {
     final Isar isar = await ref.watch(isarProvider.future);
     Settings? settings;
-    await isar.writeTxn<void>(silent: true, () async {
-      if ((settings = await isar.settings.get(0)) == null) {
-        await isar.settings.put(settings = Settings());
-      }
-    });
+    await isar.writeTxn<void>(
+      () async => isar.settings.put(
+        /// Fail-safe method to keep settings valid when upgrading the app.
+        settings = await isar.settings.get(0) ?? Settings(),
+      ),
+      silent: true,
+    );
     yield settings!;
     yield* isar.settings.watchObject(0).where((final _) => _ != null).cast();
   },
@@ -56,20 +71,36 @@ final StreamProvider<Settings> settingsProvider = StreamProvider<Settings>(
 );
 
 /// The current value of the [Settings.onboarding] property.
-final AutoDisposeFutureProvider<bool> onboardingProvider =
-    FutureProvider.autoDispose<bool>(
-  (final AutoDisposeFutureProviderRef<bool> ref) async => await ref.watch(
+final FutureProvider<bool> onboardingProvider = FutureProvider<bool>(
+  (final FutureProviderRef<bool> ref) async => await ref.watch(
     settingsProvider.future.select((final _) async => (await _).onboarding),
   ),
   dependencies: <ProviderOrFamily>[settingsProvider],
 );
 
-/// The current value of the [Settings.onboarding] property.
-final AutoDisposeFutureProvider<DeliveryType> deliveryTypeProvider =
-    FutureProvider.autoDispose<DeliveryType>(
+/// The current value of the [Settings.skippedAuthorization] property.
+final FutureProvider<bool> skippedAuthorizationProvider = FutureProvider<bool>(
   dependencies: <ProviderOrFamily>[settingsProvider],
-  (final AutoDisposeFutureProviderRef<DeliveryType> ref) async =>
-      await ref.watch(
+  (final FutureProviderRef<bool> ref) async => await ref.watch(
+    settingsProvider.future
+        .select((final _) async => (await _).skippedAuthorization),
+  ),
+);
+
+/// The current value of the [Settings.skippedDefaultAddress] property.
+final FutureProvider<bool> skippedDefaultAddressProvider = FutureProvider<bool>(
+  dependencies: <ProviderOrFamily>[settingsProvider],
+  (final FutureProviderRef<bool> ref) async => await ref.watch(
+    settingsProvider.future
+        .select((final _) async => (await _).skippedDefaultAddress),
+  ),
+);
+
+/// The current value of the [Settings.onboarding] property.
+final FutureProvider<DeliveryType> deliveryTypeProvider =
+    FutureProvider<DeliveryType>(
+  dependencies: <ProviderOrFamily>[settingsProvider],
+  (final FutureProviderRef<DeliveryType> ref) async => await ref.watch(
     settingsProvider.future.select((final _) async => (await _).deliveryType),
   ),
 );
@@ -79,10 +110,7 @@ final AutoDisposeFutureProvider<Token?> tokenProvider =
     FutureProvider.autoDispose<Token?>(
   (final AutoDisposeFutureProviderRef<Token?> ref) async {
     final Token? currentToken = ref.watch(
-      settingsProvider.select((final _) {
-        final List<Token> tokens = _.valueOrNull?.tokens ?? Settings().tokens;
-        return tokens.isEmpty ? null : tokens.first;
-      }),
+      settingsProvider.select((final _) => _.valueOrNull?.token),
     );
     if (currentToken != null &&
         currentToken.accessTokenExpirationDateTime
@@ -109,7 +137,7 @@ final AutoDisposeFutureProvider<Token?> tokenProvider =
         await isar.writeTxn(
           () async => isar.settings.put(
             await ref.read(settingsProvider.future)
-              ..tokens = <Token>[token],
+              ..token = token,
           ),
         );
         ref.keepAlive();
@@ -149,7 +177,7 @@ final AutoDisposeFutureProvider<Token?> authTokenProvider =
         await isar.writeTxn(
           () async => isar.settings.put(
             await ref.read(settingsProvider.future)
-              ..tokens = <Token>[token],
+              ..token = token,
           ),
         );
         ref.keepAlive();

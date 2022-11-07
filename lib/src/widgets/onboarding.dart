@@ -10,7 +10,7 @@ import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
 import '../hooks/sync_callback_hook.dart';
 import '../models/settings.dart';
-import '../providers/misc_providers.dart';
+import '../providers/misc.dart';
 import '../routes.dart';
 
 /// The data for the [OnboardingScreen].
@@ -93,8 +93,9 @@ class OnboardingScreen extends HookConsumerWidget {
                 ..onboarding = false,
             ),
           );
-          await (await Routes.current(container))
-              .pushReplacement(navigator, container);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await navigator
+              .pushReplacementNamed((await Routes.current(container)).name);
         });
 
     final PageController pageController = usePageController();
@@ -116,7 +117,7 @@ class OnboardingScreen extends HookConsumerWidget {
       child: WillPopScope(
         onWillPop: () async {
           await pageController.previousPage(
-            duration: const Duration(milliseconds: 500),
+            duration: const Duration(milliseconds: 373),
             curve: Curves.ease,
           );
           return false;
@@ -157,6 +158,7 @@ class OnboardingScreen extends HookConsumerWidget {
             children: <Widget>[
               for (final OnboardingPage page in pages)
                 Align(
+                  key: PageStorageKey<String>(page.source),
                   child: SingleChildScrollView(
                     key: ValueKey<Orientation>(mediaQuery.orientation),
                     padding: const EdgeInsets.all(16),
@@ -186,7 +188,8 @@ class OnboardingScreen extends HookConsumerWidget {
             ],
           ),
           bottomNavigationBar: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16)
+                .copyWith(bottom: mediaQuery.padding.bottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -210,7 +213,7 @@ class OnboardingScreen extends HookConsumerWidget {
                       minimumSize: const Size.fromHeight(0),
                     ),
                     onPressed: () async => pageController.nextPage(
-                      duration: const Duration(milliseconds: 500),
+                      duration: const Duration(milliseconds: 373),
                       curve: Curves.ease,
                     ),
                     child: Padding(

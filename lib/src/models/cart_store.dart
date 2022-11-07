@@ -1,21 +1,20 @@
+import 'package:collection/collection.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../generated/models.g.dart';
-import '../providers/api_providers.dart';
-import '../providers/misc_providers.dart';
-import '../widgets/product_screen.dart';
-import '../widgets/store_screen.dart';
+import '../providers/api.dart';
+import '../providers/misc.dart';
 
 part 'cart_store.g.dart';
 
-/// The basic app's settings.
+/// The store in the cart.
 @collection
 class CartStore {
   /// The id of the store.
   late Id id;
 
-  /// The current active tokens.
+  /// The products in this store.
   List<CartStoreProduct> products = <CartStoreProduct>[];
 
   /// The store that the [id] references.
@@ -23,14 +22,14 @@ class CartStore {
   StoreModel? store;
 }
 
-/// The basic app's settings.
+/// The product in the [CartStore].
 @embedded
 class CartStoreProduct {
-  /// The id of the product in the store.
+  /// The id of the product in the [CartStore].
   late int id;
 
   /// The amount of this product.
-  int amount = 1;
+  int amount = 0;
 
   /// The product that the [id] references.
   @ignore
@@ -38,71 +37,62 @@ class CartStoreProduct {
 }
 
 /// The provider of the current cart state.
-final StreamProvider<Iterable<CartStore>> cartProvider =
-    StreamProvider<Iterable<CartStore>>(
-  (final StreamProviderRef<Iterable<CartStore>> ref) async* {
+final StreamProvider<List<CartStore>> cartProvider =
+    StreamProvider<List<CartStore>>(
+  (final StreamProviderRef<List<CartStore>> ref) async* {
     final Isar isar = await ref.watch(isarProvider.future);
-    await for (final Iterable<CartStore> cart
+    await for (final List<CartStore> cart
         in isar.cartStores.where().watch(fireImmediately: true)) {
-      final Iterable<StoreModel> stores =
-          await ref.watch(storesProvider.future);
-      for (final CartStore store in cart) {
-        for (final StoreModel $store in stores) {
-          if ($store.id == store.id) {
-            store.store = $store;
-            break;
+      if (cart.isNotEmpty) {
+        final Iterable<StoreModel> stores =
+            await ref.read(storesProvider.future);
+        for (int index = 0; index < cart.length; index++) {
+          final CartStore store = cart.elementAt(index);
+          final int initialStoreProductLength = store.products.length;
+          store.store = stores.firstWhereOrNull((final _) => _.id == store.id);
+
+          final Iterable<StoreMenuModel>? storeMenu =
+              ref.read(storeMenuProvider(store.id)).valueOrNull;
+          if (store.store != null && initialStoreProductLength > 0) {
+            store.products = (await Future.wait(<Future<CartStoreProduct?>>[
+              for (final CartStoreProduct product in store.products)
+                Future<CartStoreProduct?>(() async {
+                  if (storeMenu != null) {
+                    outer:
+                    for (final StoreMenuModel menu in storeMenu) {
+                      if (menu.products != null) {
+                        for (final StoreMenuProductsModel menuProduct
+                            in menu.products!) {
+                          if (menuProduct.id == product.id) {
+                            product.product = menuProduct;
+                            break outer;
+                          }
+                        }
+                      }
+                    }
+                  }
+                  product.product ??=
+                      await ref.read(storeProductProvider(product.id).future);
+                  return product.product == null ? null : product;
+                })
+            ]))
+                .whereNotNull()
+                .toList();
           }
-        }
-        store.store = stores.firstWhere((final _) => _.id == store.id);
-        final Iterable<StoreMenuModel> products =
-            await ref.watch(storeMenuProvider(store.id).future);
-        for (final CartStoreProduct product in store.products) {
-          outer:
-          for (final StoreMenuModel menu in products) {
-            for (final StoreMenuProductsModel menuProduct
-                in menu.products ?? <StoreMenuProductsModel>[]) {
-              if (menuProduct.id == product.id) {
-                product.product = menuProduct;
-                break outer;
-              }
-            }
+          if (store.store == null || initialStoreProductLength == 0) {
+            cart.removeAt(index--);
+            await isar.writeTxn(() => isar.cartStores.delete(store.id));
+          } else if (initialStoreProductLength != store.products.length) {
+            await isar.writeTxn(() => isar.cartStores.put(store));
           }
         }
       }
       yield cart;
     }
   },
-  dependencies: <ProviderOrFamily>[isarProvider],
-);
-
-/// The provider of the current product amount in the [cartProvider] state.
-final FutureProvider<int> amountProvider = FutureProvider<int>(
-  (final FutureProviderRef<int> ref) async {
-    final int? storeId =
-        ref.read(StoreScreen.provider.select((final _) => _?.id));
-    final int? productId =
-        ref.watch(ProductScreen.provider.select((final _) => _?.id));
-    if (storeId == null || productId == null) {
-      return 0;
-    }
-    return await ref.watch(
-      cartProvider.future
-          .select((final Future<Iterable<CartStore>> stores) async {
-        for (final CartStore store in await stores) {
-          if (store.id == storeId) {
-            for (final CartStoreProduct product in store.products) {
-              if (product.id == productId) {
-                return product.amount;
-              }
-            }
-          }
-        }
-        return 0;
-      }),
-    );
-  },
   dependencies: <ProviderOrFamily>[
-    StoreScreen.provider,
-    ProductScreen.provider
+    isarProvider,
+    storesProvider,
+    storeMenuProvider
   ],
 );
