@@ -1,10 +1,16 @@
+import 'package:catcher/catcher.dart';
+import 'package:flash/flash.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_transition/page_transition.dart';
 
+import 'generated/i18n.g.dart';
 import 'models/settings.dart';
 import 'providers/api.dart';
+import 'styles.dart';
 import 'widgets/authorization.dart';
 import 'widgets/misc/delivery.dart';
 import 'widgets/misc/map.dart';
@@ -16,6 +22,74 @@ import 'widgets/navigation.dart';
 import 'widgets/onboarding.dart';
 import 'widgets/payment.dart';
 import 'widgets/store.dart';
+
+/// The wrapper around [MaterialApp] to support hot reload.
+@immutable
+class RoutesApp extends StatelessWidget {
+  /// The wrapper around [MaterialApp] to support hot reload.
+  const RoutesApp(this.route, {super.key});
+
+  /// The current app's route.
+  final Routes route;
+
+  @override
+  Widget build(final BuildContext context) => MaterialApp(
+        title: 'Papaya',
+        debugShowCheckedModeBanner: false,
+        navigatorKey: Catcher.navigatorKey,
+        locale: I18NLocale.enUS.locale,
+        supportedLocales: I18NLocale.values.map((final _) => _.locale),
+        localizationsDelegates: const <LocalizationsDelegate<Object?>>[
+          I18NLocalizations.delegate,
+        ],
+        theme: ThemeData.from(
+          useMaterial3: true,
+          colorScheme: defaultColorScheme,
+          textTheme: defaultTextTheme,
+        ).custom,
+        builder: (final BuildContext context, final Widget? child) {
+          final ThemeData theme = Theme.of(context);
+          final MediaQueryData mediaQuery = MediaQuery.of(context);
+          return MediaQuery(
+            data: mediaQuery.copyWith(textScaleFactor: 1),
+            child: DefaultTextStyle(
+              style: theme.textTheme.titleMedium ?? const TextStyle(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              child: FlashTheme(
+                flashBarTheme: FlashBarThemeData(
+                  brightness: Brightness.light,
+                  boxShadows: <BoxShadow>[boxShadow(Theme.of(context))],
+                ),
+                flashDialogTheme: FlashDialogThemeData(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(16),
+                  titleStyle: theme.textTheme.titleMedium,
+                  contentStyle: theme.textTheme.bodyMedium,
+                  backgroundColor: theme.colorScheme.surface,
+                  constraints: BoxConstraints(
+                    maxWidth: mediaQuery.size.width,
+                    maxHeight: mediaQuery.size.height,
+                  ),
+                ),
+                child: child!,
+              ),
+            ),
+          );
+        },
+        useInheritedMediaQuery: true,
+        initialRoute: route.name,
+        onGenerateRoute: (final RouteSettings settings) =>
+            settings.name != null ? Routes.from<void>(settings) : null,
+      );
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties..add(EnumProperty<Routes>('route', route)),
+      );
+}
 
 /// The route in the app.
 enum Routes {

@@ -11,6 +11,12 @@ targets:
         - build/**
 
     builders:
+      isar_generator|isar_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/src/models/**
+
       generators|assets:
         enabled: true
         options:

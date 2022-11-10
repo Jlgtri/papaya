@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../generated/assets.g.dart';
 import '../../generated/i18n.g.dart';
@@ -21,6 +22,7 @@ import '../../styles.dart';
 import '../store.dart';
 
 /// The screen used to display advertisments and stores.
+@immutable
 class HomeScreen extends HookConsumerWidget {
   /// The screen used to display advertisments and stores.
   const HomeScreen({super.key});
@@ -30,12 +32,13 @@ class HomeScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final NavigatorState rootNavigator =
         Navigator.of(context, rootNavigator: true);
-    final MediaQueryData rootMediaQuery = MediaQuery.of(rootNavigator.context);
     final I18N $ = I18NLocalizations.of(context);
 
-    final SyncCallback syncCallback = useSyncCallback();
-
-    final AsyncValue<Iterable<StoreModel>> stores =
+    final bool isDelivery = ref.watch(
+      deliveryTypeProvider
+          .select((final _) => _.valueOrNull == DeliveryType.delivery),
+    );
+    final AsyncValue<Iterable<StoreModel>?> stores =
         ref.watch(filteredStoresProvider);
     final bool showAllStores = ref.watch(
       storesProvider.select(
@@ -45,17 +48,21 @@ class HomeScreen extends HookConsumerWidget {
             _.value!.length != stores.value!.length,
       ),
     );
+    final AsyncValue<CarouselModel?> carousel = ref.watch(carouselProvider);
+    final Iterable<CarouselStoriesModel>? stories =
+        carousel.valueOrNull?.stories;
+
+    final SyncCallback syncCallback = useSyncCallback();
+    final PageController pageController = usePageController(initialPage: 999);
     return CustomScrollView(
+      controller: useScrollController(),
       slivers: <Widget>[
-        if ((ref.watch(
-              nearbyStoresProvider.select(
-                (final AsyncValue<Iterable<StoreModel>> stores) =>
-                    stores.valueOrNull?.isEmpty ?? false,
-              ),
-            )) &&
+        if (isDelivery &&
             ref.watch(
-              deliveryTypeProvider
-                  .select((final _) => _.valueOrNull == DeliveryType.delivery),
+              storesProvider.select(
+                (final AsyncValue<Iterable<StoreModel>?> stores) =>
+                    stores.valueOrNull?.isEmpty ?? true,
+              ),
             )) ...<Widget>[
           const SliverFillRemaining(
             hasScrollBody: false,
@@ -63,87 +70,55 @@ class HomeScreen extends HookConsumerWidget {
           ),
           const SliverToBoxAdapter(child: StoresNotFoundLower())
         ] else ...<Widget>[
-          /// Carousel with indicator
-          SliverFillRemaining(
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              fit: StackFit.expand,
-              children: <Widget>[
-                /// Carousel
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onBackground,
-                    image: false
-                        ? DecorationImage(
-                            image: CachedNetworkImageProvider(''),
-                          )
-                        : null,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 64,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Flexible(
-                          child: Text(
-                            'BKLYN Wild - Time Out Market',
-                            style: theme.textTheme.displayLarge?.copyWith(
-                              color: theme.colorScheme.surface,
-                            ),
-                            maxLines: 3,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Flexible(
-                          child: Text(
-                            'Short promotion description goes here',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              color: theme.colorScheme.surface,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 48),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(200, 0),
-                          ),
-                          onPressed: () {},
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text($.home.viewDetail),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+          /// Carousel With Indicator
+          if (carousel.isLoading)
+            SliverFillRemaining(
+              child: ColoredBox(
+                color: theme.colorScheme.onBackground,
+                child: const Center(
+                  child: CircularProgressIndicator.adaptive(),
                 ),
+              ),
+            )
+          else if (carousel is AsyncData && stories != null)
+            SliverFillRemaining(
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                fit: StackFit.expand,
+                children: <Widget>[
+                  /// Carousel
+                  PageView.builder(
+                    controller: pageController,
+                    itemBuilder: (final _, final int index) {
+                      final CarouselStoriesModel story =
+                          stories.elementAt(index % stories.length);
+                      return CarouselPage(
+                        story,
+                        key: PageStorageKey<int?>(story.id),
+                      );
+                    },
+                  ),
 
-                /// Indicator
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: DotsIndicator(
-                      dotsCount: 1,
-                      position: 0,
-                      decorator: DotsDecorator(
-                        size: const Size.square(16),
-                        activeSize: const Size.square(16),
-                        spacing: const EdgeInsets.symmetric(horizontal: 6),
-                        color: theme.colorScheme.surface,
-                        activeColor: theme.colorScheme.secondary,
+                  /// Indicator
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 22),
+                      child: SmoothPageIndicator(
+                        controller: pageController,
+                        count: stories.length,
+                        effect: ColorTransitionEffect(
+                          spacing: 12,
+                          radius: 8,
+                          dotColor: theme.colorScheme.surface,
+                          activeDotColor: theme.colorScheme.secondary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
           /// Stores Title / Show All Stores
           SliverToBoxAdapter(
@@ -154,7 +129,7 @@ class HomeScreen extends HookConsumerWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      showAllStores ? $.home.storesAll : $.home.storesNearby,
+                      isDelivery ? $.home.storesNearby : $.home.storesAll,
                       style: theme.textTheme.displayMedium?.copyWith(height: 1),
                     ),
                   ),
@@ -191,7 +166,7 @@ class HomeScreen extends HookConsumerWidget {
           ),
 
           /// Stores List
-          if (stores is AsyncData && stores.valueOrNull != null)
+          if (stores.valueOrNull != null)
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (final _, final int index) => Padding(
@@ -202,7 +177,7 @@ class HomeScreen extends HookConsumerWidget {
                 childCount: stores.value!.length,
               ),
             )
-          else
+          else if (stores.isLoading)
             const SliverToBoxAdapter(
               child: SizedBox(
                 height: 64,
@@ -216,7 +191,114 @@ class HomeScreen extends HookConsumerWidget {
   }
 }
 
+/// The widget used to display a carousel [story].
+@immutable
+class CarouselPage extends HookConsumerWidget {
+  /// The widget used to display a carousel [story].
+  const CarouselPage(this.story, {super.key});
+
+  /// The story to show on this page.
+  final CarouselStoriesModel story;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final I18N $ = I18NLocalizations.of(context);
+
+    return ColoredBox(
+      color: theme.colorScheme.onBackground,
+      child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          /// Background Image
+          CachedNetworkImage(
+            imageUrl: story.content?.image?.filename ?? '',
+            imageBuilder:
+                (final _, final ImageProvider<Object> imageProvider) =>
+                    DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  transform: const GradientRotation(0.284663201),
+                  stops: const <double>[0.1723, 0.4654, 1],
+                  colors: <Color>[
+                    Colors.black.withOpacity(0.78),
+                    Colors.black.withOpacity(0.69),
+                    Colors.black.withOpacity(0)
+                  ],
+                ),
+              ),
+              child: Image(
+                image: imageProvider,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+            errorWidget: (final _, final __, final ___) =>
+                const SizedBox.shrink(),
+          ),
+
+          /// Information Content
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 64,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (story.content?.header?.isNotEmpty ?? false)
+                  Text(
+                    story.content!.header!,
+                    style: theme.textTheme.displayLarge?.copyWith(
+                      color: theme.colorScheme.surface,
+                    ),
+                    maxLines: 3,
+                  ),
+                if (story.content?.text?.isNotEmpty ?? false) ...<Widget>[
+                  const SizedBox(height: 24),
+                  Flexible(
+                    child: Text(
+                      story.content!.text!,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: theme.colorScheme.surface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 48),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(200, 0),
+                  ),
+                  onPressed: () async =>
+                      story.content?.link?.isNotEmpty ?? false
+                          ? launchUrlString(story.content!.link!)
+                          : null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(story.content?.cta ?? $.home.viewDetail),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(DiagnosticsProperty<CarouselStoriesModel>('story', story)),
+      );
+}
+
 /// The upper part of a screen used when [nearbyStoresProvider] is empty.
+@immutable
 class StoresNotFoundUpper extends HookConsumerWidget {
   /// The upper part of a screen used when [nearbyStoresProvider] is empty.
   const StoresNotFoundUpper({super.key});
@@ -228,8 +310,7 @@ class StoresNotFoundUpper extends HookConsumerWidget {
         Navigator.of(context, rootNavigator: true);
     final I18N $ = I18NLocalizations.of(context);
 
-    final AsyncValue<DeliveryType> deliveryType =
-        ref.watch(deliveryTypeProvider);
+    final AsyncValue<DeliveryType> isDelivery = ref.watch(deliveryTypeProvider);
     final AsyncValue<UserAddressesModel?> activeAddress =
         ref.watch(activeAddressProvider);
     final UserAddressesModel? prevActiveAddress =
@@ -252,10 +333,10 @@ class StoresNotFoundUpper extends HookConsumerWidget {
     }
     final String? prevEta = usePrevious<String?>(eta);
 
-    if (deliveryType is! AsyncData || deliveryType.valueOrNull == null) {
+    if (isDelivery is! AsyncData || isDelivery.valueOrNull == null) {
       eta ??= prevEta;
     } else if (address != null && store?.id != null) {
-      switch (deliveryType.value!) {
+      switch (isDelivery.value!) {
         case DeliveryType.delivery:
           eta = ref.watch(
             storeEtaDeliveryProvider(store!.id!).select(
@@ -410,6 +491,7 @@ class StoresNotFoundUpper extends HookConsumerWidget {
 }
 
 /// The lower part of a screen used when [nearbyStoresProvider] is empty.
+@immutable
 class StoresNotFoundLower extends HookConsumerWidget {
   /// The lower part of a screen used when [nearbyStoresProvider] is empty.
   const StoresNotFoundLower({super.key});
@@ -478,6 +560,7 @@ class StoresNotFoundLower extends HookConsumerWidget {
 }
 
 /// The [StoreModel.name] property should not be null.
+@immutable
 class StoreCard extends HookConsumerWidget {
   /// The [StoreModel.name] property should not be null.
   const StoreCard(this.store, {super.key});
@@ -511,11 +594,11 @@ class StoreCard extends HookConsumerWidget {
               /// Image
               CachedNetworkImage(
                 imageUrl: store.imgUrl ?? '',
-                fit: BoxFit.fitWidth,
+                fit: BoxFit.cover,
                 height: 176,
                 filterQuality: FilterQuality.high,
                 errorWidget: (final _, final __, final ___) =>
-                    Image.asset(assets.logo, fit: BoxFit.fitWidth),
+                    Image.asset(assets.logo, fit: BoxFit.cover),
               ),
 
               const SizedBox(height: 16),

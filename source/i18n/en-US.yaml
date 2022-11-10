@@ -31,6 +31,10 @@ alert:
     body: You can't add products from multiple stores at the moment.\nClear your cart and try again.
     approve: Clear cart
     deny: I understood
+  store_information_invalid:
+    title: Error
+    body: Store information can not be loaded. Please try again later.
+    approve: I understood
 
 onboarding:
   skip: Skip

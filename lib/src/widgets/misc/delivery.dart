@@ -21,6 +21,7 @@ import '../../providers/misc.dart';
 import '../../routes.dart';
 
 /// The screen used to pick current [deliveryType] or current active address.
+@immutable
 class DeliveryScreen extends HookConsumerWidget {
   /// The screen used to pick current [deliveryType] or current active address.
   const DeliveryScreen({this.deliveryType, super.key});
@@ -253,6 +254,7 @@ typedef DeliveryTypeCallback = FutureOr<void> Function(
 );
 
 /// The switcher of [Settings.deliveryType] on [DeliveryScreen].
+@immutable
 class DeliveryTypeSwitcher extends HookConsumerWidget {
   /// The switcher of [Settings.deliveryType] on [DeliveryScreen].
   const DeliveryTypeSwitcher(this.deliveryType, {this.onChanged, super.key});
@@ -330,13 +332,14 @@ class DeliveryTypeSwitcher extends HookConsumerWidget {
 }
 
 /// The widget used to load delivery addresses.
+@immutable
 class DeliveryDeliveryLoader extends HookConsumerWidget {
   /// The widget used to load delivery addresses.
   const DeliveryDeliveryLoader({super.key});
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final AsyncValue<Iterable<UserAddressesModel>> addresses =
+    final AsyncValue<Iterable<UserAddressesModel>?> addresses =
         ref.watch(activeAddressesProvider);
     final Iterable<UserAddressesModel>? prevAddresses =
         usePrevious<Iterable<UserAddressesModel>?>(addresses.valueOrNull);
@@ -362,6 +365,7 @@ class DeliveryDeliveryLoader extends HookConsumerWidget {
 }
 
 /// The widget used to show delivery [addresses].
+@immutable
 class DeliveryDelivery extends HookConsumerWidget {
   /// The widgetused  to show delivery [addresses].
   const DeliveryDelivery(this.addresses, {super.key});
@@ -476,6 +480,7 @@ class DeliveryDelivery extends HookConsumerWidget {
 }
 
 /// The widget to load current store's pickup eta.
+@immutable
 class DeliveryPickupLoader extends HookConsumerWidget {
   /// The widget to load current store's pickup eta.
   const DeliveryPickupLoader({super.key});
@@ -528,6 +533,7 @@ class DeliveryPickupLoader extends HookConsumerWidget {
 }
 
 /// The widget to show [store] pickup [eta].
+@immutable
 class DeliveryPickup extends HookConsumerWidget {
   /// The widget to show [store] pickup [eta].
   const DeliveryPickup(this.store, this.eta, {super.key});
@@ -627,6 +633,7 @@ class DeliveryPickup extends HookConsumerWidget {
 }
 
 /// The widget used to pick the [address].
+@immutable
 class AddressRadio extends HookConsumerWidget {
   /// The widget used to pick the [address].
   const AddressRadio(this.address, {super.key});

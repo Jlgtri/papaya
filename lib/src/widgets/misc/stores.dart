@@ -11,6 +11,7 @@ import '../../routes.dart';
 import '../navigation/home.dart';
 
 /// The screen used to display stores from [allStoresProvider].
+@immutable
 class StoresScreen extends HookConsumerWidget {
   /// The screen used to display stores from [allStoresProvider].
   const StoresScreen({super.key});
@@ -25,7 +26,7 @@ class StoresScreen extends HookConsumerWidget {
         ProviderScope.containerOf(context, listen: false);
 
     final SyncCallback syncCallback = useSyncCallback();
-    final AsyncValue<Iterable<StoreModel>> stores =
+    final AsyncValue<Iterable<StoreModel>?> stores =
         ref.watch(allStoresProvider);
     return WillPopScope(
       onWillPop: () async {

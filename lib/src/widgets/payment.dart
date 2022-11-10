@@ -8,6 +8,7 @@ import '../hooks/sync_callback_hook.dart';
 import '../routes.dart';
 
 /// The screen used to process a payment.
+@immutable
 class PaymentScreen extends HookConsumerWidget {
   /// The screen used to process a payment.
   const PaymentScreen({super.key});

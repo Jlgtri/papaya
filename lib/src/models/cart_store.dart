@@ -44,12 +44,12 @@ final StreamProvider<List<CartStore>> cartProvider =
     await for (final List<CartStore> cart
         in isar.cartStores.where().watch(fireImmediately: true)) {
       if (cart.isNotEmpty) {
-        final Iterable<StoreModel> stores =
+        final Iterable<StoreModel>? stores =
             await ref.read(storesProvider.future);
         for (int index = 0; index < cart.length; index++) {
           final CartStore store = cart.elementAt(index);
           final int initialStoreProductLength = store.products.length;
-          store.store = stores.firstWhereOrNull((final _) => _.id == store.id);
+          store.store = stores?.firstWhereOrNull((final _) => _.id == store.id);
 
           final Iterable<StoreMenuModel>? storeMenu =
               ref.read(storeMenuProvider(store.id)).valueOrNull;

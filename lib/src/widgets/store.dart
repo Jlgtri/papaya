@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flash/flash.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,6 +25,7 @@ import 'modal/product.dart';
 import 'modal/store_information.dart';
 
 /// The screen used to show off a [store].
+@immutable
 class StoreScreen extends HookConsumerWidget {
   /// The screen used to show off a [store].
   const StoreScreen(this.store, {super.key});
@@ -117,6 +119,7 @@ class StoreScreen extends HookConsumerWidget {
 }
 
 /// The widget used to show products for a [store].
+@immutable
 class StoreContent extends HookConsumerWidget {
   /// The widget used to show products for a [store].
   const StoreContent(this.store, {super.key});
@@ -130,7 +133,7 @@ class StoreContent extends HookConsumerWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
-    final AsyncValue<Iterable<StoreMenuModel>> menu =
+    final AsyncValue<Iterable<StoreMenuModel>?> menu =
         ref.watch(storeMenuProvider(store.id!));
 
     final SyncCallback syncCallback = useSyncCallback();
@@ -233,22 +236,26 @@ class StoreContent extends HookConsumerWidget {
               preferredSize: Size.fromHeight(menu.isLoading ? 64 : 48),
               child: menu.isLoading
                   ? const Center(child: CircularProgressIndicator.adaptive())
-                  : Material(
+                  : Align(
+                      alignment: Alignment.centerLeft,
                       child: TabBar(
                         isScrollable: true,
                         indicatorPadding:
                             const EdgeInsets.symmetric(horizontal: 8),
+                        labelPadding:
+                            const EdgeInsets.symmetric(horizontal: 24),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         splashBorderRadius: BorderRadius.circular(8),
-                        tabs: <Tab>[
+                        tabs: <Widget>[
                           for (final StoreMenuModel menu in menu.value!)
                             if (menu.name != null && menu.products != null)
                               Tab(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 6),
+                                    child: Text(menu.name!),
                                   ),
-                                  child: Text(menu.name!),
                                 ),
                               ),
                         ],
@@ -307,6 +314,7 @@ typedef StoreProductCallback = FutureOr<void> Function(
 );
 
 /// The widget to show a [menu].
+@immutable
 class StoreMenu extends HookConsumerWidget {
   /// The widget to show a [menu].
   const StoreMenu(this.menu, {required this.onPressed, super.key});
@@ -371,6 +379,7 @@ class StoreMenu extends HookConsumerWidget {
 }
 
 /// The widget used to load information about a [store].
+@immutable
 class StoreInformationLoader extends HookConsumerWidget {
   /// The widget used to load information about a [store].
   const StoreInformationLoader(this.store, {super.key});
@@ -380,9 +389,8 @@ class StoreInformationLoader extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final AsyncValue<DeliveryType> deliveryType = ref.watch(
-      deliveryTypeProvider,
-    );
+    final AsyncValue<DeliveryType> deliveryType =
+        ref.watch(deliveryTypeProvider);
     final DeliveryType? prevDeliveryType =
         usePrevious<DeliveryType?>(deliveryType.valueOrNull);
     return deliveryType.valueOrNull != null || prevDeliveryType != null
@@ -404,6 +412,7 @@ class StoreInformationLoader extends HookConsumerWidget {
 }
 
 /// The widget used to show information about a [store].
+@immutable
 class StoreInformation extends HookConsumerWidget {
   /// The widget used to show information about a [store].
   const StoreInformation(this.store, {required this.deliveryType, super.key});
@@ -422,19 +431,20 @@ class StoreInformation extends HookConsumerWidget {
     final MediaQueryData rootMediaQuery = MediaQuery.of(rootNavigator.context);
 
     final I18N $ = I18NLocalizations.of(context);
+    final IsMounted isMounted = useIsMounted();
     final SyncCallback syncCallback = useSyncCallback();
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            /// Limited Time
-            Flexible(
-              child: Stack(
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              /// Limited Time
+              Stack(
                 alignment: Alignment.centerLeft,
                 children: <Widget>[
                   Text(
@@ -454,37 +464,36 @@ class StoreInformation extends HookConsumerWidget {
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
 
-            /// Name
-            Flexible(
-              child: Text(
-                store.name ?? '',
-                style: theme.textTheme.displayLarge?.copyWith(
-                  color: theme.colorScheme.surface,
+              const SizedBox(height: 24),
+
+              /// Name
+              if (store.name?.isNotEmpty ?? false)
+                Text(
+                  store.name!,
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    color: theme.colorScheme.surface,
+                  ),
+                  maxLines: 2,
                 ),
-                maxLines: 1,
-              ),
-            ),
 
-            /// Description
-            const SizedBox(height: 8),
-            Flexible(
-              child: Text(
-                store.description ?? '',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.surface,
+              /// Description
+              if (store.description?.isNotEmpty ?? false) ...<Widget>[
+                const SizedBox(height: 8),
+                Flexible(
+                  child: Text(
+                    store.description!,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.surface,
+                    ),
+                  ),
                 ),
-                maxLines: 4,
-              ),
-            ),
+              ],
 
-            /// Tags
-            const SizedBox(height: 40),
-            Flexible(
-              child: Padding(
+              /// Tags
+              const SizedBox(height: 40),
+              Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                 ),
@@ -524,84 +533,90 @@ class StoreInformation extends HookConsumerWidget {
                   ],
                 ),
               ),
-            ),
 
-            /// Additional Info
-            const SizedBox(height: 26),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: theme.colorScheme.surface,
-                  ),
-                  onPressed: () async => syncCallback(
-                    () async => rootNavigator.pushNamed(
-                      Routes.storeInformation.name,
-                      arguments: StoreInformationScreen(store),
+              /// Additional Info
+              const SizedBox(height: 26),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.surface,
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 2),
-                          child: Icon(icons.info, size: 24),
-                        ),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(
-                            $.store.additionalInfo,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.surface,
+                    onPressed: () async => syncCallback(() async {
+                      final StoreModel? $store =
+                          await ref.read(storeProvider(store.id!).future);
+                      if ($store != null) {
+                        await rootNavigator.pushNamed(
+                          Routes.storeInformation.name,
+                          arguments: StoreInformationScreen($store),
+                        );
+                      } else if (isMounted()) {
+                        // ignore: use_build_context_synchronously
+                        await context.showFlashDialog(
+                          title: Text($.alert.storeInformationInvalid.title),
+                          content: Text($.alert.storeInformationInvalid.body),
+                          positiveActionBuilder: (
+                            final _,
+                            final FlashController<void> controller,
+                            final __,
+                          ) =>
+                              TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.all(12),
+                            ),
+                            onPressed: controller.dismiss,
+                            child: Text(
+                              $.alert.storeInformationInvalid.approve,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      }
+                    }),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            child: Icon(icons.info, size: 24),
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              $.store.additionalInfo,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.surface,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
 
         /// Picker (Show loading state on error)
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: EdgeInsets.only(bottom: rootMediaQuery.padding.bottom),
-            child: Consumer(
-              builder: (final _, final WidgetRef ref, final Widget? child) {
-                final AsyncValue<StoreEtaDeliveryModel?> deliveryTime =
-                    ref.watch(storeEtaDeliveryProvider(store.id!));
-                final AsyncValue<StoreEtaPickupModel?> pickupTime =
-                    ref.watch(storeEtaPickupProvider(store.id!));
-                return (deliveryTime is AsyncData && pickupTime is AsyncData) &&
-                        ref.watch(
-                          storeMenuProvider(store.id!).select(
-                            (final AsyncValue<Iterable<StoreMenuModel>> menu) =>
-                                menu is AsyncData &&
-                                (menu.valueOrNull?.isNotEmpty ?? false),
-                          ),
-                        )
-                    ? StoreInformationDeliveryTypeSwitcher(
-                        deliveryTime.valueOrNull,
-                        pickupTime.valueOrNull,
-                        deliveryType: deliveryType,
-                      )
-                    : const SizedBox(
-                        height: 72,
-                        child:
-                            Center(child: CircularProgressIndicator.adaptive()),
-                      );
-              },
+            padding:
+                EdgeInsets.only(top: 64, bottom: rootMediaQuery.padding.bottom),
+            child: StoreInformationDeliveryTypeSwitcherLoader(
+              store,
+              deliveryType: deliveryType,
             ),
           ),
         ),
@@ -618,7 +633,60 @@ class StoreInformation extends HookConsumerWidget {
       );
 }
 
+/// The widget used to load a [StoreInformationDeliveryTypeSwitcher].
+@immutable
+class StoreInformationDeliveryTypeSwitcherLoader extends HookConsumerWidget {
+  /// The widget used to load a [StoreInformationDeliveryTypeSwitcher].
+  const StoreInformationDeliveryTypeSwitcherLoader(
+    this.store, {
+    required this.deliveryType,
+    super.key,
+  });
+
+  /// The store to show information for.
+  final StoreModel store;
+
+  /// The current active [DeliveryType].
+  final DeliveryType deliveryType;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final AsyncValue<StoreEtaDeliveryModel?> deliveryTime =
+        ref.watch(storeEtaDeliveryProvider(store.id!));
+    final AsyncValue<StoreEtaPickupModel?> pickupTime =
+        ref.watch(storeEtaPickupProvider(store.id!));
+    return (deliveryTime is AsyncData && pickupTime is AsyncData) &&
+            ref.watch(
+              storeMenuProvider(store.id!).select(
+                (
+                  final AsyncValue<Iterable<StoreMenuModel>?> menu,
+                ) =>
+                    menu is AsyncData &&
+                    (menu.valueOrNull?.isNotEmpty ?? false),
+              ),
+            )
+        ? StoreInformationDeliveryTypeSwitcher(
+            deliveryTime.valueOrNull,
+            pickupTime.valueOrNull,
+            deliveryType: deliveryType,
+          )
+        : const SizedBox(
+            height: 72,
+            child: Center(child: CircularProgressIndicator.adaptive()),
+          );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(DiagnosticsProperty<StoreModel>('store', store))
+          ..add(EnumProperty<DeliveryType?>('deliveryType', deliveryType)),
+      );
+}
+
 /// The switcher of [Settings.deliveryType] on [StoreScreen].
+@immutable
 class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
   /// The switcher of [Settings.deliveryType] on [StoreScreen].
   const StoreInformationDeliveryTypeSwitcher(
@@ -649,14 +717,17 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
       current: deliveryType,
       onChanged: (final DeliveryType $deliveryType) async =>
           syncCallback(() async {
+        if (deliveryType == $deliveryType) {
+          return;
+        }
         switch ($deliveryType) {
           case DeliveryType.delivery:
-            if (deliveryTime == null) {
+            if (deliveryTime?.min == null || deliveryTime?.max == null) {
               return;
             }
             break;
           case DeliveryType.pickup:
-            if (pickupTime == null) {
+            if (pickupTime?.min == null || pickupTime?.max == null) {
               return;
             }
             break;
@@ -788,6 +859,7 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
 }
 
 /// The [StoreMenuProductsModel.name] property should not be null.
+@immutable
 class StoreProductCard extends HookConsumerWidget {
   /// The [StoreMenuProductsModel.name] property should not be null.
   const StoreProductCard(this.product, {required this.onPressed, super.key});
@@ -822,11 +894,10 @@ class StoreProductCard extends HookConsumerWidget {
                 children: <Widget>[
                   CachedNetworkImage(
                     imageUrl: product.imgUrl ?? '',
-                    fit: BoxFit.fitWidth,
-                    height: 240,
+                    fit: BoxFit.cover,
                     filterQuality: FilterQuality.high,
                     errorWidget: (final _, final __, final ___) =>
-                        Image.asset(assets.logo, fit: BoxFit.fitWidth),
+                        Image.asset(assets.logo, fit: BoxFit.cover),
                   ),
                   if (product.tags
                           ?.map((final _) => _.tagName)
@@ -869,72 +940,70 @@ class StoreProductCard extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     /// Name
-                    Flexible(
-                      child: Text(
+                    if (product.name?.isNotEmpty ?? false)
+                      Text(
                         product.name!,
                         style: theme.textTheme.headlineMedium,
-                        maxLines: 1,
                       ),
-                    ),
 
                     /// Description
-                    const SizedBox(height: 8),
-                    Flexible(
-                      child: Text(
-                        product.description ?? '',
-                        style: theme.textTheme.bodyMedium,
-                        maxLines: 2,
+                    if (product.description?.isNotEmpty ?? false) ...<Widget>[
+                      const SizedBox(height: 8),
+                      Flexible(
+                        child: Text(
+                          product.description ?? '',
+                          style: theme.textTheme.bodyMedium,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                    ],
 
                     /// Footer
-                    Flexible(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          /// Price
-                          Flexible(
-                            child: Text(
-                              r'$' +
-                                  ((product.price ?? 0) / 100)
-                                      .toStringAsFixed(2),
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontSize: 24,
-                                height: 32 / 24,
-                              ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        /// Price
+                        Flexible(
+                          child: Text(
+                            r'$' +
+                                ((product.price ?? 0) / 100).toStringAsFixed(2),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontSize: 24,
+                              height: 32 / 24,
                             ),
                           ),
+                        ),
 
-                          /// Add to Cart
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              textStyle: theme.textTheme.titleSmall,
+                        /// Add to Cart
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            textStyle: theme.textTheme.titleSmall,
+                          ),
+                          onPressed: onPressed,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 4,
+                              horizontal: 12,
                             ),
-                            onPressed: onPressed,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 4,
-                                horizontal: 12,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 1),
-                                    child: Icon(icons.plus, size: 8),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text($.store.productCard.addToCart),
-                                  ),
-                                ],
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 1),
+                                  child: Icon(icons.plus, size: 8),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text($.store.productCard.addToCart),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    )
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

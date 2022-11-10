@@ -8,6 +8,7 @@ import '../../generated/i18n.g.dart';
 import '../../hooks/sync_callback_hook.dart';
 
 /// The screen used to edit user's profile.
+@immutable
 class ProfileEditScreen extends HookConsumerWidget {
   /// The screen used to edit user's profile.
   const ProfileEditScreen({super.key});

@@ -33,33 +33,16 @@ final StateProvider<Report?> errorProvider = StateProvider<Report?>(
 /// The provider of the current server time.
 final StateNotifierProvider<ServerTimeNotifier, DateTime> serverTimeProvider =
     StateNotifierProvider<ServerTimeNotifier, DateTime>(
-  (final _) => ServerTimeNotifier(),
+  (final _) => throw Exception(),
 );
 
 /// The notifier of the current server time.
 class ServerTimeNotifier extends StateNotifier<DateTime> {
   /// The notifier of the current server time.
-  ServerTimeNotifier([final DateTime? serverTime])
-      : _valueSet = serverTime != null,
-        super(serverTime ?? DateTime.now()) {
-    _timer.start();
-  }
-  final Stopwatch _timer = Stopwatch();
-
-  /// If the custom value was set on this notifier.
-  bool get valueSet => _valueSet;
-  bool _valueSet;
+  ServerTimeNotifier(super.serverTime);
+  final Stopwatch _timer = Stopwatch()..start();
 
   /// Returns the current server time.
   @override
   DateTime get state => super.state.add(_timer.elapsed);
-
-  /// Sets the current server time.
-  @override
-  set state(final DateTime serverTime) {
-    _timer.reset();
-    super.state = serverTime;
-    _timer.start();
-    _valueSet = true;
-  }
 }

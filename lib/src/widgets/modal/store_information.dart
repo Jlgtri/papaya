@@ -21,6 +21,7 @@ import '../../providers/api.dart';
 import '../../providers/location.dart';
 
 /// The screen used to show off a [store] information.
+@immutable
 class StoreInformationScreen extends HookConsumerWidget {
   /// The screen used to show off a [store] information.
   const StoreInformationScreen(this.store, {super.key});
@@ -50,8 +51,8 @@ class StoreInformationScreen extends HookConsumerWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: theme.colorScheme.surface,
       ),
@@ -79,10 +80,10 @@ class StoreInformationScreen extends HookConsumerWidget {
                     else if (storeLocation?.valueOrNull?.firstOrNull == null)
                       CachedNetworkImage(
                         imageUrl: store.imgUrl ?? '',
-                        fit: BoxFit.fitWidth,
+                        fit: BoxFit.cover,
                         filterQuality: FilterQuality.high,
                         errorWidget: (final _, final __, final ___) =>
-                            Image.asset(assets.logo, fit: BoxFit.fitWidth),
+                            Image.asset(assets.logo, fit: BoxFit.cover),
                       )
                     else
                       FlutterMap(
@@ -165,12 +166,13 @@ class StoreInformationScreen extends HookConsumerWidget {
               /// Description
               if (store.description != null) ...<Widget>[
                 const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    store.description!,
-                    style: theme.textTheme.bodyLarge,
-                    maxLines: 1,
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      store.description!,
+                      style: theme.textTheme.bodyLarge,
+                    ),
                   ),
                 ),
               ],
@@ -178,40 +180,42 @@ class StoreInformationScreen extends HookConsumerWidget {
               Divider(height: 0, color: theme.colorScheme.outline),
 
               /// Address
-              TextButton(
-                style: TextButton.styleFrom(
-                  shape: const RoundedRectangleBorder(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                ),
-                onPressed: () async => store.address?.displayLong != null
-                    ? FlutterClipboard.copy(store.address!.displayLong!)
-                    : null,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Icon(
-                      icons.marker,
-                      color: theme.colorScheme.secondary,
-                      size: 24,
+              if (store.address?.displayLong != null)
+                TextButton(
+                  style: TextButton.styleFrom(
+                    shape: const RoundedRectangleBorder(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 24,
                     ),
-                    const SizedBox(width: 17.5),
-                    Expanded(
-                      child: Text(
-                        store.address?.displayLong ?? '',
-                        style: theme.textTheme.bodyLarge,
-                        maxLines: 3,
+                  ),
+                  onPressed: () async =>
+                      FlutterClipboard.copy(store.address!.displayLong!),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(
+                        icons.marker,
+                        color: theme.colorScheme.secondary,
+                        size: 24,
                       ),
-                    ),
-                    const SizedBox(width: 32),
-                    Icon(
-                      icons.copy,
-                      color: theme.colorScheme.primary,
-                      size: 24,
-                    )
-                  ],
+                      const SizedBox(width: 17.5),
+                      Expanded(
+                        child: Text(
+                          store.address!.displayLong!,
+                          style: theme.textTheme.bodyLarge,
+                          maxLines: 3,
+                        ),
+                      ),
+                      const SizedBox(width: 32),
+                      Icon(
+                        icons.copy,
+                        color: theme.colorScheme.primary,
+                        size: 24,
+                      )
+                    ],
+                  ),
                 ),
-              ),
 
               /// Working Time
               Divider(height: 0, color: theme.colorScheme.outline),
@@ -222,60 +226,65 @@ class StoreInformationScreen extends HookConsumerWidget {
                     final WidgetRef ref,
                     final Widget? child,
                   ) =>
-                      (ref.watch(storeWorkingTimeProvider(store.id!))).when(
-                    data: (final StoreOperationDaysModel workingHours) =>
-                        TextButton(
-                      style: TextButton.styleFrom(
-                        shape: const RoundedRectangleBorder(),
-                      ),
-                      onPressed: () =>
-                          viewWorkingHours.value = !viewWorkingHours.value,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 24,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Icon(
-                              icons.clock,
-                              color: theme.colorScheme.secondary,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: AnimatedSize(
-                                duration: animationController.duration!,
-                                curve: Curves.fastOutSlowIn,
-                                alignment: Alignment.topCenter,
-                                child: StoreInformationWorkingHours(
-                                  workingHours,
-                                  extended: viewWorkingHours.value,
+                      (ref.watch(storeOperationDaysProvider(store.id!))).when(
+                    data: (final StoreOperationDaysModel? operationDays) =>
+                        operationDays == null
+                            ? const SizedBox.shrink()
+                            : TextButton(
+                                style: TextButton.styleFrom(
+                                  shape: const RoundedRectangleBorder(),
+                                ),
+                                onPressed: () => viewWorkingHours.value =
+                                    !viewWorkingHours.value,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 24,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Icon(
+                                        icons.clock,
+                                        color: theme.colorScheme.secondary,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: AnimatedSize(
+                                          duration:
+                                              animationController.duration!,
+                                          curve: Curves.fastOutSlowIn,
+                                          alignment: Alignment.topCenter,
+                                          child: StoreInformationOperationDays(
+                                            operationDays,
+                                            extended: viewWorkingHours.value,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 32),
+                                      RotationTransition(
+                                        turns:
+                                            Tween<double>(begin: 0, end: 1 / 2)
+                                                .animate(
+                                          CurvedAnimation(
+                                            parent: animationController,
+                                            curve: viewWorkingHours.value
+                                                ? Curves.easeOut
+                                                : Curves.easeIn,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          icons.misc.arrowDown,
+                                          color: theme.colorScheme.shadow,
+                                          size: 15,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 32),
-                            RotationTransition(
-                              turns:
-                                  Tween<double>(begin: 0, end: 1 / 2).animate(
-                                CurvedAnimation(
-                                  parent: animationController,
-                                  curve: viewWorkingHours.value
-                                      ? Curves.easeOut
-                                      : Curves.easeIn,
-                                ),
-                              ),
-                              child: Icon(
-                                icons.misc.arrowDown,
-                                color: theme.colorScheme.shadow,
-                                size: 15,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                     error: (final _, final __) => const SizedBox.shrink(),
                     loading: () => const SizedBox(
                       height: 72,
@@ -302,17 +311,18 @@ class StoreInformationScreen extends HookConsumerWidget {
 
 /// The widget used to display working hours information on a
 /// [StoreInformationScreen].
-class StoreInformationWorkingHours extends HookConsumerWidget {
+@immutable
+class StoreInformationOperationDays extends HookConsumerWidget {
   /// The widget used to display working hours information on a
   /// [StoreInformationScreen].
-  const StoreInformationWorkingHours(
-    this.workingTime, {
+  const StoreInformationOperationDays(
+    this.operationDays, {
     required this.extended,
     super.key,
   });
 
   /// The working hours information to show.
-  final StoreOperationDaysModel workingTime;
+  final StoreOperationDaysModel operationDays;
 
   /// If the information should be extended.
   final bool extended;
@@ -329,6 +339,10 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
             ),
           ),
         );
+
+    String getTime(final DateTime dateTime) =>
+        DateFormat('hh:mm').format(dateTime);
+
     final String currentTime = useMemoized(
       () {
         DateTime fromHours(final DateTime now, final String? hours) {
@@ -347,12 +361,12 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
 
         final DateTime now = DateTime.now();
         final StoreOperationDaysStoreRegularHoursModel? currentWorkingDay =
-            workingTime.storeRegularHours?.firstWhereOrNull(
+            operationDays.storeRegularHours?.firstWhereOrNull(
           (final _) => _.day == now.weekday,
         );
 
         final List<StoreOperationDaysStoreRegularHoursModel>?
-            sortedWorkingDays = workingTime.storeRegularHours?.toList()
+            sortedWorkingDays = operationDays.storeRegularHours?.toList()
               ?..sort(
                 (final _, final __) => ((_.day ?? -1) > now.weekday ? -1 : 1)
                     .compareTo((__.day ?? -1) > now.weekday ? -1 : 1),
@@ -360,19 +374,26 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
         final StoreOperationDaysStoreRegularHoursModel? nextOpenDay =
             sortedWorkingDays?.firstOrNull;
 
-        final DateTime openNow = fromHours(now, currentWorkingDay?.openTime);
-        final DateTime closeNow = fromHours(now, currentWorkingDay?.closeTime);
+        final String? openTime = currentWorkingDay?.openTime != null
+            ? getTime(currentWorkingDay!.openTime!)
+            : null;
+        final String? closeTime = currentWorkingDay?.closeTime != null
+            ? getTime(currentWorkingDay!.closeTime!)
+            : null;
+        final DateTime openNow = fromHours(now, openTime);
+        final DateTime closeNow = fromHours(now, closeTime);
         return now.isBefore(openNow)
-            ? $.store.info.openAt(currentWorkingDay?.openTime ?? '00:00')
+            ? $.store.info.openAt(openTime ?? '00:00')
             : now.isBefore(closeNow)
-                ? $.store.info
-                    .openUntil(currentWorkingDay?.closeTime ?? '00:00')
+                ? $.store.info.openUntil(
+                    closeTime ?? '00:00',
+                  )
                 : $.store.info.openAt(
                     getWeekDayName(nextOpenDay?.day ?? now.weekday) +
-                        (nextOpenDay?.openTime ?? '00:00'),
+                        (openTime ?? '00:00'),
                   );
       },
-      <Object?>[$.store.info, workingTime],
+      <Object?>[$.store.info, operationDays],
     );
 
     final Iterable<Iterable<StoreOperationDaysStoreRegularHoursModel>>
@@ -381,25 +402,34 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
         final List<List<StoreOperationDaysStoreRegularHoursModel>> currentDays =
             <List<StoreOperationDaysStoreRegularHoursModel>>[];
         final Iterable<StoreOperationDaysStoreRegularHoursModel> workingDays =
-            (workingTime.storeRegularHours?.toList()
-                  ?..sort(
-                    (
-                      final StoreOperationDaysStoreRegularHoursModel a,
-                      final StoreOperationDaysStoreRegularHoursModel b,
-                    ) =>
-                        a.day!.compareTo(b.day!),
-                  )) ??
+            (operationDays.storeRegularHours?.toList()
+                  ?..sort((final _, final __) {
+                    int value;
+                    final int aGreater = _.day! > 0 ? -1 : 1;
+                    final int bGreater = __.day! > 0 ? -1 : 1;
+                    if ((value = aGreater.compareTo(bGreater)) != 0) {
+                      return value;
+                    }
+                    return _.day!.compareTo(__.day!);
+                  })) ??
                 <StoreOperationDaysStoreRegularHoursModel>[];
         for (final StoreOperationDaysStoreRegularHoursModel day
             in workingDays) {
           if (day.day != null) {
+            final String? openTime =
+                day.openTime != null ? getTime(day.openTime!) : null;
+            final String? closeTime =
+                day.closeTime != null ? getTime(day.closeTime!) : null;
             final List<StoreOperationDaysStoreRegularHoursModel>
                 localCurrentDays = <StoreOperationDaysStoreRegularHoursModel>[];
             for (final StoreOperationDaysStoreRegularHoursModel $day
                 in workingDays) {
-              if (day.day != null &&
-                  $day.openTime == day.openTime &&
-                  $day.closeTime == day.closeTime &&
+              final String? $openTime =
+                  $day.openTime != null ? getTime($day.openTime!) : null;
+              final String? $closeTime =
+                  $day.closeTime != null ? getTime($day.closeTime!) : null;
+              if ($openTime == openTime &&
+                  $closeTime == closeTime &&
                   !currentDays.any((final _) => _.contains(day))) {
                 localCurrentDays.add($day);
               }
@@ -411,7 +441,7 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
         }
         return currentDays;
       },
-      <Object?>[workingTime],
+      <Object?>[operationDays],
     );
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -441,8 +471,10 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
                         )
                     ].join(days.length == 2 ? ', ' : ' - '),
                     <String>[
-                      days.first.openTime ?? '',
-                      days.first.closeTime ?? ''
+                      if (days.first.openTime != null)
+                        getTime(days.first.openTime!),
+                      if (days.first.closeTime != null)
+                        getTime(days.first.closeTime!)
                     ].join(' - ')
                   ].join(', '),
                   style: theme.textTheme.bodySmall,
@@ -462,8 +494,8 @@ class StoreInformationWorkingHours extends HookConsumerWidget {
         properties
           ..add(
             DiagnosticsProperty<StoreOperationDaysModel>(
-              'workingTime',
-              workingTime,
+              'operationDays',
+              operationDays,
             ),
           )
           ..add(DiagnosticsProperty<bool>('extended', extended)),

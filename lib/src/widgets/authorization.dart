@@ -13,6 +13,7 @@ import '../providers/misc.dart';
 import '../routes.dart';
 
 /// The screen that greets the user.
+@immutable
 class AuthorizationScreen extends HookConsumerWidget {
   /// The screen that greets the user.
   const AuthorizationScreen({super.key});

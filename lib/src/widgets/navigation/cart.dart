@@ -19,6 +19,7 @@ import '../navigation.dart';
 typedef ProductCallback = FutureOr<void> Function(CartStoreProduct product);
 
 /// The screen used to display [cartProvider].
+@immutable
 class CartScreen extends HookConsumerWidget {
   /// The screen used to display [cartProvider].
   const CartScreen({super.key});
@@ -69,6 +70,7 @@ class CartScreen extends HookConsumerWidget {
 }
 
 /// The widget used to display [CartStore] from [cartProvider].
+@immutable
 class CartStores extends HookConsumerWidget {
   /// The widget used to display [CartStore] from [cartProvider].
   const CartStores({super.key});
@@ -234,6 +236,7 @@ class CartStores extends HookConsumerWidget {
 }
 
 /// The widget used to display information about [product].
+@immutable
 class CartProductInformation extends HookConsumerWidget {
   /// The widget used to display information about [product].
   const CartProductInformation(
@@ -262,12 +265,12 @@ class CartProductInformation extends HookConsumerWidget {
           borderRadius: const BorderRadius.all(Radius.circular(8)),
           child: CachedNetworkImage(
             imageUrl: product.product?.imgUrl ?? '',
-            fit: BoxFit.fitWidth,
+            fit: BoxFit.cover,
             height: 72,
             width: 72,
             filterQuality: FilterQuality.high,
             errorWidget: (final _, final __, final ___) =>
-                Image.asset(assets.logo, fit: BoxFit.fitWidth),
+                Image.asset(assets.logo, fit: BoxFit.cover),
           ),
         ),
 
@@ -344,6 +347,7 @@ class CartProductInformation extends HookConsumerWidget {
 }
 
 /// The widget used to display a counter on a [CartProductInformation].
+@immutable
 class CartProductCounter extends StatelessWidget {
   /// The widget used to display a counter on a [CartProductInformation].
   const CartProductCounter(this.product, {this.onPressed, super.key});

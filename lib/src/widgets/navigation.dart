@@ -26,6 +26,7 @@ import 'navigation/home.dart';
 import 'navigation/profile.dart';
 
 /// The main screen used for navigating the app.
+@immutable
 class NavigationScreen extends HookConsumerWidget {
   /// The main screen used for navigating the app.
   const NavigationScreen({super.key});
@@ -80,7 +81,7 @@ class NavigationScreen extends HookConsumerWidget {
     return WillPopScope(
       onWillPop: () async {
         ref.read(willPopCompleterProvider).complete();
-        ref.refresh(willPopCompleterProvider);
+        ref.invalidate(willPopCompleterProvider);
         return ref.read(canPopProvider);
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -150,8 +151,8 @@ class NavigationScreen extends HookConsumerWidget {
                               child: Icon(icons.cancel, size: 16),
                             ),
                             onPressed: () => ref
-                              ..refresh(SearchField.suggestions)
-                              ..refresh(SearchField.provider.notifier),
+                              ..invalidate(SearchField.suggestions)
+                              ..invalidate(SearchField.provider),
                           ),
                   ),
                 ),
@@ -240,6 +241,7 @@ class NavigationScreen extends HookConsumerWidget {
 }
 
 /// The widget used to navigate to [DeliveryScreen].
+@immutable
 class DeliveryPickerField extends HookConsumerWidget {
   /// The widget used to navigate to [DeliveryScreen].
   const DeliveryPickerField({super.key});
@@ -365,6 +367,7 @@ class DeliveryPickerField extends HookConsumerWidget {
 }
 
 /// The field used for searching on [NavigationScreen].
+@immutable
 class SearchField extends HookConsumerWidget {
   /// The field used for searching on [NavigationScreen].
   const SearchField({super.key});
@@ -431,7 +434,7 @@ class SearchField extends HookConsumerWidget {
                 child: SearchFieldSuggestions(
                   onTap: (final String suggestion) async =>
                       syncCallback(() async {
-                    ref.refresh(suggestions);
+                    ref.invalidate(suggestions);
                     focusNode.unfocus();
                     final String inputText = controller.text.trim();
                     controller
@@ -540,8 +543,9 @@ class SearchField extends HookConsumerWidget {
               } else {
                 ref.read(suggestions.notifier).state =
                     (await ref.read(filteredStoresProvider.future))
-                        .map((final StoreModel store) => store.name!)
-                        .toSet();
+                            ?.map((final StoreModel store) => store.name!)
+                            .toSet() ??
+                        <String>{};
               }
             }),
           ),
@@ -552,6 +556,7 @@ class SearchField extends HookConsumerWidget {
 }
 
 /// The widget used to display [SearchField.suggestions].
+@immutable
 class SearchFieldSuggestions extends HookConsumerWidget {
   /// The widget used to display [SearchField.suggestions].
   const SearchFieldSuggestions({this.onTap, super.key});

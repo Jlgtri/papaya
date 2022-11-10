@@ -80,46 +80,53 @@ final FutureProvider<bool> onboardingProvider = FutureProvider<bool>(
 
 /// The current value of the [Settings.skippedAuthorization] property.
 final FutureProvider<bool> skippedAuthorizationProvider = FutureProvider<bool>(
-  dependencies: <ProviderOrFamily>[settingsProvider],
   (final FutureProviderRef<bool> ref) async => await ref.watch(
     settingsProvider.future
         .select((final _) async => (await _).skippedAuthorization),
   ),
+  dependencies: <ProviderOrFamily>[settingsProvider],
 );
 
 /// The current value of the [Settings.skippedDefaultAddress] property.
 final FutureProvider<bool> skippedDefaultAddressProvider = FutureProvider<bool>(
-  dependencies: <ProviderOrFamily>[settingsProvider],
   (final FutureProviderRef<bool> ref) async => await ref.watch(
     settingsProvider.future
         .select((final _) async => (await _).skippedDefaultAddress),
   ),
+  dependencies: <ProviderOrFamily>[settingsProvider],
 );
 
 /// The current value of the [Settings.onboarding] property.
 final FutureProvider<DeliveryType> deliveryTypeProvider =
     FutureProvider<DeliveryType>(
-  dependencies: <ProviderOrFamily>[settingsProvider],
   (final FutureProviderRef<DeliveryType> ref) async => await ref.watch(
     settingsProvider.future.select((final _) async => (await _).deliveryType),
   ),
+  dependencies: <ProviderOrFamily>[settingsProvider],
 );
 
-/// Get the [Settings.tokens] property value and renew it if needed.
+/// Get the [Settings.token] property value and renew it if needed.
 final AutoDisposeFutureProvider<Token?> tokenProvider =
     FutureProvider.autoDispose<Token?>(
   (final AutoDisposeFutureProviderRef<Token?> ref) async {
     final Token? currentToken = ref.watch(
       settingsProvider.select((final _) => _.valueOrNull?.token),
     );
+
+    final DateTime serverTime;
+    try {
+      serverTime = ref.read(serverTimeProvider);
+    } on Exception {
+      return currentToken;
+    }
+
     if (currentToken != null &&
-        currentToken.accessTokenExpirationDateTime
-            .isBefore(ref.read(serverTimeProvider))) {
+        serverTime.isAfter(currentToken.accessTokenExpirationDateTime)) {
       final TokenResponse? response = await const FlutterAppAuth().token(
         TokenRequest(
           authClientId,
           authRedirectUrl,
-          issuer: 'https://$authDomain',
+          issuer: authDomain,
           scopes: <String>['openid', 'profile', 'offline_access'],
           refreshToken: currentToken.refreshToken,
         ),
@@ -149,7 +156,7 @@ final AutoDisposeFutureProvider<Token?> tokenProvider =
   dependencies: <ProviderOrFamily>[settingsProvider, serverTimeProvider],
 );
 
-/// Renew the value of the [Settings.tokens] property if needed.
+/// Renew the value of the [Settings.token] property if needed.
 final AutoDisposeFutureProvider<Token?> authTokenProvider =
     FutureProvider.autoDispose<Token?>(
   (final AutoDisposeFutureProviderRef<Token?> ref) async {
@@ -160,7 +167,7 @@ final AutoDisposeFutureProvider<Token?> authTokenProvider =
         AuthorizationTokenRequest(
           authClientId,
           authRedirectUrl,
-          issuer: 'https://$authDomain',
+          issuer: authDomain,
           scopes: <String>['openid', 'profile', 'offline_access'],
           promptValues: <String>['login'],
         ),

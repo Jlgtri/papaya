@@ -26,6 +26,7 @@ import '../../providers/misc.dart';
 import '../../routes.dart';
 
 /// The screen used to select an address on map.
+@immutable
 class MapScreen extends HookConsumerWidget {
   /// The screen used to select an address on map.
   const MapScreen({super.key});
@@ -215,7 +216,6 @@ class MapScreen extends HookConsumerWidget {
             await Geolocator.checkPermission();
         if (permission == LocationPermission.whileInUse ||
             permission == LocationPermission.always) {
-          ref.refresh(latLngProvider);
           return await ref.refresh(latLngProvider.future);
         }
       }

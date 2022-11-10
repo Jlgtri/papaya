@@ -1,9 +1,9 @@
-import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../generated/assets.g.dart';
 import '../generated/i18n.g.dart';
@@ -52,6 +52,7 @@ class OnboardingPage {
 }
 
 /// The screen that greets the user.
+@immutable
 class OnboardingScreen extends HookConsumerWidget {
   /// The screen that greets the user.
   const OnboardingScreen({super.key});
@@ -66,7 +67,9 @@ class OnboardingScreen extends HookConsumerWidget {
         ProviderScope.containerOf(context, listen: false);
 
     final SyncCallback syncCallback = useSyncCallback();
-    final ValueNotifier<double> currentPage = useState(0);
+    final PageController pageController = usePageController();
+    final ValueNotifier<bool> showSkip = useState(true);
+
     final Iterable<OnboardingPage> pages = <OnboardingPage>[
       OnboardingPage(
         title: $.onboarding.$1.title,
@@ -84,7 +87,16 @@ class OnboardingScreen extends HookConsumerWidget {
         source: assets.onboarding.$3,
       ),
     ];
-
+    useMemoized(() {
+      pageController.addListener(() {
+        if (pageController.page != null) {
+          final bool $showSkip = pageController.page! < pages.length - 1.6;
+          if (showSkip.value != $showSkip) {
+            showSkip.value = $showSkip;
+          }
+        }
+      });
+    });
     Future<void> getStarted() async => syncCallback(() async {
           final Isar isar = await ref.read(isarProvider.future);
           await isar.writeTxn(
@@ -98,14 +110,6 @@ class OnboardingScreen extends HookConsumerWidget {
               .pushReplacementNamed((await Routes.current(container)).name);
         });
 
-    final PageController pageController = usePageController();
-    useMemoized(
-      () => pageController.addListener(
-        () => pageController.page != null
-            ? currentPage.value = pageController.page!
-            : null,
-      ),
-    );
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -125,7 +129,7 @@ class OnboardingScreen extends HookConsumerWidget {
         child: Scaffold(
           appBar: AppBar(
             actions: <Widget>[
-              if (currentPage.value < pages.length - 1.6)
+              if (showSkip.value)
                 Align(
                   child: Padding(
                     padding: const EdgeInsets.only(right: 12),
@@ -194,20 +198,19 @@ class OnboardingScreen extends HookConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Align(
-                  child: DotsIndicator(
-                    dotsCount: pages.length,
-                    position: currentPage.value,
-                    decorator: DotsDecorator(
-                      size: const Size.square(16),
-                      activeSize: const Size.square(16),
-                      spacing: const EdgeInsets.symmetric(horizontal: 6),
-                      color: theme.colorScheme.outline,
-                      activeColor: theme.colorScheme.secondary,
+                  child: SmoothPageIndicator(
+                    controller: pageController,
+                    count: pages.length,
+                    effect: ColorTransitionEffect(
+                      spacing: 12,
+                      radius: 8,
+                      dotColor: theme.colorScheme.outline,
+                      activeDotColor: theme.colorScheme.secondary,
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
-                if (currentPage.value < pages.length - 1.6)
+                if (showSkip.value)
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(0),

@@ -20,6 +20,7 @@ import '../../providers/misc.dart';
 import '../navigation.dart';
 
 /// The screen used to show off a [product].
+@immutable
 class ProductScreen extends HookConsumerWidget {
   /// The screen used to show off a [product].
   const ProductScreen(
@@ -75,11 +76,11 @@ class ProductScreen extends HookConsumerWidget {
                   fit: StackFit.expand,
                   children: <Widget>[
                     CachedNetworkImage(
-                      fit: BoxFit.fill,
+                      fit: BoxFit.cover,
                       filterQuality: FilterQuality.high,
                       imageUrl: product.imgUrl ?? '',
                       errorWidget: (final _, final __, final ___) =>
-                          Image.asset(assets.logo, fit: BoxFit.fitWidth),
+                          Image.asset(assets.logo, fit: BoxFit.cover),
                     ),
 
                     /// Close Button
@@ -163,22 +164,19 @@ class ProductScreen extends HookConsumerWidget {
               ),
 
               /// Name
-              if (product.name != null) ...<Widget>[
+              if (product.name?.isNotEmpty ?? false) ...<Widget>[
                 const SizedBox(height: 16),
-                Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      product.name!,
-                      style: theme.textTheme.headlineMedium,
-                      maxLines: 1,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    product.name!,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
               ],
 
               /// Description
-              if (product.description != null) ...<Widget>[
+              if (product.description?.isNotEmpty ?? false) ...<Widget>[
                 const SizedBox(height: 16),
                 Flexible(
                   child: Padding(
@@ -186,7 +184,6 @@ class ProductScreen extends HookConsumerWidget {
                     child: Text(
                       product.description!,
                       style: theme.textTheme.bodyMedium,
-                      maxLines: 2,
                     ),
                   ),
                 ),
@@ -338,6 +335,7 @@ class ProductScreen extends HookConsumerWidget {
 }
 
 /// The widget used to display a counter with price on a [ProductScreen].
+@immutable
 class ProductCounterWithPrice extends HookConsumerWidget {
   /// The widget used to display a counter with price on a [ProductScreen].
   const ProductCounterWithPrice(
@@ -420,6 +418,7 @@ class ProductCounterWithPrice extends HookConsumerWidget {
 }
 
 /// The widget used to display a counter on [ProductScreen]
+@immutable
 class ProductCounter extends HookConsumerWidget {
   /// The widget used to display a counter on [ProductScreen]
   const ProductCounter({

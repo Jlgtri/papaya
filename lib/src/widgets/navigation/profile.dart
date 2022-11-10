@@ -15,6 +15,7 @@ import '../../providers/misc.dart';
 import '../../routes.dart';
 
 /// The screen used to display a user profile.
+@immutable
 class ProfileScreen extends HookConsumerWidget {
   /// The screen used to display a user profile.
   const ProfileScreen({super.key});
@@ -30,7 +31,7 @@ class ProfileScreen extends HookConsumerWidget {
     final bool isGuest = ref.watch(
       skippedAuthorizationProvider.select((final _) => _.valueOrNull ?? true),
     );
-    final AsyncValue<Iterable<UserAddressesModel>> addresses =
+    final AsyncValue<Iterable<UserAddressesModel>?> addresses =
         ref.watch(activeAddressesProvider);
     final Iterable<UserAddressesModel>? prevAddresses =
         usePrevious<Iterable<UserAddressesModel>?>(addresses.valueOrNull);
@@ -338,6 +339,7 @@ class ProfileScreen extends HookConsumerWidget {
 }
 
 /// The card used to display an [address].
+@immutable
 class AddressCard extends HookConsumerWidget {
   /// The card used to display an [address].
   const AddressCard(this.address, {super.key});
