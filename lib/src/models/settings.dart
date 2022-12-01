@@ -1,8 +1,6 @@
-import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
 
-import '../const.dart';
 import '../providers/misc.dart';
 
 part 'settings.g.dart';
@@ -103,95 +101,4 @@ final FutureProvider<DeliveryType> deliveryTypeProvider =
     settingsProvider.future.select((final _) async => (await _).deliveryType),
   ),
   dependencies: <ProviderOrFamily>[settingsProvider],
-);
-
-/// Get the [Settings.token] property value and renew it if needed.
-final AutoDisposeFutureProvider<Token?> tokenProvider =
-    FutureProvider.autoDispose<Token?>(
-  (final AutoDisposeFutureProviderRef<Token?> ref) async {
-    final Token? currentToken = ref.watch(
-      settingsProvider.select((final _) => _.valueOrNull?.token),
-    );
-
-    final DateTime serverTime;
-    try {
-      serverTime = ref.read(serverTimeProvider);
-    } on Exception {
-      return currentToken;
-    }
-
-    if (currentToken != null &&
-        serverTime.isAfter(currentToken.accessTokenExpirationDateTime)) {
-      final TokenResponse? response = await const FlutterAppAuth().token(
-        TokenRequest(
-          authClientId,
-          authRedirectUrl,
-          issuer: authDomain,
-          scopes: <String>['openid', 'profile', 'offline_access'],
-          refreshToken: currentToken.refreshToken,
-        ),
-      );
-      if (response != null) {
-        final Token token = Token()
-          ..accessToken = response.accessToken ?? currentToken.accessToken
-          ..accessTokenExpirationDateTime =
-              response.accessTokenExpirationDateTime ??
-                  currentToken.accessTokenExpirationDateTime
-          ..idToken = response.idToken ?? currentToken.idToken
-          ..refreshToken = response.refreshToken ?? currentToken.refreshToken
-          ..tokenType = response.tokenType ?? currentToken.tokenType;
-        final Isar isar = await ref.read(isarProvider.future);
-        await isar.writeTxn(
-          () async => isar.settings.put(
-            await ref.read(settingsProvider.future)
-              ..token = token,
-          ),
-        );
-        ref.keepAlive();
-        return token;
-      }
-    }
-    return currentToken;
-  },
-  dependencies: <ProviderOrFamily>[settingsProvider, serverTimeProvider],
-);
-
-/// Renew the value of the [Settings.token] property if needed.
-final AutoDisposeFutureProvider<Token?> authTokenProvider =
-    FutureProvider.autoDispose<Token?>(
-  (final AutoDisposeFutureProviderRef<Token?> ref) async {
-    final Token? currentToken = await ref.watch(tokenProvider.future);
-    if (currentToken == null) {
-      final AuthorizationTokenResponse? response =
-          await const FlutterAppAuth().authorizeAndExchangeCode(
-        AuthorizationTokenRequest(
-          authClientId,
-          authRedirectUrl,
-          issuer: authDomain,
-          scopes: <String>['openid', 'profile', 'offline_access'],
-          promptValues: <String>['login'],
-        ),
-      );
-      if (response != null) {
-        final Token token = Token()
-          ..accessToken = response.accessToken!
-          ..accessTokenExpirationDateTime =
-              response.accessTokenExpirationDateTime!
-          ..idToken = response.idToken!
-          ..refreshToken = response.refreshToken!
-          ..tokenType = response.tokenType!;
-        final Isar isar = await ref.read(isarProvider.future);
-        await isar.writeTxn(
-          () async => isar.settings.put(
-            await ref.read(settingsProvider.future)
-              ..token = token,
-          ),
-        );
-        ref.keepAlive();
-        return token;
-      }
-    }
-    return currentToken;
-  },
-  dependencies: <ProviderOrFamily>[tokenProvider],
 );

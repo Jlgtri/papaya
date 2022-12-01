@@ -1,0 +1,175 @@
+{
+  "CarouselModel": {
+    "stories": {
+      "type": "CarouselStoriesModel[]",
+      "nullable": true
+    }
+  },
+  "CarouselStoriesModel": {
+    "name": {
+      "type": "string",
+      "nullable": true
+    },
+    "created_at": {
+      "type": "string",
+      "nullable": true
+    },
+    "published_at": {
+      "type": null,
+      "nullable": true
+    },
+    "alternates": {
+      "type": "CarouselStoriesAlternatesModel[]",
+      "nullable": true
+    },
+    "id": {
+      "type": "integer",
+      "nullable": true
+    },
+    "uuid": {
+      "type": "string",
+      "nullable": true
+    },
+    "content": {
+      "type": "CarouselStoriesContentModel",
+      "nullable": true
+    },
+    "slug": {
+      "type": "string",
+      "nullable": true
+    },
+    "full_slug": {
+      "type": "string",
+      "nullable": true
+    },
+    "default_full_slug": {
+      "type": null,
+      "nullable": true
+    },
+    "sort_by_date": {
+      "type": null,
+      "nullable": true
+    },
+    "position": {
+      "type": "integer",
+      "nullable": true
+    },
+    "tag_list": {
+      "type": "CarouselStoriesTagListModel[]",
+      "nullable": true
+    },
+    "is_startpage": {
+      "type": "boolean",
+      "nullable": true
+    },
+    "parent_id": {
+      "type": "integer",
+      "nullable": true
+    },
+    "meta_data": {
+      "type": null,
+      "nullable": true
+    },
+    "group_id": {
+      "type": "string",
+      "nullable": true
+    },
+    "first_published_at": {
+      "type": null,
+      "nullable": true
+    },
+    "release_id": {
+      "type": null,
+      "nullable": true
+    },
+    "lang": {
+      "type": "string",
+      "nullable": true
+    },
+    "path": {
+      "type": null,
+      "nullable": true
+    },
+    "translated_slugs": {
+      "type": "CarouselStoriesTranslatedSlugsModel[]",
+      "nullable": true
+    }
+  },
+  "CarouselStoriesAlternatesModel": {},
+  "CarouselStoriesContentModel": {
+    "cta": {
+      "type": "string",
+      "nullable": true
+    },
+    "_uid": {
+      "name": "uid",
+      "type": "string",
+      "nullable": true
+    },
+    "link": {
+      "type": "string",
+      "nullable": true
+    },
+    "text": {
+      "type": "string",
+      "nullable": true
+    },
+    "image": {
+      "type": "CarouselStoriesContentImageModel",
+      "nullable": true
+    },
+    "header": {
+      "type": "string",
+      "nullable": true
+    },
+    "position": {
+      "type": "string",
+      "nullable": true
+    },
+    "component": {
+      "type": "string",
+      "nullable": true
+    },
+    "_editable": {
+      "name": "editable",
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "CarouselStoriesContentImageModel": {
+    "id": {
+      "type": "integer",
+      "nullable": true
+    },
+    "alt": {
+      "type": "string",
+      "nullable": true
+    },
+    "name": {
+      "type": "string",
+      "nullable": true
+    },
+    "focus": {
+      "type": null,
+      "nullable": true
+    },
+    "title": {
+      "type": "string",
+      "nullable": true
+    },
+    "filename": {
+      "type": "string",
+      "nullable": true
+    },
+    "copyright": {
+      "type": "string",
+      "nullable": true
+    },
+    "fieldtype": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "CarouselStoriesTagListModel": {},
+  "CarouselStoriesTranslatedSlugsModel": {}
+}

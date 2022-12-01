@@ -9,6 +9,7 @@ import '../generated/i18n.g.dart';
 import '../generated/icons.g.dart';
 import '../hooks/sync_callback_hook.dart';
 import '../models/settings.dart';
+import '../providers/api.dart';
 import '../providers/misc.dart';
 import '../routes.dart';
 

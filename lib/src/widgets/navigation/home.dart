@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -43,8 +45,8 @@ class HomeScreen extends HookConsumerWidget {
     final bool showAllStores = ref.watch(
       storesProvider.select(
         (final _) =>
-            (_ is AsyncData && _.valueOrNull != null) &&
-            (stores is AsyncData && stores.valueOrNull != null) &&
+            _.asData?.value != null &&
+            stores.asData?.value != null &&
             _.value!.length != stores.value!.length,
       ),
     );
@@ -54,139 +56,155 @@ class HomeScreen extends HookConsumerWidget {
 
     final SyncCallback syncCallback = useSyncCallback();
     final PageController pageController = usePageController(initialPage: 999);
-    return CustomScrollView(
-      controller: useScrollController(),
-      slivers: <Widget>[
-        if (isDelivery &&
-            ref.watch(
-              storesProvider.select(
-                (final AsyncValue<Iterable<StoreModel>?> stores) =>
-                    stores.valueOrNull?.isEmpty ?? true,
-              ),
-            )) ...<Widget>[
-          const SliverFillRemaining(
-            hasScrollBody: false,
-            child: StoresNotFoundUpper(),
-          ),
-          const SliverToBoxAdapter(child: StoresNotFoundLower())
-        ] else ...<Widget>[
-          /// Carousel With Indicator
-          if (carousel.isLoading)
-            SliverFillRemaining(
-              child: ColoredBox(
-                color: theme.colorScheme.onBackground,
-                child: const Center(
-                  child: CircularProgressIndicator.adaptive(),
+    useMemoized(
+      () => Timer.periodic(
+        const Duration(seconds: 30),
+        (final _) async => pageController.positions.isNotEmpty
+            ? pageController.nextPage(
+                duration: const Duration(milliseconds: 433),
+                curve: Curves.ease,
+              )
+            : null,
+      ),
+    );
+    return ScrollConfiguration(
+      behavior: const ScrollBehavior().copyWith(overscroll: false),
+      child: CustomScrollView(
+        slivers: <Widget>[
+          if (isDelivery &&
+              ref.watch(
+                storesProvider.select(
+                  (final AsyncValue<Iterable<StoreModel>?> stores) =>
+                      stores.valueOrNull?.isEmpty ?? true,
                 ),
-              ),
-            )
-          else if (carousel is AsyncData && stories != null)
-            SliverFillRemaining(
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                fit: StackFit.expand,
-                children: <Widget>[
-                  /// Carousel
-                  PageView.builder(
-                    controller: pageController,
-                    itemBuilder: (final _, final int index) {
-                      final CarouselStoriesModel story =
-                          stories.elementAt(index % stories.length);
-                      return CarouselPage(
-                        story,
-                        key: PageStorageKey<int?>(story.id),
-                      );
-                    },
-                  ),
-
-                  /// Indicator
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 22),
-                      child: SmoothPageIndicator(
-                        controller: pageController,
-                        count: stories.length,
-                        effect: ColorTransitionEffect(
-                          spacing: 12,
-                          radius: 8,
-                          dotColor: theme.colorScheme.surface,
-                          activeDotColor: theme.colorScheme.secondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              )) ...<Widget>[
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: StoresNotFoundUpper(),
             ),
-
-          /// Stores Title / Show All Stores
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40)
-                  .copyWith(right: 14),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      isDelivery ? $.home.storesNearby : $.home.storesAll,
-                      style: theme.textTheme.displayMedium?.copyWith(height: 1),
-                    ),
+            const SliverToBoxAdapter(child: StoresNotFoundLower())
+          ] else ...<Widget>[
+            /// Carousel With Indicator
+            if (carousel.isLoading)
+              SliverFillRemaining(
+                child: ColoredBox(
+                  color: theme.colorScheme.onBackground,
+                  child: const Center(
+                    child: CircularProgressIndicator.adaptive(),
                   ),
-                  if (showAllStores)
-                    Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.primary,
-                          textStyle: theme.textTheme.titleMedium,
-                        ),
-                        onPressed: () async => syncCallback(
-                          () => rootNavigator.pushNamed(Routes.stores.name),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(icons.misc.arrowRight, size: 14),
-                              const SizedBox(width: 12),
-                              Flexible(child: Text($.home.storesViewAll)),
-                            ],
+                ),
+              )
+            else if (carousel.asData != null && stories != null)
+              SliverFillRemaining(
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    /// Carousel
+                    PageView.builder(
+                      controller: pageController,
+                      itemBuilder: (final _, final int index) {
+                        final CarouselStoriesModel story =
+                            stories.elementAt(index % stories.length);
+                        return CarouselPage(
+                          story,
+                          navigateToStoreAtIndex: index % stories.length,
+                          key: PageStorageKey<int?>(story.id),
+                        );
+                      },
+                    ),
+
+                    /// Indicator
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 22),
+                        child: SmoothPageIndicator(
+                          controller: pageController,
+                          count: stories.length,
+                          effect: ColorTransitionEffect(
+                            spacing: 12,
+                            radius: 8,
+                            dotColor: theme.colorScheme.surface,
+                            activeDotColor: theme.colorScheme.secondary,
                           ),
                         ),
                       ),
-                    )
-                ],
-              ),
-            ),
-          ),
-
-          /// Stores List
-          if (stores.valueOrNull != null)
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (final _, final int index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16)
-                      .copyWith(bottom: 24),
-                  child: StoreCard(stores.value!.elementAt(index)),
+                    ),
+                  ],
                 ),
-                childCount: stores.value!.length,
               ),
-            )
-          else if (stores.isLoading)
-            const SliverToBoxAdapter(
-              child: SizedBox(
-                height: 64,
-                child: Center(child: CircularProgressIndicator.adaptive()),
+
+            /// Stores Title / Show All Stores
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 40)
+                        .copyWith(right: 14),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        isDelivery ? $.home.storesNearby : $.home.storesAll,
+                        style:
+                            theme.textTheme.displayMedium?.copyWith(height: 1),
+                      ),
+                    ),
+                    if (showAllStores)
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: theme.colorScheme.primary,
+                            textStyle: theme.textTheme.titleMedium,
+                          ),
+                          onPressed: () async => syncCallback(
+                            () => rootNavigator.pushNamed(Routes.stores.name),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(icons.misc.arrowRight, size: 14),
+                                const SizedBox(width: 12),
+                                Flexible(child: Text($.home.storesViewAll)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
+                ),
               ),
             ),
-          const SliverToBoxAdapter(child: SizedBox(height: 69)),
-        ]
-      ],
+
+            /// Stores List
+            if (stores.valueOrNull != null)
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (final _, final int index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16)
+                        .copyWith(bottom: 24),
+                    child: StoreCard(stores.value!.elementAt(index)),
+                  ),
+                  childCount: stores.value!.length,
+                ),
+              )
+            else if (stores.isLoading)
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 64,
+                  child: Center(child: CircularProgressIndicator.adaptive()),
+                ),
+              ),
+            const SliverToBoxAdapter(child: SizedBox(height: 69)),
+          ]
+        ],
+      ),
     );
   }
 }
@@ -195,16 +213,22 @@ class HomeScreen extends HookConsumerWidget {
 @immutable
 class CarouselPage extends HookConsumerWidget {
   /// The widget used to display a carousel [story].
-  const CarouselPage(this.story, {super.key});
+  const CarouselPage(this.story, {this.navigateToStoreAtIndex, super.key});
 
   /// The story to show on this page.
   final CarouselStoriesModel story;
+
+  /// The index of the store to navigate to from this page.
+  final int? navigateToStoreAtIndex;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final I18N $ = I18NLocalizations.of(context);
+    final NavigatorState rootNavigator =
+        Navigator.of(context, rootNavigator: true);
 
+    final SyncCallback syncCallback = useSyncCallback();
     return ColoredBox(
       color: theme.colorScheme.onBackground,
       child: Stack(
@@ -272,10 +296,26 @@ class CarouselPage extends HookConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(200, 0),
                   ),
-                  onPressed: () async =>
-                      story.content?.link?.isNotEmpty ?? false
-                          ? launchUrlString(story.content!.link!)
-                          : null,
+                  onPressed: () async => syncCallback(() async {
+                    if (story.content?.link?.isNotEmpty ?? false) {
+                      await launchUrlString(story.content!.link!);
+                    } else if (navigateToStoreAtIndex != null) {
+                      final StoreModel? store = await ref.read(
+                        allStoresProvider.selectAsync(
+                          (final _) =>
+                              _ != null && _.length > navigateToStoreAtIndex!
+                                  ? _.elementAt(navigateToStoreAtIndex!)
+                                  : null,
+                        ),
+                      );
+                      if (store != null) {
+                        await rootNavigator.pushNamed(
+                          Routes.store.name,
+                          arguments: StoreScreen(store),
+                        );
+                      }
+                    }
+                  }),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Text(story.content?.cta ?? $.home.viewDetail),
@@ -293,7 +333,8 @@ class CarouselPage extends HookConsumerWidget {
   void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
       super.debugFillProperties(
         properties
-          ..add(DiagnosticsProperty<CarouselStoriesModel>('story', story)),
+          ..add(DiagnosticsProperty<CarouselStoriesModel>('story', story))
+          ..add(IntProperty('navigateToStoreAtIndex', navigateToStoreAtIndex)),
       );
 }
 
@@ -312,7 +353,7 @@ class StoresNotFoundUpper extends HookConsumerWidget {
 
     final AsyncValue<DeliveryType> isDelivery = ref.watch(deliveryTypeProvider);
     final AsyncValue<UserAddressesModel?> activeAddress =
-        ref.watch(activeAddressProvider);
+        ref.watch(currentAddressProvider);
     final UserAddressesModel? prevActiveAddress =
         usePrevious<UserAddressesModel?>(activeAddress.valueOrNull);
     final UserAddressesModel? address =
@@ -411,9 +452,7 @@ class StoresNotFoundUpper extends HookConsumerWidget {
               const SizedBox(height: 24),
               Text(
                 $.home.searchNotFound.description,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: 24,
-                  height: 32 / 24,
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w500,
                   color: theme.colorScheme.surface,
                 ),
@@ -470,12 +509,10 @@ class StoresNotFoundUpper extends HookConsumerWidget {
                 ),
                 onPressed: () async => syncCallback(() async {
                   final Isar isar = await ref.read(isarProvider.future);
-                  await isar.writeTxn(
-                    () async => isar.settings.put(
+                  final Settings settings =
                       await ref.read(settingsProvider.future)
-                        ..deliveryType = DeliveryType.pickup,
-                    ),
-                  );
+                        ..deliveryType = DeliveryType.pickup;
+                  await isar.writeTxn(() => isar.settings.put(settings));
                 }),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -527,9 +564,7 @@ class StoresNotFoundLower extends HookConsumerWidget {
                 Flexible(
                   child: Text(
                     $.home.searchNotFound.joinWaitingListDescription,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontSize: 24,
-                      height: 32 / 24,
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w500,
                       color: theme.colorScheme.surface,
                     ),
@@ -601,104 +636,97 @@ class StoreCard extends HookConsumerWidget {
                     Image.asset(assets.logo, fit: BoxFit.cover),
               ),
 
+              /// Name
               const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  store.name!,
+                  style: theme.textTheme.headlineMedium,
+                  maxLines: 1,
+                ),
+              ),
 
-              /// Information
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      /// Name
-                      Text(
-                        store.name!,
-                        style: theme.textTheme.headlineMedium,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 8),
+              /// Description
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  store.description ?? '',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.shadow,
+                  ),
+                  maxLines: 2,
+                ),
+              ),
 
-                      /// Description
-                      Text(
-                        store.description ?? '',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.shadow,
+              /// Icons
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: <Widget>[
+                    /// Cuisine
+                    if (store.cuisines?.firstOrNull?.isNotEmpty ??
+                        false) ...<Widget>[
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 3),
+                        child: Icon(
+                          icons.cuisine,
+                          color: theme.colorScheme.secondary,
+                          size: 16,
                         ),
-                        maxLines: 2,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          store.cuisines!.first,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xff484850),
+                          ),
+                        ),
+                      ),
+                    ] else
+                      const Expanded(child: SizedBox()),
 
-                      /// Icons
-                      Flexible(
-                        child: Row(
+                    /// Price Range
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: SizedBox(
+                        height: 28,
+                        child: Stack(
+                          fit: StackFit.passthrough,
+                          alignment: AlignmentDirectional.centerEnd,
                           children: <Widget>[
-                            /// Cuisine
-                            if ((store.cuisines?.isNotEmpty ?? false) &&
-                                store.cuisines?.first.cuisine !=
-                                    null) ...<Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 3),
-                                child: Icon(
-                                  icons.cuisine,
-                                  color: theme.colorScheme.secondary,
-                                  size: 16,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  store.cuisines?.first.cuisine ?? '',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ] else
-                              const Expanded(child: SizedBox()),
-
-                            /// Price Range
-                            Flexible(
-                              fit: FlexFit.tight,
-                              child: SizedBox(
-                                height: 28,
-                                child: Stack(
-                                  fit: StackFit.passthrough,
-                                  alignment: AlignmentDirectional.centerEnd,
-                                  children: <Widget>[
-                                    for (int i = (store.priceRange ?? 0) - 1;
-                                        i >= 0;
-                                        i--)
-                                      Positioned(
-                                        right: i * 16,
-                                        child: IconButton(
-                                          style: IconButton.styleFrom(
-                                            fixedSize: const Size.square(28),
-                                            disabledBackgroundColor:
-                                                theme.colorScheme.surfaceTint,
-                                            disabledForegroundColor:
-                                                theme.colorScheme.secondary,
-                                            padding: const EdgeInsets.all(8),
-                                            shape: CircleBorder(
-                                              side: BorderSide(
-                                                color:
-                                                    theme.colorScheme.surface,
-                                              ),
-                                            ),
-                                          ),
-                                          icon: Icon(icons.price, size: 12),
-                                          onPressed: null,
-                                        ),
+                            for (int i = (store.priceRange ?? 0) - 1;
+                                i >= 0;
+                                i--)
+                              Positioned(
+                                right: i * 16,
+                                child: IconButton(
+                                  style: IconButton.styleFrom(
+                                    fixedSize: const Size.square(28),
+                                    disabledBackgroundColor:
+                                        theme.colorScheme.surfaceTint,
+                                    disabledForegroundColor:
+                                        theme.colorScheme.secondary,
+                                    padding: const EdgeInsets.all(8),
+                                    shape: CircleBorder(
+                                      side: BorderSide(
+                                        color: theme.colorScheme.surface,
                                       ),
-                                  ],
+                                    ),
+                                  ),
+                                  icon: Icon(icons.price, size: 12),
+                                  onPressed: null,
                                 ),
                               ),
-                            ),
                           ],
                         ),
-                      )
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),

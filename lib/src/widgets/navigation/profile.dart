@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
@@ -13,6 +14,8 @@ import '../../models/settings.dart';
 import '../../providers/api.dart';
 import '../../providers/misc.dart';
 import '../../routes.dart';
+import '../modal/address.dart';
+import '../modal/profile_edit.dart';
 
 /// The screen used to display a user profile.
 @immutable
@@ -32,310 +35,401 @@ class ProfileScreen extends HookConsumerWidget {
       skippedAuthorizationProvider.select((final _) => _.valueOrNull ?? true),
     );
     final AsyncValue<Iterable<UserAddressesModel>?> addresses =
-        ref.watch(activeAddressesProvider);
+        ref.watch(currentAddressesProvider);
     final Iterable<UserAddressesModel>? prevAddresses =
         usePrevious<Iterable<UserAddressesModel>?>(addresses.valueOrNull);
     final SyncCallback syncCallback = useSyncCallback();
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          /// Title
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32)
-                  .copyWith(bottom: 24),
-              child: Text(
-                $.profile.title,
-                style: theme.textTheme.displayMedium,
-                maxLines: 1,
+    return ScrollConfiguration(
+      behavior: const ScrollBehavior().copyWith(overscroll: false),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            /// Title
+            Flexible(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 32)
+                        .copyWith(bottom: 24),
+                child: Text(
+                  $.profile.title,
+                  style: theme.textTheme.displayMedium,
+                  maxLines: 1,
+                ),
               ),
             ),
-          ),
 
-          /// Profile Info
-          if (isGuest)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xff484850),
-                  side: const BorderSide(color: Color(0xff484850)),
-                ),
-                onPressed: () async => syncCallback(() async {
-                  if (await ref.read(authTokenProvider.future) != null) {
-                    final Isar isar = await ref.read(isarProvider.future);
-                    await isar.writeTxn(
-                      () async => isar.settings.put(
-                        await ref.read(settingsProvider.future)
-                          ..skippedAuthorization = false,
-                      ),
-                    );
-                  }
-                }),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(
-                        icons.exit,
-                        size: 24,
-                        color: const Color(0xff484850),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(child: Text($.profile.login)),
-                    ],
+            /// Profile Info
+            if (isGuest)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xff484850),
+                    side: const BorderSide(color: Color(0xff484850)),
                   ),
-                ),
-              ),
-            )
-          else
-            Flexible(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  onPressed: () async => syncCallback(() async {
+                    if (await ref.read(authTokenProvider.future) != null) {
+                      final Isar isar = await ref.read(isarProvider.future);
+                      final Settings settings =
+                          await ref.read(settingsProvider.future)
+                            ..skippedAuthorization = false;
+                      await isar.writeTxn(() => isar.settings.put(settings));
+
+                      /// Push local addresses to the server.
+                      if ((await ref.read(addressesProvider.future))?.isEmpty ??
+                          false) {
+                        for (final Address address in await isar
+                            .txn(() => isar.address.where().findAll())) {
+                          await ref.read(
+                            addressProvider(
+                              (address.convert()).copyWithNull(
+                                addressId: true,
+                                userAddressId: true,
+                              ),
+                            ).future,
+                          );
+                        }
+                      }
+                    }
+                  }),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        /// Name / Edit
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16)
-                                .copyWith(top: 8),
-                            child: Text(
-                              'Jonathan Smith',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontSize: 24,
-                                height: 32 / 24,
-                              ),
-                              maxLines: 1,
-                            ),
-                          ),
+                        Icon(
+                          icons.exit,
+                          size: 24,
+                          color: const Color(0xff484850),
                         ),
-
-                        /// Phone Number
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            child: Text(
-                              '+1(212) 200 7898',
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
-
-                        /// Email
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              'jonathansmith@example.com',
-                              style: theme.textTheme.bodyMedium,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ),
+                        const SizedBox(width: 8),
+                        Flexible(child: Text($.profile.login)),
                       ],
                     ),
                   ),
+                ),
+              )
+            else
+              const Flexible(child: UserProfileLoader()),
 
-                  /// Edit
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: IconButton(
-                      style: IconButton.styleFrom(
-                        fixedSize: const Size.square(32),
-                        padding: const EdgeInsets.all(8),
-                        foregroundColor: theme.colorScheme.primary,
+            /// Delivery Address
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16)
+                    .copyWith(top: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    /// Title
+                    Flexible(
+                      child: Text(
+                        $.profile.address.title,
+                        style: theme.textTheme.titleLarge,
                       ),
-                      onPressed: () async => syncCallback(
-                        () => rootNavigator.pushNamed(Routes.profileEdit.name),
-                      ),
-                      icon: Icon(icons.pencil, size: 16),
                     ),
-                  ),
-                ],
-              ),
-            ),
 
-          /// Delivery Address
-          Flexible(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  /// Title
-                  Flexible(
-                    child: Text(
-                      $.profile.address.title,
-                      style: theme.textTheme.titleLarge,
-                    ),
-                  ),
+                    /// Address Cards
+                    if (addresses.isLoading && prevAddresses == null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: const <Widget>[
+                            Visibility(
+                              visible: false,
+                              maintainSize: true,
+                              maintainAnimation: true,
+                              maintainState: true,
+                              child: AddressCard(UserAddressesModel()),
+                            ),
+                            CircularProgressIndicator.adaptive()
+                          ],
+                        ),
+                      )
+                    else if (addresses.asData?.value != null ||
+                        prevAddresses != null)
+                      for (final UserAddressesModel address
+                          in addresses.asData?.value ?? prevAddresses!)
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: AddressCard(address),
+                          ),
+                        ),
 
-                  /// Address Cards
-                  if (addresses.isLoading && prevAddresses == null)
+                    /// Add New Address
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: const <Widget>[
-                          Visibility(
-                            visible: false,
-                            maintainSize: true,
-                            maintainAnimation: true,
-                            maintainState: true,
-                            child: AddressCard(UserAddressesModel()),
-                          ),
-                          CircularProgressIndicator.adaptive()
-                        ],
-                      ),
-                    )
-                  else if (prevAddresses != null ||
-                      addresses is AsyncData && addresses.valueOrNull != null)
-                    for (final UserAddressesModel address
-                        in addresses.valueOrNull ?? prevAddresses!)
-                      Flexible(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size.fromHeight(0),
+                          foregroundColor: theme.colorScheme.primary,
+                          textStyle: theme.textTheme.titleMedium,
+                          alignment: Alignment.centerLeft,
+                          backgroundColor: theme.colorScheme.surfaceTint,
+                        ),
+                        onPressed: () async => syncCallback(
+                          () => rootNavigator.pushNamed(Routes.map.name),
+                        ),
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: AddressCard(address),
-                        ),
-                      ),
-
-                  /// Add New Address
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size.fromHeight(0),
-                        foregroundColor: theme.colorScheme.primary,
-                        textStyle: theme.textTheme.titleMedium,
-                        alignment: Alignment.centerLeft,
-                        backgroundColor: theme.colorScheme.surfaceTint,
-                      ),
-                      onPressed: () async => syncCallback(
-                        () => rootNavigator.pushNamed(Routes.map.name),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(icons.plusCircle, size: 24),
-                            const SizedBox(width: 16),
-                            Text($.profile.address.addNew)
-                          ],
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(icons.plusCircle, size: 24),
+                              const SizedBox(width: 16),
+                              Text($.profile.address.addNew)
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          /// Payment Methods
-          Flexible(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16).copyWith(top: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  /// Title
-                  Flexible(
-                    child: Text(
-                      $.profile.payment.title,
-                      style: theme.textTheme.titleLarge,
-                    ),
-                  ),
-
-                  /// Add New Payment Method
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size.fromHeight(0),
-                        foregroundColor: theme.colorScheme.primary,
-                        textStyle: theme.textTheme.titleMedium,
-                        alignment: Alignment.centerLeft,
-                        backgroundColor: theme.colorScheme.surfaceTint,
-                      ),
-                      onPressed: () {},
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: <Widget>[
-                            Icon(icons.plusCircle, size: 24),
-                            const SizedBox(width: 16),
-                            Text($.profile.payment.addNew)
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          /// Logout
-          const SizedBox(height: 32),
-          if (!isGuest)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 117),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xff484850),
-                  side: const BorderSide(color: Color(0xff484850)),
-                ),
-                onPressed: () async => syncCallback(() async {
-                  final Isar isar = await ref.read(isarProvider.future);
-                  await isar.writeTxn(
-                    () async => isar.settings.put(
-                      (await ref.read(settingsProvider.future))..token = null,
-                    ),
-                  );
-                  await rootNavigator.pushReplacementNamed(
-                    (await Routes.current(container)).name,
-                  );
-                }),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(
-                        icons.exit,
-                        size: 24,
-                        color: const Color(0xff484850),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(child: Text($.profile.logout)),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            )
-        ],
+            ),
+
+            /// Payment Methods
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16)
+                    .copyWith(top: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    /// Title
+                    Flexible(
+                      child: Text(
+                        $.profile.payment.title,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                    ),
+
+                    /// Add New Payment Method
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size.fromHeight(0),
+                          foregroundColor: theme.colorScheme.primary,
+                          textStyle: theme.textTheme.titleMedium,
+                          alignment: Alignment.centerLeft,
+                          backgroundColor: theme.colorScheme.surfaceTint,
+                        ),
+                        onPressed: () {},
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(icons.plusCircle, size: 24),
+                              const SizedBox(width: 16),
+                              Text($.profile.payment.addNew)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// Logout
+            const SizedBox(height: 32),
+            if (!isGuest)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 117),
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xff484850),
+                    side: const BorderSide(color: Color(0xff484850)),
+                  ),
+                  onPressed: () async => syncCallback(() async {
+                    final Isar isar = await ref.read(isarProvider.future);
+                    final Settings settings =
+                        await ref.read(settingsProvider.future)
+                          ..skippedAuthorization = false
+                          ..token = null;
+                    await isar.writeTxn(() => isar.settings.put(settings));
+                    await Future<void>.delayed(
+                      const Duration(milliseconds: 100),
+                    );
+                    await rootNavigator.pushReplacementNamed(
+                      (await Routes.current(container)).name,
+                    );
+                  }),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          icons.exit,
+                          size: 24,
+                          color: const Color(0xff484850),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(child: Text($.profile.logout)),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+          ],
+        ),
       ),
     );
   }
+}
+
+/// The widget used to load a [UserProfile].
+@immutable
+class UserProfileLoader extends HookConsumerWidget {
+  /// The widget used to load a [UserProfile].
+  const UserProfileLoader({super.key});
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final AsyncValue<UserProfileModel?> profile =
+        ref.watch(profileProvider(null));
+    final UserProfileModel? prevProfile =
+        usePrevious<UserProfileModel?>(profile.valueOrNull);
+    return profile.asData?.value != null || prevProfile != null
+        ? UserProfile(profile.asData?.value ?? prevProfile!)
+        : Stack(
+            alignment: Alignment.center,
+            children: const <Widget>[
+              Visibility(
+                visible: false,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: UserProfile(
+                  UserProfileModel(
+                    name: 'undefined',
+                    phone: 'undefined',
+                    email: 'undefined',
+                  ),
+                ),
+              ),
+              CircularProgressIndicator.adaptive(),
+            ],
+          );
+  }
+}
+
+/// The widget used to show off a [profile].
+@immutable
+class UserProfile extends HookConsumerWidget {
+  /// The widget used to show off a [profile].
+  const UserProfile(this.profile, {super.key});
+
+  /// The profile to show in this widget.
+  final UserProfileModel profile;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final NavigatorState rootNavigator =
+        Navigator.of(context, rootNavigator: true);
+    final SyncCallback syncCallback = useSyncCallback();
+    final PhoneInputFormatter phoneFormatter =
+        useMemoized(() => PhoneInputFormatter(allowEndlessPhone: true));
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              /// Name / Edit
+              if (profile.name?.isNotEmpty ?? false)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16)
+                      .copyWith(top: 8),
+                  child: Text(
+                    profile.name!,
+                    style: theme.textTheme.headlineSmall,
+                    maxLines: 1,
+                  ),
+                ),
+
+              /// Phone Number
+              if (profile.phone?.isNotEmpty ?? false)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    phoneFormatter
+                        .formatEditUpdate(
+                          TextEditingValue.empty,
+                          TextEditingValue(text: profile.phone!),
+                        )
+                        .text,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+
+              /// Email
+              if (profile.email?.isNotEmpty ?? false)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    profile.email!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.shadow,
+                    ),
+                    maxLines: 1,
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        /// Edit
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: IconButton(
+            style: IconButton.styleFrom(
+              fixedSize: const Size.square(32),
+              padding: const EdgeInsets.all(8),
+              foregroundColor: theme.colorScheme.primary,
+            ),
+            onPressed: () async => syncCallback(
+              () => rootNavigator.pushNamed(
+                Routes.profileEdit.name,
+                arguments: ProfileEditScreen(profile),
+              ),
+            ),
+            icon: Icon(icons.pencil, size: 16),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(DiagnosticsProperty<UserProfileModel>('profile', profile)),
+      );
 }
 
 /// The card used to display an [address].
@@ -350,7 +444,8 @@ class AddressCard extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
-    final I18N $ = I18NLocalizations.of(context);
+    final NavigatorState rootNavigator =
+        Navigator.of(context, rootNavigator: true);
     final SyncCallback syncCallback = useSyncCallback();
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -385,6 +480,10 @@ class AddressCard extends HookConsumerWidget {
                           ..defaultAddress = $address.id == address.addressId
                     ]),
                   );
+                } else {
+                  await ref.read(
+                    defaultAddressProvider(address.userAddressId!).future,
+                  );
                 }
               }),
       child: Padding(
@@ -394,55 +493,10 @@ class AddressCard extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             /// Information
-            Flexible(
+            Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(top: 8, right: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    /// Title
-                    Flexible(
-                      child: Text(
-                        $.profile.address.card.title,
-                        style: theme.textTheme.bodyLarge,
-                        maxLines: 1,
-                      ),
-                    ),
-
-                    /// Address Value
-                    const SizedBox(height: 8),
-                    Flexible(
-                      child: Text(
-                        address.displayLong ?? '',
-                        style: theme.textTheme.titleMedium,
-                        maxLines: 2,
-                      ),
-                    ),
-
-                    /// Instructions Title
-                    const SizedBox(height: 16),
-                    Flexible(
-                      child: Text(
-                        $.profile.address.card.instructions,
-                        style: theme.textTheme.bodyLarge,
-                        maxLines: 1,
-                      ),
-                    ),
-
-                    /// Instructions Value
-                    const SizedBox(height: 8),
-                    Flexible(
-                      child: Text(
-                        (address.memo?.isEmpty ?? true)
-                            ? $.profile.address.card.instructionsEmpty
-                            : address.memo!,
-                        style: theme.textTheme.titleMedium,
-                        maxLines: 2,
-                      ),
-                    ),
-                  ],
-                ),
+                child: AddressCardInformation(address),
               ),
             ),
 
@@ -453,12 +507,90 @@ class AddressCard extends HookConsumerWidget {
                 padding: const EdgeInsets.all(8),
                 foregroundColor: theme.colorScheme.primary,
               ),
-              onPressed: () {},
+              onPressed: () async => syncCallback(
+                () => rootNavigator.pushNamed(
+                  Routes.address.name,
+                  arguments: AddressScreen(address),
+                ),
+              ),
               icon: Icon(icons.pencil, size: 16),
             )
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(DiagnosticsProperty<UserAddressesModel>('address', address)),
+      );
+}
+
+/// The widget used to display information about an [address].
+@immutable
+class AddressCardInformation extends StatelessWidget {
+  /// The widget used to display information about an [address].
+  const AddressCardInformation(this.address, {super.key});
+
+  /// The address to display in this card.
+  final UserAddressesModel address;
+
+  @override
+  Widget build(final BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final I18N $ = I18NLocalizations.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        /// Address Title
+        Flexible(
+          child: Text(
+            $.profile.address.card.title,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.shadow,
+            ),
+            maxLines: 1,
+          ),
+        ),
+
+        /// Address Value
+        const SizedBox(height: 8),
+        Flexible(
+          child: Text(
+            address.displayLong ?? address.displayShort ?? '',
+            style: theme.textTheme.titleMedium,
+            maxLines: 2,
+          ),
+        ),
+
+        /// Instructions Title
+        const SizedBox(height: 16),
+        Flexible(
+          child: Text(
+            $.profile.address.card.instructions,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.shadow,
+            ),
+            maxLines: 1,
+          ),
+        ),
+
+        /// Instructions Value
+        const SizedBox(height: 8),
+        Flexible(
+          child: Text(
+            (address.memo?.isEmpty ?? true)
+                ? $.profile.address.card.instructionsEmpty
+                : address.memo!,
+            style: theme.textTheme.titleMedium,
+            maxLines: 2,
+          ),
+        ),
+      ],
     );
   }
 

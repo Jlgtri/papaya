@@ -1,6 +1,7 @@
 import 'package:geocoding/geocoding.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:us_states/us_states.dart';
 
 import '../generated/models.g.dart';
 import '../providers/misc.dart';
@@ -13,13 +14,16 @@ class Address {
   /// The id of this address.
   Id id = Isar.autoIncrement;
 
+  /// The `user_address_id` property of this [Address].
+  int? userId;
+
   /// The `street_number` property of this [Address].
   String? streetNumber;
 
   /// The `route` property of this [Address].
   String? route;
 
-  /// The `internal` property of this [Address].
+  /// The number of apartment.
   String? internal;
 
   /// The `postal_code` property of this [Address].
@@ -27,9 +31,6 @@ class Address {
 
   /// The `memo` property of this [Address].
   String? memo;
-
-  /// The number of the apartment.
-  String? apartment;
 
   /// region name
   String? region;
@@ -41,7 +42,7 @@ class Address {
   String? city;
 
   /// The `default_address` property of this [Address].
-  bool defaultAddress = false;
+  bool? defaultAddress;
 
   /// The `state` property of this [Address].
   AddressState? state;
@@ -57,13 +58,13 @@ class Address {
 
   /// Convert this address to [UserAddressesModel].
   UserAddressesModel convert() => UserAddressesModel(
-        addressId: id,
+        addressId: id == Isar.autoIncrement ? null : id,
+        userAddressId: userId,
         streetNumber: streetNumber,
         route: route,
         internal: internal,
         postalCode: postalCode,
         memo: memo,
-        apartment: apartment,
         region: region,
         neighborhood: neighborhood,
         city: city,
@@ -76,32 +77,32 @@ class Address {
           <String?>[streetNumber, route]
               .whereType<String>()
               .map((final _) => _.trim())
-              .where((final _) => _.isNotEmpty)
+              .where((final _) => _.isNotEmpty && _ != 'undefined')
               .join(' '),
           city,
           state?.longName
         ]
             .whereType<String>()
             .map((final _) => _.trim())
-            .where((final _) => _.isNotEmpty)
+            .where((final _) => _.isNotEmpty && _ != 'undefined')
             .join(', '),
         displayLong: <String?>[
           <String?>[streetNumber, route]
               .whereType<String>()
               .map((final _) => _.trim())
-              .where((final _) => _.isNotEmpty)
+              .where((final _) => _.isNotEmpty && _ != 'undefined')
               .join(' '),
           city,
           state?.longName,
           <String?>[state?.shortName, postalCode]
               .whereType<String>()
               .map((final _) => _.trim())
-              .where((final _) => _.isNotEmpty)
+              .where((final _) => _.isNotEmpty && _ != 'undefined')
               .join(' ')
         ]
             .whereType<String>()
             .map((final _) => _.trim())
-            .where((final _) => _.isNotEmpty)
+            .where((final _) => _.isNotEmpty && _ != 'undefined')
             .join(', '),
       );
 }
@@ -169,6 +170,9 @@ extension PlacemarkConvert on Placemark {
       ..neighborhood = neighborhood.isNotEmpty ? neighborhood : null
       ..postalCode = postalCode.isNotEmpty ? postalCode : null
       ..state = (AddressState()
+        ..shortName = stateLongName.isNotEmpty
+            ? USStates.getAbbreviation(stateLongName)
+            : null
         ..longName = stateLongName.isNotEmpty ? stateLongName : null)
       ..country = (AddressCountry()
         ..shortName = countryShortName.isNotEmpty ? countryShortName : null
@@ -181,12 +185,12 @@ extension AddressConvert on UserAddressesModel {
   /// Convert this address to [Address].
   Address convert() => Address()
     ..id = addressId ?? Isar.autoIncrement
+    ..userId = userAddressId
     ..streetNumber = streetNumber
     ..route = route
     ..internal = internal
     ..postalCode = postalCode
     ..memo = memo
-    ..apartment = apartment
     ..region = region
     ..neighborhood = neighborhood
     ..city = city

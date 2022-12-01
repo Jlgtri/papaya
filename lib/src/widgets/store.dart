@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flash/flash.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -65,10 +65,9 @@ class StoreScreen extends HookConsumerWidget {
         child: MediaQuery.removePadding(
           context: context,
           removeBottom: true,
-          child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: theme.colorScheme.onBackground,
-            body: Stack(
+          child: Material(
+            color: theme.colorScheme.onBackground,
+            child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
                 /// Background Image
@@ -137,30 +136,6 @@ class StoreContent extends HookConsumerWidget {
         ref.watch(storeMenuProvider(store.id!));
 
     final SyncCallback syncCallback = useSyncCallback();
-    Future<void> onProductPressed(final StoreMenuProductsModel product) async =>
-        syncCallback(() async {
-          // CartStoreProduct? $$product;
-          // outer:
-          // for (final CartStore $store in await ref.read(cartProvider.future)) {
-          //   if ($store.id == store.id) {
-          //     for (final CartStoreProduct $product in $store.products) {
-          //       if ($product.id == product.id) {
-          //         $$product = $product;
-          //         break outer;
-          //       }
-          //     }
-          //   }
-          // }
-          await navigator.pushNamed(
-            Routes.product.name,
-            arguments: ProductScreen(
-              store,
-              product,
-              // currentAmount: $$product?.amount,
-            ),
-          );
-        });
-
     final List<Widget> storeInformation = <Widget>[
       SliverFillRemaining(
         child: Column(
@@ -211,7 +186,7 @@ class StoreContent extends HookConsumerWidget {
     ];
 
     final Widget scrollable;
-    if (menu is! AsyncData || (menu.valueOrNull?.isEmpty ?? true)) {
+    if (menu.asData?.value?.isEmpty ?? true) {
       scrollable = CustomScrollView(slivers: storeInformation);
     } else {
       scrollable = NestedScrollView(
@@ -279,7 +254,13 @@ class StoreContent extends HookConsumerWidget {
                   if (menu.name != null && menu.products != null)
                     StoreMenu(
                       menu,
-                      onPressed: onProductPressed,
+                      onPressed: (final StoreMenuProductsModel product) async =>
+                          syncCallback(
+                        () => navigator.pushNamed(
+                          Routes.product.name,
+                          arguments: ProductScreen(store, product),
+                        ),
+                      ),
                       key: PageStorageKey<int?>(menu.id),
                     )
               ],
@@ -389,16 +370,16 @@ class StoreInformationLoader extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final AsyncValue<DeliveryType> deliveryType =
-        ref.watch(deliveryTypeProvider);
+    final DeliveryType? deliveryType =
+        ref.watch(deliveryTypeProvider.select((final _) => _.valueOrNull));
     final DeliveryType? prevDeliveryType =
-        usePrevious<DeliveryType?>(deliveryType.valueOrNull);
-    return deliveryType.valueOrNull != null || prevDeliveryType != null
+        usePrevious<DeliveryType?>(deliveryType);
+    return deliveryType != null || prevDeliveryType != null
         ? Padding(
             padding: const EdgeInsets.all(24),
             child: StoreInformation(
               store,
-              deliveryType: deliveryType.valueOrNull ?? prevDeliveryType!,
+              deliveryType: deliveryType ?? prevDeliveryType!,
             ),
           )
         : const Center(child: CircularProgressIndicator.adaptive());
@@ -512,8 +493,8 @@ class StoreInformation extends HookConsumerWidget {
                       ),
                       maxLines: 1,
                     ),
-                    if ((store.cuisines?.isNotEmpty ?? false) &&
-                        store.cuisines?.first.cuisine != null) ...<Widget>[
+                    if (store.cuisines?.firstOrNull?.isNotEmpty ??
+                        false) ...<Widget>[
                       const SizedBox(width: 48),
                       Icon(
                         icons.cuisine,
@@ -522,7 +503,7 @@ class StoreInformation extends HookConsumerWidget {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        store.cuisines?.first.cuisine ?? '',
+                        store.cuisines!.first,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: theme.colorScheme.surface,
@@ -554,26 +535,9 @@ class StoreInformation extends HookConsumerWidget {
                         );
                       } else if (isMounted()) {
                         // ignore: use_build_context_synchronously
-                        await context.showFlashDialog(
-                          title: Text($.alert.storeInformationInvalid.title),
-                          content: Text($.alert.storeInformationInvalid.body),
-                          positiveActionBuilder: (
-                            final _,
-                            final FlashController<void> controller,
-                            final __,
-                          ) =>
-                              TextButton(
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.all(12),
-                            ),
-                            onPressed: controller.dismiss,
-                            child: Text(
-                              $.alert.storeInformationInvalid.approve,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
+                        await rootNavigator.pushNamed(
+                          Routes.storeInformationInvalid.name,
+                          arguments: StoreInformationInvalidScreen(store),
                         );
                       }
                     }),
@@ -651,19 +615,13 @@ class StoreInformationDeliveryTypeSwitcherLoader extends HookConsumerWidget {
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
-    final AsyncValue<StoreEtaDeliveryModel?> deliveryTime =
+    final AsyncValue<StoreEtaModel?> deliveryTime =
         ref.watch(storeEtaDeliveryProvider(store.id!));
-    final AsyncValue<StoreEtaPickupModel?> pickupTime =
+    final AsyncValue<StoreEtaModel?> pickupTime =
         ref.watch(storeEtaPickupProvider(store.id!));
-    return (deliveryTime is AsyncData && pickupTime is AsyncData) &&
+    return (!deliveryTime.isLoading && !pickupTime.isLoading) &&
             ref.watch(
-              storeMenuProvider(store.id!).select(
-                (
-                  final AsyncValue<Iterable<StoreMenuModel>?> menu,
-                ) =>
-                    menu is AsyncData &&
-                    (menu.valueOrNull?.isNotEmpty ?? false),
-              ),
+              storeMenuProvider(store.id!).select((final _) => !_.isLoading),
             )
         ? StoreInformationDeliveryTypeSwitcher(
             deliveryTime.valueOrNull,
@@ -697,10 +655,10 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
   });
 
   /// The delivery time to show in this switcher.
-  final StoreEtaDeliveryModel? deliveryTime;
+  final StoreEtaModel? deliveryTime;
 
   /// The pickup time to show in this switcher.
-  final StoreEtaPickupModel? pickupTime;
+  final StoreEtaModel? pickupTime;
 
   /// The current active [DeliveryType].
   final DeliveryType deliveryType;
@@ -733,12 +691,9 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
             break;
         }
         final Isar isar = await ref.read(isarProvider.future);
-        await isar.writeTxn(
-          () async => isar.settings.put(
-            await ref.read(settingsProvider.future)
-              ..deliveryType = $deliveryType,
-          ),
-        );
+        final Settings settings = await ref.read(settingsProvider.future)
+          ..deliveryType = $deliveryType;
+        await isar.writeTxn(() => isar.settings.put(settings));
       }),
       indicatorSize: Size.infinite,
       backgroundIndicatorBuilder: (final _, final __) => Padding(
@@ -777,7 +732,7 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
                     }(__.value),
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: ColorTween(
-                        begin: theme.colorScheme.onBackground,
+                        begin: theme.colorScheme.shadow,
                         end: theme.colorScheme.surface,
                       ).transform(
                         __.value == DeliveryType.delivery
@@ -818,7 +773,7 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
                       }(__.value),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: ColorTween(
-                          begin: theme.colorScheme.onBackground,
+                          begin: theme.colorScheme.shadow,
                           end: theme.colorScheme.surface,
                         ).transform(
                           __.value == DeliveryType.delivery
@@ -843,17 +798,9 @@ class StoreInformationDeliveryTypeSwitcher extends HookConsumerWidget {
       super.debugFillProperties(
         properties
           ..add(
-            DiagnosticsProperty<StoreEtaDeliveryModel>(
-              'deliveryTime',
-              deliveryTime,
-            ),
+            DiagnosticsProperty<StoreEtaModel>('deliveryTime', deliveryTime),
           )
-          ..add(
-            DiagnosticsProperty<StoreEtaPickupModel>(
-              'pickupTime',
-              pickupTime,
-            ),
-          )
+          ..add(DiagnosticsProperty<StoreEtaModel>('pickupTime', pickupTime))
           ..add(EnumProperty<DeliveryType?>('deliveryType', deliveryType)),
       );
 }
@@ -899,6 +846,8 @@ class StoreProductCard extends HookConsumerWidget {
                     errorWidget: (final _, final __, final ___) =>
                         Image.asset(assets.logo, fit: BoxFit.cover),
                   ),
+
+                  /// Image
                   if (product.tags
                           ?.map((final _) => _.tagName)
                           .contains('Gluten-Free') ??
@@ -951,7 +900,7 @@ class StoreProductCard extends HookConsumerWidget {
                       const SizedBox(height: 8),
                       Flexible(
                         child: Text(
-                          product.description ?? '',
+                          product.description!,
                           style: theme.textTheme.bodyMedium,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -969,10 +918,7 @@ class StoreProductCard extends HookConsumerWidget {
                           child: Text(
                             r'$' +
                                 ((product.price ?? 0) / 100).toStringAsFixed(2),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontSize: 24,
-                              height: 32 / 24,
-                            ),
+                            style: theme.textTheme.headlineSmall,
                           ),
                         ),
 

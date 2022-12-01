@@ -62,8 +62,8 @@ const TextTheme defaultTextTheme = TextTheme(
   ),
   headlineSmall: TextStyle(
     fontFamily: 'Quicksand',
-    fontSize: 30,
-    height: 40 / 30,
+    fontSize: 24,
+    height: 32 / 24,
     fontWeight: FontWeight.bold,
     leadingDistribution: TextLeadingDistribution.even,
   ),
@@ -151,7 +151,10 @@ extension CustomThemeData on ThemeData {
         backgroundColor: colorScheme.background,
         splashColor: colorScheme.shadow.withOpacity(1 / 10),
         highlightColor: colorScheme.primary.withOpacity(1 / 10),
-        textTheme: textTheme.apply(displayColor: colorScheme.onBackground),
+        textTheme: textTheme.apply(
+          displayColor: colorScheme.onBackground,
+          bodyColor: colorScheme.onBackground,
+        ),
         appBarTheme: AppBarTheme(
           elevation: 0,
           scrolledUnderElevation: 0,
@@ -288,6 +291,8 @@ extension CustomThemeData on ThemeData {
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: colorScheme.surface,
           contentPadding: const EdgeInsets.all(16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -313,10 +318,7 @@ extension CustomThemeData on ThemeData {
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(width: 3 / 2, color: colorScheme.error),
           ),
-          hintStyle: textTheme.titleMedium?.copyWith(
-            color: colorScheme.outline,
-            fontWeight: FontWeight.w500,
-          ),
+          hintStyle: textTheme.bodyLarge,
           errorStyle: textTheme.titleMedium,
           labelStyle:
               textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),

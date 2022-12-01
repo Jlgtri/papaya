@@ -27,14 +27,34 @@ alert:
     approve: Confirm
     deny: Cancel
   store_added:
-    title: Store already added
-    body: You can't add products from multiple stores at the moment.\nClear your cart and try again.
-    approve: Clear cart
-    deny: I understood
+    title: Start a new order?
+    body(final String store):
+      Hey, you still have items in your cart from <bold>$store</bold>.\n
+      Do you want to start a new order or return to your previous one?
+    approve: Start New Order
+    deny(final String store): Return to $store
   store_information_invalid:
     title: Error
     body: Store information can not be loaded. Please try again later.
     approve: I understood
+  profile_edit_error:
+    title: Error
+    body: There was an error while trying to edit the profile. Please try again later.
+    approve: Okay, thanks
+  note_clear:
+    title: Warning
+    body: Are you sure you want to remove your note?
+    approve: Yes, please
+    deny: No, leave it
+  address_remove:
+    title: Warning
+    body: Are you sure you want to remove this address?
+    approve: Yes, please
+    deny: No, leave it
+  address_error:
+    title: Error
+    body: There was an error while trying to modify the address. Please try again later.
+    approve: Okay, thanks
 
 onboarding:
   skip: Skip
@@ -55,11 +75,22 @@ auth:
   sign_up: Sign Up
   sign_in: Log In
 
+address_form:
+  address_title: Delivery Address
+  address_change: Change
+  apartment_title: Apartment
+  apartment_hint: Apartment
+  instructions_title: Delivery Instructions
+  instructions_hint: Any notes to the driver?
+  deny: Cancel
+  approve: Save
+
 map:
   back: Back
   title: Choose Your Address
   hint: Enter your location
   confirm: Confirm
+  address_title: Add Address
 
 home:
   address_hint: Choose Your Address
@@ -74,7 +105,7 @@ home:
     home: Home
     String cart(final int count): |
       return count > 0 ? 'Cart x$count' : 'Cart';
-    String cart_tooltip(final int count): $count Items
+    String cart_tooltip(final int count): "$count Item${count != 1 ? 's' : ''}"
     orders: Orders
     profile: Profile
 
@@ -118,7 +149,8 @@ store:
 
   info:
     open_until(final String until): Open until $until
-    open_at(final String at): Open at $at
+    open_at(final String time): Open at $time
+    open_at_day(final String weekDay, final String time): Open at $weekDay $time
 
 delivery:
   back: Back
@@ -139,76 +171,84 @@ delivery:
 
 cart:
   title: Your Cart
-  empty: Your cart is empty.
+  empty: Your cart is empty.\nAdd some items to your order.
+  add_items: Add some items
 
 
 payment:
   back: Back
   title: Checkout
-  store_name: Store Name
-  delivery: Delivery in 20-30 mins
-  delivery_time: 'Delivery time:'
-  time: Time
-  dietary_restrictions: Any dietary Restrictions?
-  note: Leave us a Note
-  bill:
+  store_delivery_time(final String time): 'Delivery time: $time'
+
+  note:
+    prompt_title: Any dietary Restrictions?
+    prompt: Leave us a Note
+
+    title: Note
+    description: Leave us a note
+    approve: Save
+    deny: Cancel
+    clear_tooltip: Clear
+    edit: Change
+
+  summary:
     subtotal: Subtotal
     delivery_tax: Delivery
+    tips: Tips
     sales_tax: Sales Tax
+    discount: Discount
     total: Total
+
   customer_info:
-    one: '1'
     title: Customer Info
-    description: Create Papaya account to speed up check-out. Already have an account?
-    first_name: First Name
-    hint_first_name: Enter your first name
-    last_name: Last Name
-    hint_last_name: Enter your last name
-    email: Email
-    phone: Phone
-    create_account_btn: Create Account & Continue
-    continue_asguest: Continue as a Guest
+    unauthorized_title: Create Papaya account to speed up check-out. Already have an account?
+    unauthorized_log_in: Log In
+    authorized: Continue
+    create_account: Create Account & Continue
+
   order_details:
-    two: '2'
     title: Order Details
-    deliver_tab: Delivery
-    pickup_tab: Pickup
-    estimated_delivery: Estimated delivery time - 30-40 mins
-    estimated_pick_up: Estimated pickup time - 10-20 mins
-    delivery_adress: Delivery Adress
-    hint_delivery_adress: Enter your  Adress
-    change: Change
-    apartment: Apartment
-    hint_apartment: " Apartment number"
-    delivery_instructions: Delivery Instructions
-    hint_delivery_instructions: Any Notes to the Driver?
-    continue_to_payment: Continue to Payment
+    delivery_title: Choose Delivery Address
+    delivery_address(final String address): 'Delivery Address: $address'
+    delivery_instructions(final String instructions):
+      'Delivery Instructions: $instructions'
+    delivery_unavailable: Delivery unavailable
+    pickup_unavailable: Pickup unavailable
+    delivery_time(final int min, final int max):
+      Estimated delivery time - $min-$max mins
+    pickup_time(final int min, final int max):
+      Estimated pickup time - $min-$max mins
+    proceed: Continue to Payment
+
   payment:
-    three: '3'
     title: Payment
+    add_tip: Add a Tip
     quick_tip: Quick Tip
-    tip:
-      tip_five: "$5"
-      tip_ten: "$10"
-      tip_fifteen: "$15"
-      tip_twenty: "$20"
-      custom_tip: Custom Tip
+    custom_tip: Custom Tip
     payment_method: Choose payment method
-    apple: Apple Pay
-    google: Google Pay
-    card: Or pay with credit card
-    add_payment: Add Payment Method
-    card_number: Card Number
-    hint_card_number: Enter your card number
-    expiration_date: Expiry Date
-    hint_expiration_date: MM/YY
-    cvv: CVV
-    hint_cvv: Enter Code
-    dicount: Do you have Discount Code?
-    apply: Apply Here
-    apply_btn: Apply
-    change: Change
-    pay_btn: Pay $
+    apple_pay: Apple Pay
+    google_pay: Google Pay
+    credit_card:
+      select_title: Or select credit card
+      add_title: Or pay with credit card
+      title(final String brand, final String ending):
+        '$brand ending in $ending'
+
+      add_card: Add Payment Method
+      card_number: Card Number
+      expiration_date: Expiry Date
+      expiration_date_hint: MM/YY
+      cvc: CVC
+      cvc_hint: Enter Code
+    discount:
+      title: Do you have Discount Code?
+      apply: Apply Here
+      hint: Enter Code
+      confirm: Apply
+      change: Change
+      applied(final String code): $code Code Applied
+    proceed(final double amount): Pay \$${amount.toStringAsFixed(2)}
+
 
 profile:
   title: Profile
@@ -221,6 +261,9 @@ profile:
       title: Delivery Address
       instructions: Delivery Instructions
       instructions_empty: None
+    edit:
+      remove_tooltip: Remove
+      title: Edit Address
 
   payment:
     title: Payment Methods
@@ -229,47 +272,14 @@ profile:
   edit:
     title: Edit Info
     first_name: First Name
-    first_name_hint: Enter First Name
+    first_name_hint: Enter your first name
     last_name: Last Name
-    last_name_hint: Enter Last Name
+    last_name_hint: Enter your last name
     email: Email
-    email_hint: Enter Email
+    email_hint: Enter your email address
     phone: Phone
-    phone_hint: Enter Phone
+    phone_hint: Enter your phone
     confirm: Save
-
-  add_adress:
-    title: Add Address
-    delivery_adress: Delivery Adress
-    hint_adress: Enter your Adress
-    apartment: Apartment
-    hint_apartment: " Apartment number"
-    delivery_instructions: Delivery Instructions
-    hint_delivery_instructions: Any Notes to the Driver?
-    save_btn: Save
-    cancel_btn: Cancel
-
-  edit_adress:
-    title: Edit Adress
-    delivery_adress: Delivery Adress
-    hint_adress: Enter your Adress
-    apartment: Apartment
-    hint_apartment: " Apartment number"
-    save_btn: Save
-    cancel_btn: Cancel
-
-  first_name: First Name
-  last_name: Last Name
-  phone: Phone
-  email: Email
-  change_password: Change Password
-  current_password: Current Password
-  hint_current_password: Enter your current password
-  new_password: New Password
-  hint_new_password: Enter your new password
-  confirm_password: Confirm Password
-  hint_confirm_password: Confirm your new password
-  save_password: Save Password
 
 
 orders:

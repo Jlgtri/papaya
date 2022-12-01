@@ -37,15 +37,15 @@ class CartStoreProduct {
 }
 
 /// The provider of the current cart state.
-final StreamProvider<List<CartStore>> cartProvider =
-    StreamProvider<List<CartStore>>(
-  (final StreamProviderRef<List<CartStore>> ref) async* {
+final AutoDisposeStreamProvider<List<CartStore>> cartProvider =
+    StreamProvider.autoDispose<List<CartStore>>(
+  (final AutoDisposeStreamProviderRef<List<CartStore>> ref) async* {
+    final Iterable<StoreModel>? stores =
+        await ref.watch(allStoresProvider.future);
     final Isar isar = await ref.watch(isarProvider.future);
     await for (final List<CartStore> cart
         in isar.cartStores.where().watch(fireImmediately: true)) {
       if (cart.isNotEmpty) {
-        final Iterable<StoreModel>? stores =
-            await ref.read(storesProvider.future);
         for (int index = 0; index < cart.length; index++) {
           final CartStore store = cart.elementAt(index);
           final int initialStoreProductLength = store.products.length;
@@ -95,4 +95,22 @@ final StreamProvider<List<CartStore>> cartProvider =
     storesProvider,
     storeMenuProvider
   ],
+);
+
+/// The provider of the current total value in the [cartProvider].
+final AutoDisposeFutureProvider<double> cartTotalProvider =
+    FutureProvider.autoDispose<double>(
+  (final AutoDisposeFutureProviderRef<double> ref) async => await ref.watch(
+    cartProvider.future.select(
+      (final _) async => (await _).fold<double>(
+        0,
+        (final double prevValue, final _) => _.products.fold<double>(
+          prevValue,
+          (final double prevValue, final _) =>
+              prevValue + (_.product?.price ?? 0) * (_.amount / 100),
+        ),
+      ),
+    ),
+  ),
+  dependencies: <ProviderOrFamily>[cartProvider],
 );

@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "id": 29,
+      "name": "Sautéed Broccoli",
+      "description": "Broccoli with garlic, Korean chili flakes, scallion infused EVOO, and lemon. Vegan. Gluten free.",
+      "img_url": "https://res.cloudinary.com/orderpapaya/image/upload/f_auto/products_staging/c558fc37-029a-4552-bc42-32247b1b7f43.jpg",
+      "price": 1000,
+      "price_total": 2000,
+      "quantity": 2
+    },
+    {
+      "id": 30,
+      "name": "Roasted Corn & Edamame",
+      "description": "Corn and edamame with garlic, Korean chili flakes, and toasted sesame oil. Vegan. Gluten free.",
+      "img_url": "https://res.cloudinary.com/orderpapaya/image/upload/f_auto/products_staging/f62db2fc-5bb8-4fae-a82c-5483a59a6a20.jpg",
+      "price": 1000,
+      "price_total": 1000,
+      "quantity": 1
+    }
+  ],
+  "subtotal": 3000,
+  "tax": 266,
+  "delivery_cost": 300,
+  "delivery_tip": 400,
+  "total": 3966
+}

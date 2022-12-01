@@ -32,13 +32,12 @@ class _SyncCallbackHook extends Hook<SyncCallback> {
   _SyncCallbackHookState createState() => _SyncCallbackHookState();
 
   @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(
-      properties
-        ..add(DiagnosticsProperty<bool>('discard', discard))
-        ..add(DiagnosticsProperty<bool>('postFrame', postFrame)),
-    );
-  }
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(DiagnosticsProperty<bool>('discard', discard))
+          ..add(DiagnosticsProperty<bool>('postFrame', postFrame)),
+      );
 }
 
 class _SyncCallbackHookState

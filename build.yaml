@@ -3,12 +3,9 @@ targets:
   $default:
     sources:
       include:
-        - '**'
         - $package$
-      exclude:
-        - lib/$lib$
-        - .dart_tool/**
-        - build/**
+        - source/**
+        - lib/src/models/**
 
     builders:
       isar_generator|isar_generator:
@@ -32,7 +29,7 @@ targets:
       generators|models:
         enabled: true
         options:
-          import_path: source/models.json
+          import_path: source/models/
           export_path: lib/src/generated/models.g.dart
           convert_class_names: false
           include_null_fields: false
@@ -44,3 +41,4 @@ targets:
           export_path: lib/src/generated/icons.g.dart
           font_export_path: source/icons.ttf
           height: 32
+          normalize: true

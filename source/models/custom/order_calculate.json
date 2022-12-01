@@ -1,0 +1,66 @@
+{
+  "OrderCalculateModel": {
+    "items": {
+      "type": "OrderCalculateItemsModel[]",
+      "nullable": true
+    },
+    "subtotal": {
+      "type": "integer",
+      "nullable": true
+    },
+    "discount": {
+      "type": "integer",
+      "nullable": true
+    },
+    "discountRate": {
+      "type": "integer",
+      "nullable": true
+    },
+    "tax": {
+      "type": "integer",
+      "nullable": true
+    },
+    "delivery_cost": {
+      "type": "integer",
+      "nullable": true
+    },
+    "delivery_tip": {
+      "type": "integer",
+      "nullable": true
+    },
+    "total": {
+      "type": "integer",
+      "nullable": true
+    }
+  },
+  "OrderCalculateItemsModel": {
+    "id": {
+      "type": "integer",
+      "nullable": true
+    },
+    "name": {
+      "type": "string",
+      "nullable": true
+    },
+    "description": {
+      "type": "string",
+      "nullable": true
+    },
+    "img_url": {
+      "type": "string",
+      "nullable": true
+    },
+    "price": {
+      "type": "integer",
+      "nullable": true
+    },
+    "price_total": {
+      "type": "integer",
+      "nullable": true
+    },
+    "quantity": {
+      "type": "integer",
+      "nullable": true
+    }
+  }
+}

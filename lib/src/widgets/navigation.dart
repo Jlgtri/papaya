@@ -85,8 +85,8 @@ class NavigationScreen extends HookConsumerWidget {
         return ref.read(canPopProvider);
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          statusBarColor: theme.colorScheme.onBackground,
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.light,
           statusBarBrightness: Brightness.dark,
           systemNavigationBarIconBrightness: Brightness.dark,
@@ -98,12 +98,12 @@ class NavigationScreen extends HookConsumerWidget {
             appBar: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: theme.colorScheme.onBackground,
-              systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarColor: theme.colorScheme.onBackground,
+              systemOverlayStyle: const SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
                 statusBarIconBrightness: Brightness.light,
                 statusBarBrightness: Brightness.dark,
                 systemNavigationBarIconBrightness: Brightness.dark,
-                systemNavigationBarColor: theme.colorScheme.surface,
+                systemNavigationBarColor: Colors.transparent,
               ),
               toolbarHeight: searchActive ? searchAppBarHeight : appBarHeight,
               titleSpacing: 0,
@@ -148,7 +148,7 @@ class NavigationScreen extends HookConsumerWidget {
                             ),
                             icon: Padding(
                               padding: const EdgeInsets.all(12),
-                              child: Icon(icons.cancel, size: 16),
+                              child: Icon(icons.cross, size: 16),
                             ),
                             onPressed: () => ref
                               ..invalidate(SearchField.suggestions)
@@ -161,11 +161,21 @@ class NavigationScreen extends HookConsumerWidget {
             body: PageView(
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),
-              children: const <Widget>[
-                HomeScreen(key: PageStorageKey<String>('HomeScreen')),
-                CartScreen(key: PageStorageKey<String>('CartScreen')),
-                Placeholder(key: PageStorageKey<String>('OrdersScreen')),
-                ProfileScreen(key: PageStorageKey<String>('ProfileScreen')),
+              children: <Widget>[
+                const HomeScreen(key: PageStorageKey<String>('HomeScreen')),
+                CartScreen(
+                  onEmptyCartPressed: () async => pageController.animateToPage(
+                    0,
+                    duration:
+                        Duration(milliseconds: currentPage.value.abs() * 233),
+                    curve: Curves.ease,
+                  ),
+                  key: const PageStorageKey<String>('CartScreen'),
+                ),
+                const Placeholder(key: PageStorageKey<String>('OrdersScreen')),
+                const ProfileScreen(
+                  key: PageStorageKey<String>('ProfileScreen'),
+                ),
               ],
             ),
             bottomNavigationBar: Padding(
@@ -255,70 +265,82 @@ class DeliveryPickerField extends HookConsumerWidget {
 
     final AsyncValue<DeliveryType> deliveryType =
         ref.watch(deliveryTypeProvider);
-    final AsyncValue<UserAddressesModel?> activeAddress =
-        ref.watch(activeAddressProvider);
-    final UserAddressesModel? prevActiveAddress =
-        usePrevious<UserAddressesModel?>(activeAddress.valueOrNull);
-    final UserAddressesModel? address =
-        activeAddress.valueOrNull ?? prevActiveAddress;
+    final AsyncValue<UserAddressesModel?>? deliveryAddress =
+        deliveryType.valueOrNull == DeliveryType.delivery
+            ? ref.watch(currentAddressProvider)
+            : null;
+    final String? prevDeliveryAddress =
+        usePrevious<String?>(deliveryAddress?.asData?.value?.displayLong);
 
-    final StoreModel? store = ref.watch(
+    final int? storeId = ref.watch(
       cartProvider.select(
-        (final _) =>
-            _.whenOrNull<StoreModel?>(data: (final _) => _.firstOrNull?.store),
+        (final _) => _.whenOrNull<int?>(data: (final _) => _.firstOrNull?.id),
       ),
     );
+    final String? pickupAddress = storeId != null
+        ? ref.watch(
+            storeProvider(storeId)
+                .select((final _) => _.valueOrNull?.address?.displayLong),
+          )
+        : null;
+    final String? prevPickupAddress = usePrevious<String?>(pickupAddress);
+
+    final String? address = (final DeliveryType? deliveryType) {
+      switch (deliveryType) {
+        case DeliveryType.delivery:
+          return deliveryAddress?.isLoading ?? false
+              ? prevDeliveryAddress
+              : deliveryAddress?.asData?.value?.displayLong ??
+                  prevDeliveryAddress;
+        case DeliveryType.pickup:
+          return pickupAddress ?? prevPickupAddress;
+        case null:
+          return null;
+      }
+    }(deliveryType.valueOrNull);
 
     String? eta;
-    if (address == null) {
+    if (deliveryType.valueOrNull == DeliveryType.delivery && address == null) {
       eta = $.home.addressHint;
-    } else if (store?.id == null) {
+    } else if (storeId == null) {
       eta = $.home.storeHint;
     }
-    final String? prevEta = usePrevious<String?>(eta);
-
-    if (deliveryType is! AsyncData || deliveryType.valueOrNull == null) {
-      eta ??= prevEta;
-    } else if (address != null && store?.id != null) {
+    if (deliveryType.asData?.value != null &&
+        (address != null && storeId != null)) {
       switch (deliveryType.value!) {
         case DeliveryType.delivery:
           eta = ref.watch(
-            storeEtaDeliveryProvider(store!.id!).select(
+            storeEtaDeliveryProvider(storeId).select(
               (final _) =>
-                  _.whenOrNull<String?>(
-                    data: (final _) => _?.min != null && _?.max != null
-                        ? $.delivery.deliveryToTime(
-                            _!.min!,
-                            _.max!,
-                            address.displayLong!,
-                          )
-                        : null,
-                  ) ??
-                  $.home.storeHint,
+                  _.valueOrNull?.min != null && _.valueOrNull?.max != null
+                      ? $.delivery.deliveryToTime(
+                          _.valueOrNull!.min!,
+                          _.valueOrNull!.max!,
+                          address,
+                        )
+                      : null,
             ),
           );
           break;
 
         case DeliveryType.pickup:
           eta = ref.watch(
-            storeEtaPickupProvider(store!.id!).select(
+            storeEtaPickupProvider(storeId).select(
               (final _) =>
-                  _.whenOrNull<String?>(
-                    data: (final _) => _?.min != null && _?.max != null
-                        ? $.delivery.pickupFromTime(
-                            _!.min!,
-                            _.max!,
-                            address.displayLong!,
-                          )
-                        : null,
-                  ) ??
-                  $.home.storeHint,
+                  _.valueOrNull?.min != null && _.valueOrNull?.max != null
+                      ? $.delivery.pickupFromTime(
+                          _.valueOrNull!.min!,
+                          _.valueOrNull!.max!,
+                          address,
+                        )
+                      : null,
             ),
           );
       }
     }
 
     final SyncCallback syncCallback = useSyncCallback();
+    final String? prevEta = usePrevious<String?>(eta);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: TextButton(
@@ -332,7 +354,8 @@ class DeliveryPickerField extends HookConsumerWidget {
           () async => rootNavigator.pushNamed(
             Routes.delivery.name,
             arguments: DeliveryScreen(
-              deliveryType: await ref.read(deliveryTypeProvider.future),
+              deliveryType: deliveryType.valueOrNull ??
+                  await ref.read(deliveryTypeProvider.future),
             ),
           ),
         ),
@@ -351,7 +374,7 @@ class DeliveryPickerField extends HookConsumerWidget {
               const SizedBox(width: 12),
               Flexible(
                 child: Text(
-                  eta ?? $.home.addressHint,
+                  eta ?? prevEta ?? $.home.addressHint,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -448,11 +471,13 @@ class SearchField extends HookConsumerWidget {
                     };
                     if (inputText.isNotEmpty) {
                       final Isar isar = await ref.read(isarProvider.future);
+                      final DateTime serverTime =
+                          await ref.read(serverTimeProvider.notifier).future;
                       await isar.writeTxn(
                         () => isar.searchEntrys.put(
                           SearchEntry()
                             ..value = inputText
-                            ..timestamp = ref.read(serverTimeProvider),
+                            ..timestamp = serverTime,
                         ),
                       );
                     }

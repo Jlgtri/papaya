@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
-import 'package:flash/flash.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
+import 'package:styled_text/styled_text.dart';
 
 import '../../generated/assets.g.dart';
 import '../../generated/i18n.g.dart';
@@ -17,7 +17,7 @@ import '../../generated/models.g.dart';
 import '../../hooks/sync_callback_hook.dart';
 import '../../models/cart_store.dart';
 import '../../providers/misc.dart';
-import '../navigation.dart';
+import '../../routes.dart';
 
 /// The screen used to show off a [product].
 @immutable
@@ -94,7 +94,7 @@ class ProductScreen extends HookConsumerWidget {
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: theme.colorScheme.surface,
                           ),
-                          icon: Icon(icons.close, size: 13),
+                          icon: Icon(icons.crossBold, size: 13),
                           color: theme.colorScheme.primary,
                           onPressed: () async =>
                               syncCallback(navigator.maybePop),
@@ -183,7 +183,9 @@ class ProductScreen extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       product.description!,
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.shadow,
+                      ),
                     ),
                   ),
                 ),
@@ -196,6 +198,9 @@ class ProductScreen extends HookConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.shadow,
+                    ),
                     onPressed: () {},
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -248,49 +253,11 @@ class ProductScreen extends HookConsumerWidget {
                         (cartStore = await isar
                                 .txn(() => isar.cartStores.get(store.id!))) ==
                             null) {
-                      if (!isMounted()) {
-                        return;
-                      }
-                      final StateController<bool> canPopNotifier = ref
-                          .read(NavigationScreen.canPopProvider.notifier)
-                        ..state = false;
-                      // ignore: use_build_context_synchronously
-                      return context
-                          .showFlashDialog(
-                            dismissCompleter: ref.read(
-                              NavigationScreen.willPopCompleterProvider,
-                            ),
-                            title: Text($.alert.storeAdded.title),
-                            content: Text($.alert.storeAdded.body),
-                            negativeActionBuilder: (
-                              final _,
-                              final FlashController<void> controller,
-                              final __,
-                            ) =>
-                                TextButton(
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.all(12),
-                              ),
-                              onPressed: () async {
-                                await isar.writeTxn(isar.cartStores.clear);
-                                await controller.dismiss();
-                              },
-                              child: Text($.alert.storeAdded.approve),
-                            ),
-                            positiveActionBuilder: (
-                              final _,
-                              final FlashController<void> controller,
-                              final __,
-                            ) =>
-                                TextButton(
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.all(12),
-                              ),
-                              onPressed: controller.dismiss,
-                              child: Text($.alert.storeAdded.deny),
-                            ),
-                          )
-                          .then((final _) => canPopNotifier.state = true);
+                      await navigator.pushNamed(
+                        Routes.productInvalid.name,
+                        arguments: ProductInvalidScreen(store, product),
+                      );
+                      return;
                     }
 
                     final CartStoreProduct? $product = cartStore!.products
@@ -387,10 +354,7 @@ class ProductCounterWithPrice extends HookConsumerWidget {
             r'$' +
                 ((product.price ?? 0) * (amount.value ?? 1) / 100)
                     .toStringAsFixed(2),
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontSize: 24,
-              height: 32 / 24,
-            ),
+            style: theme.textTheme.headlineSmall,
             textAlign: TextAlign.end,
           ),
         ),
@@ -428,14 +392,14 @@ class ProductCounter extends HookConsumerWidget {
     final int? initial,
     super.key,
   })  : min = min ?? 1,
-        max = max ?? 9,
+        max = max ?? 99,
         initial = initial ?? 1,
         assert(
-          (min ?? 1) < (max ?? 9),
+          (min ?? 1) < (max ?? 99),
           'Minimum value should be less than maximum value.',
         ),
         assert(
-          (initial ?? 1) >= (min ?? 1) && (initial ?? 1) <= (max ?? 9),
+          (initial ?? 1) >= (min ?? 1) && (initial ?? 1) <= (max ?? 99),
           'Initial value should be in bounds with minimum and maximum values.',
         );
 
@@ -466,12 +430,8 @@ class ProductCounter extends HookConsumerWidget {
               disabledForegroundColor: theme.colorScheme.shadow,
               foregroundColor: theme.colorScheme.shadow,
               shape: RoundedRectangleBorder(
-                side: BorderSide(
-                  color: theme.colorScheme.shadow,
-                ),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(8),
-                ),
+                side: BorderSide(color: theme.colorScheme.shadow),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
               ),
             ),
             icon: Icon(icons.minus, size: 12),
@@ -486,13 +446,13 @@ class ProductCounter extends HookConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: SizedBox(
-              width: 9,
+              width: 34,
               child: Text(
                 amount.value.toString(),
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: 24,
-                  height: 32 / 24,
-                ),
+                style: theme.textTheme.headlineSmall,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
               ),
             ),
           ),
@@ -537,6 +497,191 @@ class ProductCounter extends HookConsumerWidget {
               'onPressed',
               onPressed,
             ),
+          ),
+      );
+}
+
+/// The screen used to notify about invalid product added to a cart on
+/// [ProductScreen].
+@immutable
+class ProductInvalidScreen extends HookConsumerWidget {
+  /// The screen used to notify about invalid product added to a cart on
+  /// [ProductScreen].
+  const ProductInvalidScreen(this.store, this.product, {super.key});
+
+  /// The store owner of the [product] to show off on this screen.
+  final StoreModel store;
+
+  /// The product to show off on this screen.
+  final StoreMenuProductsModel product;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final NavigatorState navigator = Navigator.of(context);
+    final I18N $ = I18NLocalizations.of(context);
+    final SyncCallback syncCallback = useSyncCallback();
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+      ),
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: ColoredBox(
+                color: theme.colorScheme.surface,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      /// Title / Clear
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              $.alert.storeAdded.title,
+                              style: theme.textTheme.displaySmall,
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                          IconButton(
+                            style: IconButton.styleFrom(
+                              fixedSize: const Size.square(30),
+                              foregroundColor: theme.colorScheme.outline,
+                              padding: const EdgeInsets.all(6),
+                              shape: const CircleBorder(),
+                            ),
+                            icon: Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Icon(icons.cross, size: 16),
+                            ),
+                            onPressed: () async =>
+                                syncCallback(navigator.maybePop),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                      ),
+
+                      /// Body
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: StyledText(
+                          text: $.alert.storeAdded.body(store.name ?? ''),
+                          style: theme.textTheme.bodyMedium,
+                          maxLines: 5,
+                          textAlign: TextAlign.start,
+                          tags: <String, StyledTextTagBase>{
+                            'bold': StyledTextTag(
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          },
+                        ),
+                      ),
+
+                      /// Actions
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: <Widget>[
+                            /// Approve
+
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.surface,
+                                  minimumSize: const Size.fromHeight(0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                    side: BorderSide(
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                  ),
+                                  textStyle: theme.textTheme.titleSmall,
+                                ),
+                                onPressed: () async => syncCallback(() async {
+                                  final Isar isar =
+                                      await ref.read(isarProvider.future);
+                                  await isar.writeTxn(isar.cartStores.clear);
+                                  await navigator.maybePop();
+                                }),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  child: Text($.alert.storeAdded.approve),
+                                ),
+                              ),
+                            ),
+
+                            /// Deny
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.shadow,
+                                  backgroundColor: theme.colorScheme.surface,
+                                  minimumSize: const Size.fromHeight(0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(8),
+                                    ),
+                                    side: BorderSide(
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                  ),
+                                  textStyle: theme.textTheme.titleSmall,
+                                ),
+                                onPressed: () async =>
+                                    syncCallback(navigator.maybePop),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  child: Text(
+                                    $.alert.storeAdded.deny(store.name ?? ''),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties
+          ..add(DiagnosticsProperty<StoreModel>('store', store))
+          ..add(
+            DiagnosticsProperty<StoreMenuProductsModel>('product', product),
           ),
       );
 }

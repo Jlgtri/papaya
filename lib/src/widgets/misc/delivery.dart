@@ -191,41 +191,53 @@ class DeliveryScreen extends HookConsumerWidget {
                 .copyWith(bottom: 8 + mediaQuery.padding.bottom),
             child: ElevatedButton(
               onPressed: () async => syncCallback(() async {
+                final bool unathorized =
+                    await ref.read(skippedAuthorizationProvider.future);
+                final UserAddressesModel? currentAddress =
+                    await ref.read(currentAddressProvider.future);
                 final UserAddressesModel? selectedAddress =
                     ref.read(AddressRadio.provider);
 
-                /// User is Guest.
+                /// User is Authorized.
                 /// User has selected [DeliveryType.delivery].
                 /// User has [selectedAddress] different from existing default.
-                final bool modifiedDefaultAddress = selectedAddress != null &&
+                if (!unathorized &&
                     deliveryType.value == DeliveryType.delivery &&
-                    await ref.read(skippedAuthorizationProvider.future) &&
-                    (await ref.read(activeAddressProvider.future))
-                            ?.displayLong !=
-                        selectedAddress.displayLong;
+                    selectedAddress?.userAddressId != null &&
+                    currentAddress != selectedAddress) {
+                  await ref.read(
+                    defaultAddressProvider(selectedAddress!.userAddressId!)
+                        .future,
+                  );
+                }
 
-                /// Optimize Isar transaction for multiple queries.
+                /// User is Unauthorized.
+                /// User has selected [DeliveryType.delivery].
+                /// User has [selectedAddress] different from existing default.
+                final Isar isar = await ref.read(isarProvider.future);
+                if (unathorized &&
+                    deliveryType.value == DeliveryType.delivery &&
+                    selectedAddress != null &&
+                    currentAddress != selectedAddress) {
+                  await isar.writeTxn(
+                    () async => isar.address.putAll(<Address>[
+                      for (final Address $address
+                          in await isar.address.where().findAll())
+                        $address
+                          ..defaultAddress =
+                              $address.id == selectedAddress.addressId
+                    ]),
+                  );
+                }
+
+                /// [DeliveryType] is different from [Settings.deliveryType].
                 final Settings settings =
                     await ref.read(settingsProvider.future);
-                if (settings.deliveryType != deliveryType.value ||
-                    modifiedDefaultAddress) {
-                  final Isar isar = await ref.read(isarProvider.future);
-                  await isar.writeTxn(() async {
-                    if (settings.deliveryType != deliveryType.value) {
-                      await isar.settings.put(
-                        settings..deliveryType = deliveryType.value,
-                      );
-                    }
-                    if (modifiedDefaultAddress) {
-                      await isar.address.putAll(<Address>[
-                        for (final Address $address
-                            in await isar.address.where().findAll())
-                          $address
-                            ..defaultAddress =
-                                $address.id == selectedAddress.addressId
-                      ]);
-                    }
-                  });
+                if (settings.deliveryType != deliveryType.value) {
+                  await isar.writeTxn(
+                    () => isar.settings
+                        .put(settings..deliveryType = deliveryType.value),
+                  );
                 }
                 await navigator.maybePop();
               }),
@@ -303,7 +315,7 @@ class DeliveryTypeSwitcher extends HookConsumerWidget {
             }(__.value),
             style: theme.textTheme.titleMedium?.copyWith(
               color: ColorTween(
-                begin: theme.colorScheme.onBackground,
+                begin: theme.colorScheme.shadow,
                 end: theme.colorScheme.surface,
               ).transform(
                 __.value == DeliveryType.delivery
@@ -311,6 +323,8 @@ class DeliveryTypeSwitcher extends HookConsumerWidget {
                     : ___.position,
               ),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.visible,
           ),
         ),
       ),
@@ -340,12 +354,11 @@ class DeliveryDeliveryLoader extends HookConsumerWidget {
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final AsyncValue<Iterable<UserAddressesModel>?> addresses =
-        ref.watch(activeAddressesProvider);
+        ref.watch(currentAddressesProvider);
     final Iterable<UserAddressesModel>? prevAddresses =
         usePrevious<Iterable<UserAddressesModel>?>(addresses.valueOrNull);
-    return prevAddresses != null ||
-            addresses is AsyncData && addresses.valueOrNull != null
-        ? DeliveryDelivery(addresses.valueOrNull ?? prevAddresses!)
+    return addresses.asData?.value != null || prevAddresses != null
+        ? DeliveryDelivery(addresses.asData?.value ?? prevAddresses!)
         : Stack(
             alignment: Alignment.center,
             children: const <Widget>[
@@ -498,36 +511,48 @@ class DeliveryPickupLoader extends HookConsumerWidget {
               maintainState: true,
               child: DeliveryPickup(
                 StoreModel(),
-                StoreEtaPickupModel(),
+                StoreEtaModel(),
               ),
             ),
             CircularProgressIndicator.adaptive(),
           ],
         ),
-        data: (final List<CartStore> cart) =>
-            cart.isEmpty || cart.first.store == null
-                ? const SizedBox.shrink()
-                : (ref.watch(storeEtaPickupProvider(cart.first.id))).when(
-                    loading: () => Stack(
-                      alignment: Alignment.center,
-                      children: const <Widget>[
-                        Visibility(
-                          visible: false,
-                          maintainSize: true,
-                          maintainAnimation: true,
-                          maintainState: true,
-                          child: DeliveryPickup(
-                            StoreModel(),
-                            StoreEtaPickupModel(),
-                          ),
-                        ),
-                        CircularProgressIndicator.adaptive(),
-                      ],
-                    ),
-                    data: (final StoreEtaPickupModel? eta) =>
-                        DeliveryPickup(cart.first.store!, eta),
-                    error: (final _, final __) => const SizedBox.shrink(),
+        data: (final List<CartStore> cart) {
+          if (cart.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          final AsyncValue<StoreModel?> store =
+              ref.watch(storeProvider(cart.first.id));
+          final AsyncValue<StoreEtaModel?> pickupEta =
+              ref.watch(storeEtaPickupProvider(cart.first.id));
+
+          if (store.isLoading || pickupEta.isLoading) {
+            return Stack(
+              alignment: Alignment.center,
+              children: const <Widget>[
+                Visibility(
+                  visible: false,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: DeliveryPickup(
+                    StoreModel(),
+                    StoreEtaModel(),
                   ),
+                ),
+                CircularProgressIndicator.adaptive(),
+              ],
+            );
+          } else if (pickupEta.asData != null &&
+              store.asData != null &&
+              (store.value != null || cart.first.store != null)) {
+            return DeliveryPickup(
+              store.value ?? cart.first.store!,
+              pickupEta.value,
+            );
+          }
+          return const SizedBox.shrink();
+        },
         error: (final _, final __) => const SizedBox.shrink(),
       );
 }
@@ -542,7 +567,7 @@ class DeliveryPickup extends HookConsumerWidget {
   final StoreModel store;
 
   /// The approximate time to pickup in this store.
-  final StoreEtaPickupModel? eta;
+  final StoreEtaModel? eta;
 
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
@@ -628,7 +653,7 @@ class DeliveryPickup extends HookConsumerWidget {
       super.debugFillProperties(
         properties
           ..add(DiagnosticsProperty<StoreModel>('store', store))
-          ..add(DiagnosticsProperty<StoreEtaPickupModel>('eta', eta)),
+          ..add(DiagnosticsProperty<StoreEtaModel>('eta', eta)),
       );
 }
 
@@ -650,15 +675,12 @@ class AddressRadio extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final bool? isSelected = ref.watch(
           provider.select(
-            (final _) =>
-                _ == null ? null : _.displayLong == address.displayLong,
+            (final _) => _ == null ? null : _ == address,
           ),
         ) ??
         ref.watch(
-          activeAddressProvider.select(
-            (final _) => _.valueOrNull == null
-                ? null
-                : _.value!.displayLong == address.displayLong,
+          currentAddressProvider.select(
+            (final _) => _.valueOrNull == null ? null : _.value! == address,
           ),
         );
     final bool? prevIsSelected = usePrevious<bool?>(isSelected);
@@ -710,6 +732,7 @@ class AddressRadio extends HookConsumerWidget {
                     address.displayLong ?? '',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
+                      color: theme.colorScheme.shadow,
                     ),
                   ),
                 ),

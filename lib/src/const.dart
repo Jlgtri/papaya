@@ -1,11 +1,11 @@
 /// The client id in the Auth0 service.
-const String authClientId = 'a6ANZLJCJeIGOeG9Uu1km0SXaNphuhJ3';
+const String authClientId = 'uLX3xFLuRKowRUIXnidcNJGx414rzC6o';
 
 /// The authorization domain in the Auth0 service.
-const String authDomain = 'https://dev-fvuy4407.us.auth0.com';
+const String authDomain = 'https://papaya-staging.us.auth0.com';
 
 /// The authorization redirect url in the Auth0 service.
-const String authRedirectUrl = 'com.fluttercrew.papaya://login-calback';
+const String authRedirectUrl = 'com.fluttercrew.papaya://login-callback';
 
 /// The url used to access map tiles.
 const String mapTileUrl =

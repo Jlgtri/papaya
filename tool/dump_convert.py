@@ -1,5 +1,5 @@
 from json import dump, load
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Iterable, Mapping
 
 
 def main(path: str, export_path: str, /, root_name: str) -> None:
@@ -18,9 +18,9 @@ def main(path: str, export_path: str, /, root_name: str) -> None:
 
 
 def process_properties(
-    export: Dict[str, Any],
+    export: Mapping[str, Any],
     path: str,
-    properties: Dict[str, Any],
+    properties: Mapping[str, Any],
 ) -> None:
     if path not in export:
         export[path] = {}
@@ -33,7 +33,8 @@ def process_properties(
         elif not isinstance(value, str) and isinstance(value, Iterable):
             is_iter = True
             for item in value or ({},):
-                process_properties(export, _path, item)
+                if isinstance(item, Mapping):
+                    process_properties(export, _path, item)
 
         if key not in export[path]:
             export[path][key] = dict(
@@ -59,4 +60,6 @@ def process_properties(
 
 
 if __name__ == '__main__':
-    main('tool/storyblock.json', 'tool/export.json', 'CarouselModel')
+    main(
+        'tool/user_cards.json', 'tool/export_user_cards.json', 'OrderCalculate'
+    )

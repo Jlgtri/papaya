@@ -19,6 +19,7 @@ import '../../generated/models.g.dart';
 import '../../hooks/sync_callback_hook.dart';
 import '../../providers/api.dart';
 import '../../providers/location.dart';
+import '../store.dart';
 
 /// The screen used to show off a [store] information.
 @immutable
@@ -122,7 +123,7 @@ class StoreInformationScreen extends HookConsumerWidget {
                             backgroundColor: theme.colorScheme.primary,
                             foregroundColor: theme.colorScheme.surface,
                           ),
-                          icon: Icon(icons.close, size: 13),
+                          icon: Icon(icons.crossBold, size: 13),
                           color: theme.colorScheme.primary,
                           onPressed: () async =>
                               syncCallback(navigator.maybePop),
@@ -171,18 +172,21 @@ class StoreInformationScreen extends HookConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       store.description!,
-                      style: theme.textTheme.bodyLarge,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.shadow,
+                      ),
                     ),
                   ),
                 ),
               ],
               const SizedBox(height: 16),
-              Divider(height: 0, color: theme.colorScheme.outline),
+              Divider(height: 1, color: theme.colorScheme.outline),
 
               /// Address
               if (store.address?.displayLong != null)
                 TextButton(
                   style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.shadow,
                     shape: const RoundedRectangleBorder(),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -218,7 +222,7 @@ class StoreInformationScreen extends HookConsumerWidget {
                 ),
 
               /// Working Time
-              Divider(height: 0, color: theme.colorScheme.outline),
+              Divider(height: 1, color: theme.colorScheme.outline),
               Flexible(
                 child: Consumer(
                   builder: (
@@ -232,6 +236,7 @@ class StoreInformationScreen extends HookConsumerWidget {
                             ? const SizedBox.shrink()
                             : TextButton(
                                 style: TextButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.shadow,
                                   shape: const RoundedRectangleBorder(),
                                 ),
                                 onPressed: () => viewWorkingHours.value =
@@ -388,9 +393,9 @@ class StoreInformationOperationDays extends HookConsumerWidget {
                 ? $.store.info.openUntil(
                     closeTime ?? '00:00',
                   )
-                : $.store.info.openAt(
-                    getWeekDayName(nextOpenDay?.day ?? now.weekday) +
-                        (openTime ?? '00:00'),
+                : $.store.info.openAtDay(
+                    getWeekDayName(nextOpenDay?.day ?? now.weekday),
+                    openTime ?? '00:00',
                   );
       },
       <Object?>[$.store.info, operationDays],
@@ -499,5 +504,131 @@ class StoreInformationOperationDays extends HookConsumerWidget {
             ),
           )
           ..add(DiagnosticsProperty<bool>('extended', extended)),
+      );
+}
+
+/// The screen used to notify about invalid store on [StoreScreen].
+@immutable
+class StoreInformationInvalidScreen extends HookConsumerWidget {
+  /// The screen used to notify about invalid store on [StoreScreen].
+  const StoreInformationInvalidScreen(this.store, {super.key});
+
+  /// The store to show this screen for.
+  final StoreModel store;
+
+  @override
+  Widget build(final BuildContext context, final WidgetRef ref) {
+    final ThemeData theme = Theme.of(context);
+    final NavigatorState navigator = Navigator.of(context);
+    final I18N $ = I18NLocalizations.of(context);
+    final SyncCallback syncCallback = useSyncCallback();
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.transparent,
+      ),
+      child: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: ColoredBox(
+                color: theme.colorScheme.surface,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      /// Title / Clear
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Text(
+                              $.alert.storeInformationInvalid.title,
+                              style: theme.textTheme.displaySmall,
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                          IconButton(
+                            style: IconButton.styleFrom(
+                              fixedSize: const Size.square(30),
+                              foregroundColor: theme.colorScheme.outline,
+                              padding: const EdgeInsets.all(6),
+                              shape: const CircleBorder(),
+                            ),
+                            icon: Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Icon(icons.cross, size: 16),
+                            ),
+                            onPressed: () async =>
+                                syncCallback(navigator.maybePop),
+                          ),
+                          const SizedBox(width: 10),
+                        ],
+                      ),
+
+                      /// Body
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          $.alert.storeInformationInvalid.body,
+                          style: theme.textTheme.bodyMedium,
+                          maxLines: 5,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+
+                      /// Approve
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: theme.colorScheme.surface,
+                            minimumSize: const Size.fromHeight(0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
+                              side: BorderSide(
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                            textStyle: theme.textTheme.titleSmall,
+                          ),
+                          onPressed: () async =>
+                              syncCallback(navigator.maybePop),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child:
+                                Text($.alert.storeInformationInvalid.approve),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
+      super.debugFillProperties(
+        properties..add(DiagnosticsProperty<StoreModel>('store', store)),
       );
 }

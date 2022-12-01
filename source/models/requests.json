@@ -1,0 +1,704 @@
+{
+  "UserAddressRequestModel": {
+    "street_number": {
+      "type": "string",
+      "doc": null,
+      "nullable": true
+    },
+    "route": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "route"
+    },
+    "internal": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "internal"
+    },
+    "postal_code": {
+      "type": "string",
+      "doc": null,
+      "nullable": true
+    },
+    "memo": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "memo"
+    },
+    "region": {
+      "type": "string",
+      "doc": "region name",
+      "nullable": true,
+      "name": "region"
+    },
+    "neighborhood": {
+      "type": "string",
+      "doc": "Neighborhood name",
+      "nullable": true,
+      "name": "neighborhood"
+    },
+    "city": {
+      "type": "string",
+      "doc": "city name",
+      "nullable": true,
+      "name": "city"
+    },
+    "country": {
+      "type": "UserAddressRequestCountryModel",
+      "doc": null,
+      "nullable": true,
+      "name": "country"
+    },
+    "state": {
+      "type": "UserAddressRequestStateModel",
+      "doc": null,
+      "nullable": true,
+      "name": "state"
+    },
+    "county": {
+      "type": "string",
+      "doc": "county name",
+      "nullable": true,
+      "name": "county"
+    },
+    "lng": {
+      "type": "float",
+      "doc": "Address longitude",
+      "nullable": true,
+      "name": "lng"
+    },
+    "lat": {
+      "type": "float",
+      "doc": "Address latitude",
+      "nullable": true,
+      "name": "lat"
+    }
+  },
+  "UserAddressRequestCountryModel": {
+    "short_name": {
+      "type": "string",
+      "doc": "Short country name",
+      "nullable": true
+    },
+    "long_name": {
+      "type": "string",
+      "doc": "Long country name",
+      "nullable": true
+    }
+  },
+  "UserAddressRequestStateModel": {
+    "short_name": {
+      "type": "string",
+      "doc": "Short state name",
+      "nullable": true
+    },
+    "long_name": {
+      "type": "string",
+      "doc": "Long state name",
+      "nullable": true
+    }
+  },
+  "UserRequestModel": {
+    "user": {
+      "type": "UserRequestUserModel",
+      "doc": null,
+      "nullable": true,
+      "name": "user"
+    }
+  },
+  "UserRequestUserModel": {
+    "user_id": {
+      "type": "integer",
+      "doc": "ID of the user",
+      "nullable": true
+    },
+    "created_at": {
+      "type": "string",
+      "doc": "User record createdAt date string",
+      "nullable": true
+    },
+    "email": {
+      "type": "string",
+      "doc": "User email",
+      "nullable": true,
+      "name": "email"
+    },
+    "given_name": {
+      "type": "string",
+      "doc": "User's first name",
+      "nullable": true
+    },
+    "family_name": {
+      "type": "string",
+      "doc": "User's last name",
+      "nullable": true
+    }
+  },
+  "WaitlistUserRequestModel": {
+    "firstName": {
+      "type": "string",
+      "doc": "First name of the user (optional)",
+      "nullable": true,
+      "name": "firstName"
+    },
+    "lastName": {
+      "type": "string",
+      "doc": "Last name of the user (optional)",
+      "nullable": true,
+      "name": "lastName"
+    },
+    "email": {
+      "type": "string",
+      "doc": "User email (required)",
+      "nullable": true,
+      "name": "email"
+    },
+    "postalCode": {
+      "type": "string",
+      "doc": "User's postal code (required)",
+      "nullable": true,
+      "name": "postalCode"
+    },
+    "source": {
+      "type": "string",
+      "doc": "Where the user signed up from (required)",
+      "nullable": true,
+      "name": "source"
+    },
+    "campaign": {
+      "type": "string",
+      "doc": "Ad campaign the user arrived from (optional)",
+      "nullable": true,
+      "name": "campaign"
+    }
+  },
+  "WaitlistRestaurantRequestModel": {
+    "firstName": {
+      "type": "string",
+      "doc": "First name of the contact (optional)",
+      "nullable": true,
+      "name": "firstName"
+    },
+    "lastName": {
+      "type": "string",
+      "doc": "Last name of the contact (optional)",
+      "nullable": true,
+      "name": "lastName"
+    },
+    "email": {
+      "type": "string",
+      "doc": "Contact email (required)",
+      "nullable": true,
+      "name": "email"
+    },
+    "phone": {
+      "type": "string",
+      "doc": "Contact's phone number (required)",
+      "nullable": true,
+      "name": "phone"
+    },
+    "restaurantName": {
+      "type": "string",
+      "doc": "Name of the restaurant (required)",
+      "nullable": true,
+      "name": "restaurantName"
+    },
+    "source": {
+      "type": "string",
+      "doc": "Where the contact signed up from (required)",
+      "nullable": true,
+      "name": "source"
+    },
+    "campaign": {
+      "type": "string",
+      "doc": "Ad campaign the contact arrived from (optional)",
+      "nullable": true,
+      "name": "campaign"
+    }
+  },
+  "OrderRequestModel": {
+    "paymentIntentId": {
+      "type": "string",
+      "doc": "Stripe Payment Intent ID - should have previously been created.",
+      "nullable": true,
+      "name": "paymentIntentId"
+    },
+    "store": {
+      "type": "OrderRequestStoreModel",
+      "doc": "Store metadata",
+      "nullable": true,
+      "name": "store"
+    },
+    "cartItems": {
+      "type": "OrderRequestCartItemsModel[]",
+      "doc": "Cart items - array of objects, with item ID and quantity",
+      "nullable": true,
+      "name": "cartItems"
+    },
+    "handoffTypeId": {
+      "type": "integer",
+      "doc": "Handoff type ID - 1 for delivery, 2 for pickup",
+      "nullable": true,
+      "name": "handoffTypeId"
+    },
+    "discountCode": {
+      "type": "string",
+      "doc": "Discount code",
+      "nullable": true,
+      "name": "discountCode"
+    },
+    "deliveryTip": {
+      "type": "integer",
+      "doc": "Delivery tip - in cents",
+      "nullable": true,
+      "name": "deliveryTip"
+    },
+    "memo": {
+      "type": "string",
+      "doc": "Note for the chef",
+      "nullable": true,
+      "name": "memo"
+    },
+    "saveCard": {
+      "type": "boolean",
+      "doc": "Save card in the customer's Stripe profile for future use. Relevant only if adding a new payment method.",
+      "nullable": true,
+      "name": "saveCard"
+    },
+    "paymentMethodId": {
+      "type": "string",
+      "doc": "ID of the Stripe payment method to use for the order.",
+      "nullable": true,
+      "name": "paymentMethodId"
+    },
+    "address": {
+      "type": "UserAddressesModel",
+      "doc": "Address for the delivery of the order",
+      "nullable": true,
+      "name": "address"
+    }
+  },
+  "OrderRequestStoreModel": {
+    "id": {
+      "type": "integer",
+      "doc": "Store ID",
+      "nullable": true,
+      "name": "id"
+    }
+  },
+  "OrderRequestCartItemsModel": {
+    "productId": {
+      "type": "integer",
+      "nullable": true,
+      "name": "productId"
+    },
+    "quantity": {
+      "type": "integer",
+      "nullable": true,
+      "name": "quantity"
+    }
+  },
+  "OrderCalculateRequestModel": {
+    "cartItems": {
+      "type": "OrderCalculateRequestCartItemsModel[]",
+      "doc": "Cart items - array of objects, with item ID and quantity",
+      "nullable": true,
+      "name": "cartItems"
+    },
+    "handoffTypeId": {
+      "type": "integer",
+      "doc": "Handoff type ID - 1 for delivery, 2 for pickup",
+      "nullable": true,
+      "name": "handoffTypeId"
+    },
+    "discountCode": {
+      "type": "string",
+      "doc": "Discount code",
+      "nullable": true,
+      "name": "discountCode"
+    },
+    "deliveryTip": {
+      "type": "integer",
+      "doc": "Delivery tip - in cents",
+      "nullable": true,
+      "name": "deliveryTip"
+    }
+  },
+  "OrderCalculateRequestCartItemsModel": {
+    "productId": {
+      "type": "integer",
+      "nullable": true,
+      "name": "productId"
+    },
+    "quantity": {
+      "type": "integer",
+      "nullable": true,
+      "name": "quantity"
+    }
+  },
+  "PaymentIntentRequestModel": {
+    "store": {
+      "type": "PaymentIntentRequestStoreModel",
+      "doc": "Store metadata",
+      "nullable": true,
+      "name": "store"
+    },
+    "cartItems": {
+      "type": "PaymentIntentRequestCartItemsModel[]",
+      "doc": "Cart items - array of objects, with item ID and quantity",
+      "nullable": true,
+      "name": "cartItems"
+    },
+    "handoffTypeId": {
+      "type": "integer",
+      "doc": "Handoff type ID - 1 for delivery, 2 for pickup",
+      "nullable": true,
+      "name": "handoffTypeId"
+    },
+    "discountCode": {
+      "type": "string",
+      "doc": "Discount code",
+      "nullable": true,
+      "name": "discountCode"
+    },
+    "deliveryTip": {
+      "type": "integer",
+      "doc": "Delivery tip - in cents",
+      "nullable": true,
+      "name": "deliveryTip"
+    }
+  },
+  "PaymentIntentRequestStoreModel": {
+    "id": {
+      "type": "integer",
+      "doc": "Store ID",
+      "nullable": true,
+      "name": "id"
+    },
+    "name": {
+      "type": "string",
+      "doc": "Store name",
+      "nullable": true,
+      "name": "name"
+    }
+  },
+  "PaymentIntentRequestCartItemsModel": {
+    "productId": {
+      "type": "integer",
+      "nullable": true,
+      "name": "productId"
+    },
+    "quantity": {
+      "type": "integer",
+      "nullable": true,
+      "name": "quantity"
+    }
+  },
+  "PaymentIntentPriceRequestModel": {
+    "store": {
+      "type": "PaymentIntentPriceRequestStoreModel",
+      "doc": "Store metadata",
+      "nullable": true,
+      "name": "store"
+    },
+    "cartItems": {
+      "type": "PaymentIntentPriceRequestCartItemsModel[]",
+      "doc": "Cart items - array of objects, with item ID and quantity",
+      "nullable": true,
+      "name": "cartItems"
+    },
+    "handoffTypeId": {
+      "type": "integer",
+      "doc": "Handoff type ID - 1 for delivery, 2 for pickup",
+      "nullable": true,
+      "name": "handoffTypeId"
+    },
+    "discountCode": {
+      "type": "string",
+      "doc": "Discount code",
+      "nullable": true,
+      "name": "discountCode"
+    },
+    "deliveryTip": {
+      "type": "integer",
+      "doc": "Delivery tip - in cents",
+      "nullable": true,
+      "name": "deliveryTip"
+    }
+  },
+  "PaymentIntentPriceRequestStoreModel": {
+    "id": {
+      "type": "integer",
+      "doc": "Store ID",
+      "nullable": true,
+      "name": "id"
+    }
+  },
+  "PaymentIntentPriceRequestCartItemsModel": {
+    "productId": {
+      "type": "integer",
+      "nullable": true,
+      "name": "productId"
+    },
+    "quantity": {
+      "type": "integer",
+      "nullable": true,
+      "name": "quantity"
+    }
+  },
+  "DeliveryValidateRequestModel": {
+    "storeId": {
+      "type": "string",
+      "doc": "ID of the store",
+      "nullable": true,
+      "name": "storeId"
+    },
+    "dropoffAddress": {
+      "type": "DeliveryValidateRequestDropoffAddressModel",
+      "doc": null,
+      "nullable": true,
+      "name": "dropoffAddress"
+    },
+    "dropoffLng": {
+      "type": "string",
+      "doc": "Destination longitude",
+      "nullable": true,
+      "name": "dropoffLng"
+    },
+    "dropoffLat": {
+      "type": "string",
+      "doc": "Destination latitude",
+      "nullable": true,
+      "name": "dropoffLat"
+    },
+    "price": {
+      "type": "integer",
+      "doc": "Price of the order in dollars",
+      "nullable": true,
+      "name": "price"
+    }
+  },
+  "DeliveryValidateRequestDropoffAddressModel": {
+    "city": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "city"
+    },
+    "state": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "state"
+    },
+    "street": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "street"
+    },
+    "zip": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "zip"
+    },
+    "fullAddress": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "fullAddress"
+    }
+  },
+  "DeliveryValidateStoreRequestModel": {
+    "storeId": {
+      "type": "string",
+      "doc": "ID of the store",
+      "nullable": true,
+      "name": "storeId"
+    },
+    "lng": {
+      "type": "float",
+      "doc": "User address longitude",
+      "nullable": true,
+      "name": "lng"
+    },
+    "lat": {
+      "type": "float",
+      "doc": "User address latitude",
+      "nullable": true,
+      "name": "lat"
+    }
+  },
+  "DeliveryRequestModel": {
+    "storeId": {
+      "type": "string",
+      "doc": "ID of the store",
+      "nullable": true,
+      "name": "storeId"
+    },
+    "orderId": {
+      "type": "string",
+      "doc": "ID of the order",
+      "nullable": true,
+      "name": "orderId"
+    },
+    "deliveryProvider": {
+      "type": "string",
+      "doc": "Delivery provider name returned from delivery/validate route",
+      "nullable": true,
+      "name": "deliveryProvider"
+    },
+    "deliveryProviderId": {
+      "type": "string",
+      "doc": "ID of the delivery provider",
+      "nullable": true,
+      "name": "deliveryProviderId"
+    },
+    "price": {
+      "type": "integer",
+      "doc": "Price of the order in dollars",
+      "nullable": true,
+      "name": "price"
+    },
+    "tip": {
+      "type": "integer",
+      "doc": null,
+      "nullable": true,
+      "name": "tip"
+    },
+    "consumer": {
+      "type": "DeliveryRequestConsumerModel",
+      "doc": null,
+      "nullable": true,
+      "name": "consumer"
+    }
+  },
+  "DeliveryRequestConsumerModel": {
+    "name": {
+      "type": "string",
+      "doc": "Name of the client",
+      "nullable": true,
+      "name": "name"
+    },
+    "lastName": {
+      "type": "string",
+      "doc": "Last name of the client",
+      "nullable": true,
+      "name": "lastName"
+    },
+    "email": {
+      "type": "string",
+      "doc": "Email of the client",
+      "nullable": true,
+      "name": "email"
+    },
+    "phoneNumber": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "phoneNumber"
+    },
+    "address": {
+      "type": "DeliveryRequestConsumerAddressModel",
+      "doc": null,
+      "nullable": true,
+      "name": "address"
+    }
+  },
+  "DeliveryRequestConsumerAddressModel": {
+    "city": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "city"
+    },
+    "state": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "state"
+    },
+    "street": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "street"
+    },
+    "zip": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "zip"
+    },
+    "fullAddress": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "fullAddress"
+    }
+  },
+  "DeliveryTipRequestModel": {
+    "deliveryId": {
+      "type": "string",
+      "doc": "ID of the delivery",
+      "nullable": true,
+      "name": "deliveryId"
+    },
+    "tip": {
+      "type": "integer",
+      "doc": null,
+      "nullable": true,
+      "name": "tip"
+    }
+  },
+  "DeliveryAddressRequestModel": {
+    "deliveryId": {
+      "type": "string",
+      "doc": "ID of the delivery",
+      "nullable": true,
+      "name": "deliveryId"
+    },
+    "address": {
+      "type": "DeliveryAddressRequestAddressModel",
+      "doc": null,
+      "nullable": true,
+      "name": "address"
+    }
+  },
+  "DeliveryAddressRequestAddressModel": {
+    "city": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "city"
+    },
+    "state": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "state"
+    },
+    "street": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "street"
+    },
+    "zip": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "zip"
+    },
+    "fullAddress": {
+      "type": "string",
+      "doc": null,
+      "nullable": true,
+      "name": "fullAddress"
+    }
+  }
+}

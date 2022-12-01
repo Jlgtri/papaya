@@ -99,12 +99,9 @@ class OnboardingScreen extends HookConsumerWidget {
     });
     Future<void> getStarted() async => syncCallback(() async {
           final Isar isar = await ref.read(isarProvider.future);
-          await isar.writeTxn(
-            () async => isar.settings.put(
-              await ref.read(settingsProvider.future)
-                ..onboarding = false,
-            ),
-          );
+          final Settings settings = await ref.read(settingsProvider.future)
+            ..onboarding = false;
+          await isar.writeTxn(() => isar.settings.put(settings));
           await Future<void>.delayed(const Duration(milliseconds: 100));
           await navigator
               .pushReplacementNamed((await Routes.current(container)).name);
