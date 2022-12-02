@@ -30,7 +30,7 @@ class AuthorizationScreen extends HookConsumerWidget {
 
     final SyncCallback syncCallback = useSyncCallback();
     Future<void> authorize() async => syncCallback(() async {
-          if (await ref.read(authTokenProvider.future) != null) {
+          if (await ref.read(tokenProvider.notifier).authorize() != null) {
             await navigator
                 .pushReplacementNamed((await Routes.current(container)).name);
           }

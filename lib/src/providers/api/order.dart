@@ -47,6 +47,14 @@ final AutoDisposeFutureProviderFamily<Object?, OrderRequestModel>
           },
         ),
       );
+      final Response<Object?> response2 = await dio.get<Object?>(
+        '/public/order/payment/${request.paymentIntentId}',
+        options: Options(
+          headers: <String, Object?>{
+            HttpHeaders.authorizationHeader: 'Bearer ${token.idToken}',
+          },
+        ),
+      );
       if (response.data is Map<String, Object?>) {
         ref.keepAlive();
         return response.data! as Map<String, Object?>;

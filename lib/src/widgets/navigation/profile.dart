@@ -70,7 +70,8 @@ class ProfileScreen extends HookConsumerWidget {
                     side: const BorderSide(color: Color(0xff484850)),
                   ),
                   onPressed: () async => syncCallback(() async {
-                    if (await ref.read(authTokenProvider.future) != null) {
+                    if (await ref.read(tokenProvider.notifier).authorize() !=
+                        null) {
                       final Isar isar = await ref.read(isarProvider.future);
                       final Settings settings =
                           await ref.read(settingsProvider.future)

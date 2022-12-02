@@ -192,7 +192,7 @@ class PaymentScreen extends HookConsumerWidget {
                 saveCard: true,
                 memo: note.isEmpty ? null : note,
                 paymentIntentId: paymentIntent.paymentIntent!.id,
-                paymentMethodId: paymentIntent.paymentIntent!.id,
+                paymentMethodId: 'pm_card_mastercard',
                 address: address.value,
                 handoffTypeId: initialDeliveryType.index + 1,
                 discountCode: discountCode,
@@ -1017,7 +1017,8 @@ class PaymentCustomerInformation extends HookConsumerWidget {
                             foregroundColor: theme.colorScheme.shadow,
                           ),
                           onPressed: () async => syncCallback(() async {
-                            if (await ref.read(authTokenProvider.future) !=
+                            if (await (ref.read(tokenProvider.notifier))
+                                    .authorize() !=
                                 null) {
                               final Isar isar =
                                   await ref.read(isarProvider.future);
