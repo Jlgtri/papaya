@@ -135,6 +135,7 @@ class StoreContent extends HookConsumerWidget {
     final AsyncValue<Iterable<StoreMenuModel>?> menu =
         ref.watch(storeMenuProvider(store.id!));
 
+    final Map<int, GlobalKey> menuKeys = useMemoized(() => <int, GlobalKey>{});
     final SyncCallback syncCallback = useSyncCallback();
     final List<Widget> storeInformation = <Widget>[
       SliverFillRemaining(
@@ -221,6 +222,20 @@ class StoreContent extends HookConsumerWidget {
                             const EdgeInsets.symmetric(horizontal: 24),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         splashBorderRadius: BorderRadius.circular(8),
+                        onTap: (final int index) async {
+                          final GlobalKey? menuKey =
+                              menuKeys[menu.value?.elementAtOrNull(index)?.id];
+                          final RenderObject? object =
+                              menuKey?.currentContext?.findRenderObject();
+                          if (object != null) {
+                            final ScrollableState scrollable =
+                                Scrollable.of(menuKey!.currentContext!)!;
+                            await scrollable.position.ensureVisible(
+                              object,
+                              duration: const Duration(milliseconds: 333),
+                            );
+                          }
+                        },
                         tabs: <Widget>[
                           for (final StoreMenuModel menu in menu.value!)
                             if (menu.name != null && menu.products != null)
@@ -248,22 +263,105 @@ class StoreContent extends HookConsumerWidget {
             systemNavigationBarColor: theme.colorScheme.surface,
           ),
           child: Material(
-            child: TabBarView(
-              children: <Widget>[
-                for (final StoreMenuModel menu in menu.value!)
-                  if (menu.name != null && menu.products != null)
-                    StoreMenu(
-                      menu,
-                      onPressed: (final StoreMenuProductsModel product) async =>
-                          syncCallback(
-                        () => navigator.pushNamed(
-                          Routes.product.name,
-                          arguments: ProductScreen(store, product),
-                        ),
-                      ),
-                      key: PageStorageKey<int?>(menu.id),
-                    )
-              ],
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (final ScrollNotification notification) {
+                // Retrieve the RenderObject, linked to a specific item
+                final RenderObject? notificationObject =
+                    notification.context?.findRenderObject();
+                // Retrieve the viewport related to the scroll area
+                final RenderNestedScrollViewViewport? viewport =
+                    RenderAbstractViewport.of(notificationObject)
+                        as RenderNestedScrollViewViewport?;
+                final ScrollPosition? offset =
+                    viewport?.offset as ScrollPosition?;
+                if (viewport == null ||
+                    // Fixes assertion error
+                    offset!.pixels < offset.maxScrollExtent - 1) {
+                  return false;
+                }
+                for (int index = 0;
+                    index < (menu.valueOrNull?.length ?? 0);
+                    index++) {
+                  // Retrieve the RenderObject, linked to a specific item
+                  final RenderObject? object =
+                      menuKeys[menu.valueOrNull?.elementAt(index).id]
+                          ?.currentContext
+                          ?.findRenderObject();
+                  if (object != null && object.attached) {
+                    // Check if the item is in the viewport
+                    final double deltaTop =
+                        viewport.getOffsetToReveal(object, 0).offset -
+                            notification.metrics.pixels;
+                    final double deltaBottom =
+                        deltaTop + object.semanticBounds.size.height;
+                    if (deltaTop >= 0 &&
+                            deltaTop < viewport.paintBounds.height ||
+                        deltaBottom > 0 &&
+                            deltaBottom < viewport.paintBounds.height) {
+                      final TabController? tabController =
+                          DefaultTabController.of(notification.context!);
+                      if (tabController != null &&
+                          tabController.index != index) {
+                        tabController.animateTo(
+                          index,
+                          duration: const Duration(milliseconds: 233),
+                        );
+                      }
+                      break;
+                    }
+                  }
+                }
+                return false;
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 48),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      for (final StoreMenuModel $menu in menu.value!)
+                        if ($menu.name != null &&
+                            $menu.products != null) ...<Widget>[
+                          Column(
+                            key: menuKeys.putIfAbsent($menu.id!, GlobalKey.new),
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const SizedBox(height: 40),
+                              Flexible(
+                                child: Text(
+                                  $menu.name!,
+                                  style: theme.textTheme.displayMedium,
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+                              ...$menu.products!.map(
+                                (final StoreMenuProductsModel product) =>
+                                    Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  child: StoreProductCard(
+                                    product,
+                                    onPressed: () async => syncCallback(
+                                      () => navigator.pushNamed(
+                                        Routes.product.name,
+                                        arguments:
+                                            ProductScreen(store, product),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      SizedBox(height: mediaQuery.padding.bottom + 81),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -293,69 +391,6 @@ class StoreContent extends HookConsumerWidget {
 typedef StoreProductCallback = FutureOr<void> Function(
   StoreMenuProductsModel product,
 );
-
-/// The widget to show a [menu].
-@immutable
-class StoreMenu extends HookConsumerWidget {
-  /// The widget to show a [menu].
-  const StoreMenu(this.menu, {required this.onPressed, super.key});
-
-  /// The menu to show in this widget.
-  final StoreMenuModel menu;
-
-  /// The callback on [StoreMenuModel.products].
-  final StoreProductCallback? onPressed;
-
-  @override
-  Widget build(final BuildContext context, final WidgetRef ref) {
-    final ThemeData theme = Theme.of(context);
-    final MediaQueryData mediaQuery = MediaQuery.of(context);
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const SizedBox(height: 40),
-          Flexible(
-            child: Text(
-              menu.name!,
-              style: theme.textTheme.displayMedium,
-            ),
-          ),
-          const SizedBox(height: 28),
-          ...menu.products!.map(
-            (final StoreMenuProductsModel product) => Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 12,
-              ),
-              child: StoreProductCard(
-                product,
-                onPressed:
-                    onPressed != null ? () async => onPressed!(product) : null,
-              ),
-            ),
-          ),
-          SizedBox(height: mediaQuery.padding.bottom + 81),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void debugFillProperties(final DiagnosticPropertiesBuilder properties) =>
-      super.debugFillProperties(
-        properties
-          ..add(DiagnosticsProperty<StoreMenuModel>('menu', menu))
-          ..add(
-            ObjectFlagProperty<StoreProductCallback?>.has(
-              'onPressed',
-              onPressed,
-            ),
-          ),
-      );
-}
 
 /// The widget used to load information about a [store].
 @immutable

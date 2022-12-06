@@ -35,6 +35,8 @@ class TokenNotifier extends AutoDisposeAsyncNotifier<Token?> {
         ).then((final _) => _refreshFuture = null);
         ref.keepAlive();
         return currentToken;
+      } else if (currentToken.refreshToken.isEmpty) {
+        return null;
       }
 
       /// Refresh the token.
@@ -44,9 +46,7 @@ class TokenNotifier extends AutoDisposeAsyncNotifier<Token?> {
           authRedirectUrl,
           issuer: authDomain,
           scopes: <String>['openid', 'profile', 'offline_access'],
-          refreshToken: currentToken.refreshToken.isEmpty
-              ? null
-              : currentToken.refreshToken,
+          refreshToken: currentToken.refreshToken,
         ),
       );
       if (response != null) {
