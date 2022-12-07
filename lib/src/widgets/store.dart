@@ -188,7 +188,61 @@ class StoreContent extends HookConsumerWidget {
 
     final Widget scrollable;
     if (menu.asData?.value?.isEmpty ?? true) {
-      scrollable = CustomScrollView(slivers: storeInformation);
+      scrollable = CustomScrollView(
+        slivers: <Widget>[
+          ...storeInformation,
+          if (!menu.isLoading)
+            SliverToBoxAdapter(
+              child: Material(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    /// Title
+                    const SizedBox(height: 64),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 48),
+                      child: Text(
+                        $.store.empty,
+                        style: theme.textTheme.displayMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    /// Back Button
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 38),
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: theme.colorScheme.primary,
+                        ),
+                        onPressed: navigator.maybePop,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Icon(icons.misc.arrowLeft, size: 14),
+                              ),
+                              const SizedBox(width: 12),
+                              Flexible(child: Text($.store.emptyReturn))
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 64),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      );
     } else {
       scrollable = NestedScrollView(
         headerSliverBuilder: (final _, final bool innerBoxIsScrolled) =>
@@ -520,7 +574,7 @@ class StoreInformation extends HookConsumerWidget {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      $.store.vegan,
+                      '',
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: theme.colorScheme.surface,
                       ),

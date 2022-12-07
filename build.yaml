@@ -23,7 +23,7 @@ targets:
       generators|i18n:
         enabled: true
         options:
-          import_path: source/i18n/
+          import_path: source/i18n
           export_path: lib/src/generated/i18n.g.dart
 
       generators|models:

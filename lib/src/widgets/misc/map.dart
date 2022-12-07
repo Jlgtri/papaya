@@ -190,7 +190,7 @@ class MapScreen extends HookConsumerWidget {
               } else {
                 animateStream.add(defaultLatLng);
                 final LatLng? currentLocation = await getCurrentLocation();
-                if (currentLocation != null) {
+                if (!animateStream.isClosed && currentLocation != null) {
                   animateStream.add(currentLocation);
                 }
               }

@@ -126,9 +126,10 @@ stores_all:
 store:
   back: Back
   limited_time: Limited Time Only!
-  vegan: Vegan
   country: Country
   additional_info: Additional Info
+  empty: There are no products yet
+  empty_return: Back to discover
 
   delivery: Delivery
   delivery_unavailable: Unavailable
