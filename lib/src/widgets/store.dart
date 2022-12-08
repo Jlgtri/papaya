@@ -55,12 +55,12 @@ class StoreScreen extends HookConsumerWidget {
         return false;
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
+        value: SystemUiOverlayStyle(
+          statusBarColor: theme.colorScheme.surface,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
           systemNavigationBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarColor: theme.colorScheme.surface,
         ),
         child: MediaQuery.removePadding(
           context: context,
@@ -143,9 +143,9 @@ class StoreContent extends HookConsumerWidget {
           children: <Widget>[
             AppBar(
               systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: Brightness.light,
-                statusBarBrightness: Brightness.dark,
+                statusBarColor: theme.colorScheme.surface,
+                statusBarIconBrightness: Brightness.dark,
+                statusBarBrightness: Brightness.light,
                 systemNavigationBarIconBrightness: Brightness.dark,
                 systemNavigationBarColor: theme.colorScheme.surface,
               ),
@@ -252,7 +252,7 @@ class StoreContent extends HookConsumerWidget {
             pinned: true,
             backgroundColor: theme.colorScheme.surface,
             systemOverlayStyle: SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
+              statusBarColor: theme.colorScheme.surface,
               statusBarIconBrightness: Brightness.dark,
               statusBarBrightness: Brightness.light,
               systemNavigationBarIconBrightness: Brightness.dark,
@@ -310,7 +310,7 @@ class StoreContent extends HookConsumerWidget {
         ],
         body: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
+            statusBarColor: theme.colorScheme.surface,
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light,
             systemNavigationBarIconBrightness: Brightness.dark,
@@ -382,7 +382,7 @@ class StoreContent extends HookConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              const SizedBox(height: 40),
+                              const SizedBox(height: 48),
                               Flexible(
                                 child: Text(
                                   $menu.name!,
@@ -565,39 +565,52 @@ class StoreInformation extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                 ),
-                child: Row(
+                child: Wrap(
+                  spacing: 48,
                   children: <Widget>[
-                    Icon(
-                      icons.vegan,
-                      size: 24,
-                      color: theme.colorScheme.surface,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      '',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.surface,
+                    /// Kitchen Type
+                    if (store.kitchenType?.isNotEmpty ?? false)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            icons.vegan,
+                            size: 24,
+                            color: theme.colorScheme.surface,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            store.kitchenType!,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.surface,
+                            ),
+                            maxLines: 1,
+                          ),
+                        ],
                       ),
-                      maxLines: 1,
-                    ),
-                    if (store.cuisines?.firstOrNull?.isNotEmpty ??
-                        false) ...<Widget>[
-                      const SizedBox(width: 48),
-                      Icon(
-                        icons.cuisine,
-                        size: 24,
-                        color: theme.colorScheme.surface,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        store.cuisines!.first,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.surface,
-                        ),
-                        maxLines: 1,
-                      ),
-                    ],
+
+                    /// Cuisines
+                    if (store.cuisines != null)
+                      for (final String cuisine in store.cuisines!)
+                        if (cuisine.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Icon(
+                                icons.cuisine,
+                                size: 24,
+                                color: theme.colorScheme.surface,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                store.cuisines!.first,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.colorScheme.surface,
+                                ),
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
                   ],
                 ),
               ),

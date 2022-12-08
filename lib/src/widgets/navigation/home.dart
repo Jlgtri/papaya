@@ -665,34 +665,60 @@ class StoreCard extends HookConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    /// Cuisine
-                    if (store.cuisines?.firstOrNull?.isNotEmpty ??
-                        false) ...<Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 3),
-                        child: Icon(
-                          icons.cuisine,
-                          color: theme.colorScheme.secondary,
-                          size: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          store.cuisines!.first,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xff484850),
+                    /// Kitchen Type
+                    if (store.kitchenType?.isNotEmpty ?? false)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            icons.vegan,
+                            color: theme.colorScheme.secondary,
+                            size: 16,
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Text(
+                            store.kitchenType!,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xff484850),
+                            ),
+                            maxLines: 1,
+                          ),
+                          const SizedBox(width: 16),
+                        ],
                       ),
-                    ] else
-                      const Expanded(child: SizedBox()),
+
+                    /// Cuisines
+                    if (store.cuisines != null)
+                      for (final String cuisine in store.cuisines!)
+                        if (cuisine.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 2),
+                                child: Icon(
+                                  icons.cuisine,
+                                  color: theme.colorScheme.secondary,
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                cuisine,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xff484850),
+                                ),
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
 
                     /// Price Range
                     Flexible(
-                      fit: FlexFit.tight,
                       child: SizedBox(
                         height: 28,
                         child: Stack(

@@ -13,7 +13,8 @@ final AutoDisposeFutureProvider<Iterable<StoreModel>?> allStoresProvider =
       ref.keepAlive();
       return (response.data! as Iterable<Object?>)
           .whereType<Map<String, Object?>>()
-          .map(storeConverter.fromJson);
+          .map(storeConverter.fromJson)
+          .where((final _) => _.active ?? true);
     }
     return null;
   },
