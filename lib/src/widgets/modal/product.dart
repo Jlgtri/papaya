@@ -214,7 +214,7 @@ class ProductScreen extends HookConsumerWidget {
                             child: Text($.store.productScreen.additionalInfo),
                           ),
                           const SizedBox(width: 11),
-                          Icon(icons.misc.arrowDown, size: 10)
+                          Icon(icons.arrow.down, size: 10)
                         ],
                       ),
                     ),

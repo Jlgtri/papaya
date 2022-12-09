@@ -23,6 +23,7 @@ import '../routes.dart';
 import 'misc/delivery.dart';
 import 'navigation/cart.dart';
 import 'navigation/home.dart';
+import 'navigation/orders.dart';
 import 'navigation/profile.dart';
 
 /// The main screen used for navigating the app.
@@ -172,7 +173,7 @@ class NavigationScreen extends HookConsumerWidget {
                   ),
                   key: const PageStorageKey<String>('CartScreen'),
                 ),
-                const Placeholder(key: PageStorageKey<String>('OrdersScreen')),
+                const OrdersScreen(key: PageStorageKey<String>('OrdersScreen')),
                 const ProfileScreen(
                   key: PageStorageKey<String>('ProfileScreen'),
                 ),
@@ -380,7 +381,7 @@ class DeliveryPickerField extends HookConsumerWidget {
                 ),
               ),
               const SizedBox(width: 11),
-              Icon(icons.misc.arrowDown, size: 10),
+              Icon(icons.arrow.down, size: 10),
             ],
           ),
         ),

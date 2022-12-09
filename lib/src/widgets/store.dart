@@ -170,7 +170,7 @@ class StoreContent extends HookConsumerWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          Icon(icons.misc.arrowLeft, size: 14),
+                          Icon(icons.arrow.left, size: 14),
                           const SizedBox(width: 12),
                           Flexible(child: Text($.store.back))
                         ],
@@ -227,7 +227,7 @@ class StoreContent extends HookConsumerWidget {
                             children: <Widget>[
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
-                                child: Icon(icons.misc.arrowLeft, size: 14),
+                                child: Icon(icons.arrow.left, size: 14),
                               ),
                               const SizedBox(width: 12),
                               Flexible(child: Text($.store.emptyReturn))

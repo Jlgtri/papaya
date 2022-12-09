@@ -169,7 +169,7 @@ class HomeScreen extends HookConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                Icon(icons.misc.arrowRight, size: 14),
+                                Icon(icons.arrow.right, size: 14),
                                 const SizedBox(width: 12),
                                 Flexible(child: Text($.home.storesViewAll)),
                               ],

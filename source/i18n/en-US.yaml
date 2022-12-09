@@ -285,16 +285,31 @@ profile:
 
 orders:
   title: Orders
-  current: Current
-  more: More
-  purchase_history: Purchase History
-  less: Less
-  title_of_order: 'Title '
-  price_of_order: Price
-  order_number: Order Number
-  contact_support_btn: Contact Support
-  repeat_order_btn: Repeat Order
-  add_tip_btn: Add a Tip
+  current_title: Current
+  history_title: Purchase History
+  card:
+    more: More
+    less: Less
+
+    status:
+      current: Current
+      completed: Completed
+    estimate:
+      delivery(final String time): Estimated delivery time $time
+      pickup(final String time): Estimated pickup time $time
+    details:
+      title: Order Details
+      tips: Add
+      tips_add: Add a Tip
+      delivery: Delivery
+      tax: Sales Tax
+      total: Total
+      product:
+        title: Title
+        price: Price
+      number: Order Number
+      support: Contact Support
+      repeat: Repeat Order
 
 order_history:
   title: Order History

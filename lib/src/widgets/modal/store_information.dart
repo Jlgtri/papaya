@@ -281,7 +281,7 @@ class StoreInformationScreen extends HookConsumerWidget {
                                           ),
                                         ),
                                         child: Icon(
-                                          icons.misc.arrowDown,
+                                          icons.arrow.down,
                                           color: theme.colorScheme.shadow,
                                           size: 15,
                                         ),

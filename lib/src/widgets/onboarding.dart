@@ -144,7 +144,7 @@ class OnboardingScreen extends HookConsumerWidget {
                             const SizedBox(width: 12),
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
-                              child: Icon(icons.misc.arrowRight, size: 14),
+                              child: Icon(icons.arrow.right, size: 14),
                             ),
                           ],
                         ),

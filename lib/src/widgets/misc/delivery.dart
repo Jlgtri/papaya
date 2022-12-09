@@ -124,7 +124,7 @@ class DeliveryScreen extends HookConsumerWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Icon(icons.misc.arrowLeft, size: 14),
+                        Icon(icons.arrow.left, size: 14),
                         const SizedBox(width: 12),
                         Flexible(child: Text($.delivery.back))
                       ],

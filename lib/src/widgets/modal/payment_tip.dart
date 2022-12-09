@@ -49,7 +49,7 @@ class PaymentTipForm extends HookConsumerWidget {
     );
     final RegExp customTipFilteringRegExp = useMemoized(
       () => RegExp(
-        r'^([1-9]{1}[0-9]{0,}(\.[0-9]{0,2})?|0(\.[0-9]{0,2})?|\.[0-9]{1,2})$',
+        r'^([1-9]{1}[0-9]{0,2}(\.[0-9]{0,2})?|0(\.[0-9]{0,2})?|\.[0-9]{1,2})$',
       ),
     );
 
@@ -359,8 +359,6 @@ class PaymentMethodForm extends HookConsumerWidget {
     );
   }
 }
-
-
 
 /// The widget used to pick the credit [card].
 @immutable
