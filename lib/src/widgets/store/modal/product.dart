@@ -10,19 +10,19 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:styled_text/styled_text.dart';
 
-import '../../generated/assets.g.dart';
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../models/cart_store.dart';
-import '../../providers/misc.dart';
-import '../../routes.dart';
+import '../../../generated/assets.g.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../generated/models.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../models/cart_store.dart';
+import '../../../providers/misc.dart';
+import '../../../routes.dart';
 
-/// The screen used to show off a [product].
+/// The screen used to show off a [product] from the [store].
 @immutable
 class ProductScreen extends HookConsumerWidget {
-  /// The screen used to show off a [product].
+  /// The screen used to show off a [product] from the [store].
   const ProductScreen(
     this.store,
     this.product, {
@@ -44,10 +44,8 @@ class ProductScreen extends HookConsumerWidget {
     final ThemeData theme = Theme.of(context);
     final I18N $ = I18NLocalizations.of(context);
     final NavigatorState navigator = Navigator.of(context);
-    final IsMounted isMounted = useIsMounted();
     final SyncCallback syncCallback = useSyncCallback();
     final ObjectRef<int> currentAmount = useRef(this.currentAmount ?? 1);
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -190,37 +188,6 @@ class ProductScreen extends HookConsumerWidget {
                   ),
                 ),
               ],
-
-              /// More Info
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      foregroundColor: theme.colorScheme.shadow,
-                    ),
-                    onPressed: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Flexible(
-                            child: Text($.store.productScreen.additionalInfo),
-                          ),
-                          const SizedBox(width: 11),
-                          Icon(icons.arrow.down, size: 10)
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
 
               /// Counter
               const SizedBox(height: 24),

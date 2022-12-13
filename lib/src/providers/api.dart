@@ -15,9 +15,10 @@ import '../generated/models.g.dart';
 import '../models/address.dart';
 import '../models/settings.dart';
 import '../providers/misc.dart';
-import '../widgets/navigation.dart';
+import '../widgets/navigation/navigation.dart';
 
 part 'api/auth0.dart';
+part 'api/flags.dart';
 part 'api/order.dart';
 part 'api/payment.dart';
 part 'api/stores.dart';
@@ -38,10 +39,13 @@ final FutureProvider<Dio> dioProvider = FutureProvider<Dio>(
 
 class _ExceptionInterceptor extends Interceptor {
   @override
-  void onError(final DioError error, final ErrorInterceptorHandler handler) {
+  Future<void> onError(
+    final DioError error,
+    final ErrorInterceptorHandler handler,
+  ) async {
     if (error.requestOptions.method == 'GET') {
       final Object? ref = error.requestOptions.extra['ref'];
-      if (ref is Ref) {
+      if (ref is Ref && !await InternetConnectionChecker().hasConnection) {
         late final StreamSubscription<InternetConnectionStatus> subscription;
         subscription = (InternetConnectionChecker().onStatusChange)
             .listen((final InternetConnectionStatus status) async {

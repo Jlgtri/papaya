@@ -9,22 +9,22 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import '../generated/i18n.g.dart';
-import '../generated/icons.g.dart';
-import '../generated/models.g.dart';
-import '../hooks/sync_callback_hook.dart';
-import '../hooks/widget_state_hook.dart';
-import '../models/cart_store.dart';
-import '../models/search_entry.dart';
-import '../models/settings.dart';
-import '../providers/api.dart';
-import '../providers/misc.dart';
-import '../routes.dart';
-import 'misc/delivery.dart';
-import 'navigation/cart.dart';
-import 'navigation/home.dart';
-import 'navigation/orders.dart';
-import 'navigation/profile.dart';
+import '../../generated/i18n.g.dart';
+import '../../generated/icons.g.dart';
+import '../../generated/models.g.dart';
+import '../../hooks/sync_callback_hook.dart';
+import '../../hooks/widget_state_hook.dart';
+import '../../models/cart_store.dart';
+import '../../models/search_entry.dart';
+import '../../models/settings.dart';
+import '../../providers/api.dart';
+import '../../providers/misc.dart';
+import '../../routes.dart';
+import 'delivery.dart';
+import 'tabs/cart.dart';
+import 'tabs/home.dart';
+import 'tabs/orders.dart';
+import 'tabs/profile.dart';
 
 /// The main screen used for navigating the app.
 @immutable

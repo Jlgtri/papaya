@@ -10,18 +10,18 @@ import 'package:isar/isar.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import '../../generated/assets.g.dart';
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../models/cart_store.dart';
-import '../../models/settings.dart';
-import '../../providers/api.dart';
-import '../../providers/misc.dart';
-import '../../routes.dart';
-import '../../styles.dart';
-import '../store.dart';
+import '../../../generated/assets.g.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../generated/models.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../models/cart_store.dart';
+import '../../../models/settings.dart';
+import '../../../providers/api.dart';
+import '../../../providers/misc.dart';
+import '../../../routes.dart';
+import '../../../styles.dart';
+import '../../store/store.dart';
 
 /// The screen used to display advertisments and stores.
 @immutable

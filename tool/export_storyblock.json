@@ -1,0 +1,1 @@
+{"FlagsModel": {"enter_address": {"type": "FlagsEnterAddressModel", "nullable": true}}, "FlagsEnterAddressModel": {"enabled": {"type": "bool", "nullable": true}, "value": {"type": "object", "nullable": true}}}

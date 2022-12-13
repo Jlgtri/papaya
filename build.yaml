@@ -23,7 +23,7 @@ targets:
       generators|i18n:
         enabled: true
         options:
-          import_path: source/i18n
+          import_path: source/i18n/
           export_path: lib/src/generated/i18n.g.dart
 
       generators|models:
@@ -40,5 +40,5 @@ targets:
           import_path: source/icons/
           export_path: lib/src/generated/icons.g.dart
           font_export_path: source/icons.ttf
-          height: 32
+          height: 128
           normalize: true

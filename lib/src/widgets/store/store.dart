@@ -11,16 +11,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import '../generated/assets.g.dart';
-import '../generated/i18n.g.dart';
-import '../generated/icons.g.dart';
-import '../generated/models.g.dart';
-import '../hooks/sync_callback_hook.dart';
-import '../models/settings.dart';
-import '../providers/api.dart';
-import '../providers/misc.dart';
-import '../routes.dart';
-import '../styles.dart';
+import '../../generated/assets.g.dart';
+import '../../generated/i18n.g.dart';
+import '../../generated/icons.g.dart';
+import '../../generated/models.g.dart';
+import '../../hooks/sync_callback_hook.dart';
+import '../../models/settings.dart';
+import '../../providers/api.dart';
+import '../../providers/misc.dart';
+import '../../routes.dart';
+import '../../styles.dart';
 import 'modal/product.dart';
 import 'modal/store_information.dart';
 

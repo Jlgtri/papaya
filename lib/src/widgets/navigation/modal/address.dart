@@ -8,17 +8,17 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../models/address.dart';
-import '../../models/settings.dart';
-import '../../providers/api.dart';
-import '../../providers/misc.dart';
-import '../../routes.dart';
-import '../misc/map.dart';
-import '../navigation/profile.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../generated/models.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../models/address.dart';
+import '../../../models/settings.dart';
+import '../../../providers/api.dart';
+import '../../../providers/misc.dart';
+import '../../../routes.dart';
+import '../map.dart';
+import '../tabs/profile.dart';
 
 /// The screen used to edit user address.
 @immutable

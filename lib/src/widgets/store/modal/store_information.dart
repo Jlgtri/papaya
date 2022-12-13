@@ -11,14 +11,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../const.dart';
-import '../../generated/assets.g.dart';
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../providers/api.dart';
-import '../../providers/location.dart';
+import '../../../const.dart';
+import '../../../generated/assets.g.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../generated/models.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../providers/api.dart';
+import '../../../providers/location.dart';
 import '../store.dart';
 
 /// The screen used to show off a [store] information.

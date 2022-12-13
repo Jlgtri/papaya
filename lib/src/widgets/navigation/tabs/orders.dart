@@ -5,14 +5,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../generated/assets.g.dart';
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../models/cart_store.dart';
-import '../../models/settings.dart';
-import '../../providers/api.dart';
+import '../../../generated/assets.g.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../generated/models.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../models/cart_store.dart';
+import '../../../models/settings.dart';
+import '../../../providers/api.dart';
 
 /// The screen used to display a list of orders.
 @immutable

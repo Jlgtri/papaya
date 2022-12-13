@@ -7,13 +7,13 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import '../../generated/assets.g.dart';
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../models/cart_store.dart';
-import '../../providers/misc.dart';
-import '../../routes.dart';
+import '../../../generated/assets.g.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../models/cart_store.dart';
+import '../../../providers/misc.dart';
+import '../../../routes.dart';
 
 /// The callback with a [CartStoreProduct] product.
 typedef ProductCallback = FutureOr<void> Function(CartStoreProduct product);

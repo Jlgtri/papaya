@@ -25,7 +25,7 @@ import '../../providers/api.dart';
 import '../../providers/location.dart';
 import '../../providers/misc.dart';
 import '../../routes.dart';
-import '../modal/address.dart';
+import 'modal/address.dart';
 
 /// The screen used to select an address on map.
 @immutable

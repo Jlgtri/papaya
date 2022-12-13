@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -11,20 +12,21 @@ import 'models/settings.dart';
 import 'providers/api.dart';
 import 'styles.dart';
 import 'widgets/authorization.dart';
-import 'widgets/misc/delivery.dart';
-import 'widgets/misc/map.dart';
-import 'widgets/misc/stores.dart';
-import 'widgets/modal/address.dart';
-import 'widgets/modal/payment_method.dart';
-import 'widgets/modal/payment_note.dart';
-import 'widgets/modal/product.dart';
-import 'widgets/modal/profile_edit.dart';
-import 'widgets/modal/store_information.dart';
-import 'widgets/navigation.dart';
-import 'widgets/navigation/cart.dart';
+import 'widgets/error.dart';
+import 'widgets/navigation/delivery.dart';
+import 'widgets/navigation/map.dart';
+import 'widgets/navigation/modal/address.dart';
+import 'widgets/navigation/modal/profile_edit.dart';
+import 'widgets/navigation/navigation.dart';
+import 'widgets/navigation/tabs/cart.dart';
 import 'widgets/onboarding.dart';
-import 'widgets/payment.dart';
-import 'widgets/store.dart';
+import 'widgets/payment/modal/payment_method.dart';
+import 'widgets/payment/modal/payment_note.dart';
+import 'widgets/payment/payment.dart';
+import 'widgets/store/modal/product.dart';
+import 'widgets/store/modal/store_information.dart';
+import 'widgets/store/store.dart';
+import 'widgets/store/stores.dart';
 
 /// The wrapper around [MaterialApp] to support hot reload.
 @immutable
@@ -79,7 +81,17 @@ class RoutesApp extends StatelessWidget {
 
 /// The route in the app.
 enum Routes {
-  /// The greeting screen.
+  /// The screen that displays an error occured while connecting to the internet.
+  ///
+  /// **Can** be provided with [ErrorConnectionScreen] as an argument.
+  errorConnection('error_connection'),
+
+  /// The screen that displays an error occured while connecting to the server.
+  ///
+  /// **Can** be provided with [ErrorServerScreen] as an argument.
+  errorServer('error_server'),
+
+  /// The screen that greets the user.
   ///
   /// **Can** be provided with [OnboardingScreen] as an argument.
   onboarding('onboarding'),
@@ -215,9 +227,13 @@ enum Routes {
   static Future<Routes> current(final ProviderContainer container) async {
     if (await container.read(onboardingProvider.future)) {
       return onboarding;
+    } else if (!await InternetConnectionChecker().hasConnection) {
+      return errorConnection;
     } else if (!await container.read(skippedAuthorizationProvider.future) &&
         await container.read(tokenProvider.future) == null) {
       return authorization;
+    } else if (await container.read(flagsFailSafeProvider.future) == null) {
+      return errorServer;
     } else if (!await container.read(skippedDefaultAddressProvider.future) &&
         await container.read(currentAddressProvider.future) == null) {
       return map;
@@ -230,6 +246,30 @@ enum Routes {
   static Route<T> from<T extends Object?>(final RouteSettings settings) {
     final Object? arguments = settings.arguments;
     switch (values.firstWhere((final Routes _) => _.name == settings.name)) {
+      case errorConnection:
+        return PageTransition<T>(
+          settings: settings,
+          type: PageTransitionType.fade,
+          duration: const Duration(milliseconds: 500),
+          reverseDuration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuad,
+          child: arguments is ErrorConnectionScreen
+              ? arguments
+              : const ErrorConnectionScreen(),
+        );
+
+      case errorServer:
+        return PageTransition<T>(
+          settings: settings,
+          type: PageTransitionType.fade,
+          duration: const Duration(milliseconds: 500),
+          reverseDuration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuad,
+          child: arguments is ErrorServerScreen
+              ? arguments
+              : const ErrorServerScreen(),
+        );
+
       case onboarding:
         return PageTransition<T>(
           settings: settings,

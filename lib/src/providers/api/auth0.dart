@@ -60,8 +60,8 @@ class TokenNotifier extends AutoDisposeAsyncNotifier<Token?> {
   Future<Token?> authorize() async {
     final Token? token = await future;
     if (token == null) {
-      if (state != const AsyncLoading<Token>()) {
-        state = const AsyncLoading<Token>();
+      if (state != const AsyncLoading<Token?>()) {
+        state = const AsyncLoading<Token?>();
       }
       state = await AsyncValue.guard(() async {
         final AuthorizationTokenResponse? response =

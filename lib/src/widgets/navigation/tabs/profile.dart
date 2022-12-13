@@ -5,15 +5,15 @@ import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../generated/models.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../models/address.dart';
-import '../../models/settings.dart';
-import '../../providers/api.dart';
-import '../../providers/misc.dart';
-import '../../routes.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../generated/models.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../models/address.dart';
+import '../../../models/settings.dart';
+import '../../../providers/api.dart';
+import '../../../providers/misc.dart';
+import '../../../routes.dart';
 import '../modal/address.dart';
 import '../modal/profile_edit.dart';
 

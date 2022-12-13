@@ -60,6 +60,4 @@ def process_properties(
 
 
 if __name__ == '__main__':
-    main(
-        'tool/user_cards.json', 'tool/export_user_cards.json', 'OrderCalculate'
-    )
+    main('tool/storyblock.json', 'tool/export_storyblock.json', 'FlagsModel')

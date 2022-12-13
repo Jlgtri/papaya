@@ -8,9 +8,9 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../hooks/sync_callback_hook.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
 
 /// The screen used to create/edit credit card credentials.
 @immutable

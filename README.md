@@ -8,7 +8,7 @@ flutter build apk --release --split-per-abi --split-debug-info --obfuscate
 
 ### Update Dependencies
 
-dart pub upgrade --null-safety --precompile
+flutter pub outdated  --prereleases --dependency-overrides --dev-dependencies
 
 ### Create Launch Icons
 

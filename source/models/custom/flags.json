@@ -1,0 +1,18 @@
+{
+  "FlagsModel": {
+    "enter_address": {
+      "type": "FlagsEnterAddressModel",
+      "nullable": true
+    }
+  },
+  "FlagsEnterAddressModel": {
+    "enabled": {
+      "type": "boolean",
+      "nullable": true
+    },
+    "value": {
+      "type": null,
+      "nullable": true
+    }
+  }
+}

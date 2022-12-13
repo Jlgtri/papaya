@@ -12,21 +12,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 
-import '../generated/i18n.g.dart';
-import '../generated/icons.g.dart';
-import '../generated/models.g.dart';
-import '../hooks/not_null_hook.dart';
-import '../hooks/sync_callback_hook.dart';
-import '../models/cart_store.dart';
-import '../models/settings.dart';
-import '../providers/api.dart';
-import '../providers/misc.dart';
-import '../routes.dart';
-import 'misc/delivery.dart';
+import '../../generated/i18n.g.dart';
+import '../../generated/icons.g.dart';
+import '../../generated/models.g.dart';
+import '../../hooks/not_null_hook.dart';
+import '../../hooks/sync_callback_hook.dart';
+import '../../models/cart_store.dart';
+import '../../models/settings.dart';
+import '../../providers/api.dart';
+import '../../providers/misc.dart';
+import '../../routes.dart';
+import '../navigation/delivery.dart';
+import '../navigation/modal/profile_edit.dart';
+import '../navigation/tabs/cart.dart';
+import '../navigation/tabs/profile.dart';
 import 'modal/payment_tip.dart';
-import 'modal/profile_edit.dart';
-import 'navigation/cart.dart';
-import 'navigation/profile.dart';
 
 /// The current step on the [PaymentScreen].
 enum PaymentStep {

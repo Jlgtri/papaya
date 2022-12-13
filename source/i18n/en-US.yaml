@@ -56,6 +56,20 @@ alert:
     body: There was an error while trying to modify the address. Please try again later.
     approve: Okay, thanks
 
+error_connection:
+  subtitle: disconnected
+  title: Lost internet connection
+  description:  Please check your internet connection settings and try again
+  primary: Try Again
+  secondary: Open Settings
+
+error_server:
+  subtitle: 500 Error
+  title: Can't connect to the server
+  description: Please try again in a few minutes
+  primary: Try Again
+  secondary: Contact Us
+
 onboarding:
   skip: Skip
   next: Next
@@ -146,7 +160,6 @@ store:
   product_screen:
     add_to_cart: Add to Cart
     remove_from_cart: Remove from Cart
-    additional_info: More info
 
   info:
     open_until(final String until): Open until $until
@@ -310,16 +323,3 @@ orders:
       number: Order Number
       support: Contact Support
       repeat: Repeat Order
-
-order_history:
-  title: Order History
-  order_number: Order Number
-  date: Date
-  status: Status
-  total: Total
-  view: View
-  cancel: Cancel
-  cancel_order: Cancel Order
-  cancel_order_confirm: Are you sure you want to cancel this order?
-  cancel_order_confirm_btn: Cancel Order
-  cancel_order_cancel_btn: Cancel

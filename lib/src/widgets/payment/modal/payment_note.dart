@@ -4,10 +4,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../generated/i18n.g.dart';
-import '../../generated/icons.g.dart';
-import '../../hooks/sync_callback_hook.dart';
-import '../../routes.dart';
+import '../../../generated/i18n.g.dart';
+import '../../../generated/icons.g.dart';
+import '../../../hooks/sync_callback_hook.dart';
+import '../../../routes.dart';
 import '../payment.dart';
 
 /// The screen used to create/edit credit card credentials.

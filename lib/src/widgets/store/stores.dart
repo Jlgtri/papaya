@@ -8,7 +8,7 @@ import '../../generated/models.g.dart';
 import '../../hooks/sync_callback_hook.dart';
 import '../../providers/api.dart';
 import '../../routes.dart';
-import '../navigation/home.dart';
+import '../navigation/tabs/home.dart';
 
 /// The screen used to display stores from [allStoresProvider].
 @immutable
