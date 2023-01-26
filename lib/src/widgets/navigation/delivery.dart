@@ -94,20 +94,20 @@ class DeliveryScreen extends HookConsumerWidget {
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
-          systemNavigationBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: theme.colorScheme.surface,
-          statusBarColor: Colors.transparent,
+          statusBarColor: theme.colorScheme.surface,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
+          systemNavigationBarIconBrightness: Brightness.dark,
+          systemNavigationBarColor: theme.colorScheme.surface,
         ),
         child: Scaffold(
           appBar: AppBar(
             systemOverlayStyle: SystemUiOverlayStyle(
-              systemNavigationBarIconBrightness: Brightness.dark,
-              systemNavigationBarColor: theme.colorScheme.surface,
-              statusBarColor: Colors.transparent,
+              statusBarColor: theme.colorScheme.surface,
               statusBarIconBrightness: Brightness.dark,
               statusBarBrightness: Brightness.light,
+              systemNavigationBarIconBrightness: Brightness.dark,
+              systemNavigationBarColor: theme.colorScheme.surface,
             ),
             leadingWidth: double.infinity,
             leading: Align(

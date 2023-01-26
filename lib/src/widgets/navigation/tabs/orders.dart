@@ -10,9 +10,10 @@ import '../../../generated/i18n.g.dart';
 import '../../../generated/icons.g.dart';
 import '../../../generated/models.g.dart';
 import '../../../hooks/sync_callback_hook.dart';
-import '../../../models/cart_store.dart';
 import '../../../models/settings.dart';
 import '../../../providers/api.dart';
+import '../../../routes.dart';
+import '../order.dart';
 
 /// The screen used to display a list of orders.
 @immutable
@@ -93,13 +94,10 @@ class OrderCard extends HookConsumerWidget {
 
   final bool current;
   final DeliveryType deliveryType;
-
-  static final DateFormat _currentDateFormat = DateFormat('h:mm a');
-  static final DateFormat _historyDateFormat = DateFormat('DD.MM.YYYY, h:mm a');
-
   @override
   Widget build(final BuildContext context, final WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
+    final NavigatorState navigator = Navigator.of(context);
     final I18N $ = I18NLocalizations.of(context);
     final StoreModel? store = ref.watch(
       allStoresProvider.select((final _) => _.valueOrNull?.firstOrNull),
@@ -121,7 +119,12 @@ class OrderCard extends HookConsumerWidget {
               TextButton(
                 style:
                     TextButton.styleFrom(shape: const RoundedRectangleBorder()),
-                onPressed: () => showMore.value = !showMore.value,
+                onPressed: () async => current
+                    ? navigator.pushNamed(
+                        Routes.order.name,
+                        arguments: const OrderScreen(),
+                      )
+                    : showMore.value = !showMore.value,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +176,7 @@ class OrderCard extends HookConsumerWidget {
                           Text(
                             current
                                 ? () {
-                                    final String time = _currentDateFormat
+                                    final String time = DateFormat('h:mm a')
                                         .format(DateTime.now());
                                     switch (deliveryType) {
                                       case DeliveryType.delivery:
@@ -184,7 +187,8 @@ class OrderCard extends HookConsumerWidget {
                                             .pickup(time);
                                     }
                                   }()
-                                : _historyDateFormat.format(DateTime.now()),
+                                : DateFormat('DD.MM.YYYY, h:mm a')
+                                    .format(DateTime.now()),
                             style: theme.textTheme.bodySmall,
                           ),
 
@@ -200,7 +204,6 @@ class OrderCard extends HookConsumerWidget {
                               ),
 
                               /// Delivery Addess
-
                               Text(
                                 currentAddress.value!.displayLong!,
                                 maxLines: 1,
@@ -215,7 +218,9 @@ class OrderCard extends HookConsumerWidget {
                     if (store?.name?.isNotEmpty ?? false)
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 4),
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
                         child: Text(
                           store!.name!,
                           style: theme.textTheme.titleLarge,
@@ -274,211 +279,10 @@ class OrderCard extends HookConsumerWidget {
               ),
               if (showMore.value) ...<Widget>[
                 Divider(height: 0, color: theme.colorScheme.outline),
-
-                /// Order Details Title
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    $.orders.card.details.title,
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  padding: const EdgeInsets.all(16).copyWith(bottom: 0),
+                  child: const OrderDetails(),
                 ),
-
-                /// Column Names
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16)
-                      .copyWith(bottom: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      /// Title
-                      Text(
-                        $.orders.card.details.product.title,
-                        style: theme.textTheme.bodyLarge,
-                      ),
-
-                      /// Price
-                      Text(
-                        $.orders.card.details.product.price,
-                        style: theme.textTheme.bodyLarge,
-                      )
-                    ],
-                  ),
-                ),
-
-                /// Products
-                for (final CartStoreProduct product in <CartStoreProduct>[])
-                  if (product.amount > 0)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          /// Image
-                          ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(8)),
-                            child: CachedNetworkImage(
-                              height: 52,
-                              width: 52,
-                              imageUrl: product.product?.imgUrl ?? '',
-                              fit: BoxFit.cover,
-                              filterQuality: FilterQuality.high,
-                              errorWidget: (final _, final __, final ___) =>
-                                  Image.asset(assets.logo, fit: BoxFit.cover),
-                            ),
-                          ),
-
-                          /// Name / Quantity
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Text(
-                                  product.product?.name ?? '',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'x${product.amount}',
-                                  style: theme.textTheme.bodyMedium,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          /// Price
-                          const SizedBox(width: 16),
-                          Text(
-                            r'$32.85',
-                            style: theme.textTheme.bodyLarge,
-                          )
-                        ],
-                      ),
-                    ),
-
-                /// Delivery Price
-                if (true)
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        /// Icon
-                        ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8)),
-                          child: ColoredBox(
-                            color: theme.colorScheme.secondary,
-                            child: Padding(
-                              padding: const EdgeInsets.all(14),
-                              child: Icon(
-                                icons.delivery,
-                                color: theme.colorScheme.surface,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        /// Name / Quantity
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            $.orders.card.details.delivery,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-
-                        /// Price
-                        const SizedBox(width: 16),
-                        Text(
-                          r'$8.00',
-                          style: theme.textTheme.titleMedium,
-                        )
-                      ],
-                    ),
-                  ),
-
-                /// Tax
-                if (true)
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        /// Icon
-                        ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8)),
-                          child: ColoredBox(
-                            color: theme.colorScheme.secondary,
-                            child: Padding(
-                              padding: const EdgeInsets.all(14),
-                              child: Icon(
-                                icons.tax,
-                                color: theme.colorScheme.surface,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        /// Name / Quantity
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Row(
-                            children: <Widget>[
-                              Text(
-                                $.orders.card.details.tax,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-
-                              /// Tooltip
-                              const SizedBox(width: 4),
-                              IconButton(
-                                style: IconButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  foregroundColor: theme.colorScheme.primary,
-                                ),
-                                onPressed: () {},
-                                icon: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Icon(icons.misc.search, size: 20),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        /// Price
-                        const SizedBox(width: 8),
-                        Text(
-                          r'$8.00',
-                          style: theme.textTheme.titleMedium,
-                        )
-                      ],
-                    ),
-                  ),
 
                 /// Total Price
                 Padding(

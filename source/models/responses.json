@@ -1,1152 +1,1098 @@
 {
   "UserProfileModel": {
-    "created_at": {
-      "type": "string",
-      "doc": "Date user account was created in iso string format",
-      "nullable": true
-    },
-    "name": {
-      "type": "string",
-      "doc": "User's name",
-      "nullable": true,
-      "name": "name"
-    },
-    "email": {
-      "type": "string",
-      "doc": "User email",
-      "nullable": true,
-      "name": "email"
-    },
-    "email_verified": {
-      "type": "boolean",
-      "doc": "Email verified status",
-      "nullable": true
-    },
-    "phone": {
-      "type": "string",
-      "doc": "User's phone",
-      "nullable": true,
-      "name": "phone"
-    },
-    "identities": {
-      "type": "UserProfileIdentitiesModel[]",
-      "doc": null,
-      "nullable": true,
-      "name": "identities"
-    },
-    "nickname": {
-      "type": "string",
-      "doc": "User's nickname",
-      "nullable": true,
-      "name": "nickname"
-    },
-    "picture": {
-      "type": "string",
-      "doc": "Link to user's avatar",
-      "nullable": true,
-      "name": "picture"
-    },
-    "updated_at": {
-      "type": "string",
-      "doc": "Date user account was updated in iso string format",
-      "nullable": true
-    },
-    "userId": {
-      "type": "string",
-      "doc": "User ID",
-      "nullable": true,
-      "name": "userId"
-    },
-    "stripeCustomerId": {
-      "type": "string",
-      "doc": "User's Stripe Customer ID",
-      "nullable": true,
-      "name": "stripeCustomerId"
-    },
-    "last_ip": {
-      "type": "string",
-      "doc": "User's last login ip",
-      "nullable": true
-    },
-    "last_login": {
-      "type": "string",
-      "doc": "Date user logged in last time in iso string format",
-      "nullable": true
-    },
-    "logins_count": {
-      "type": "integer",
-      "doc": "Count of user's logins",
-      "nullable": true
-    },
-    "given_name": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
-    },
-    "family_name": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
+    "fields": {
+      "created_at": {
+        "type": "string",
+        "doc": "Date user account was created in iso string format",
+        "nullable": true
+      },
+      "name": {
+        "type": "string",
+        "doc": "User's name",
+        "nullable": true,
+        "name": "name"
+      },
+      "email": {
+        "type": "string",
+        "doc": "User email",
+        "nullable": true,
+        "name": "email"
+      },
+      "email_verified": {
+        "type": "boolean",
+        "doc": "Email verified status",
+        "nullable": true
+      },
+      "phone": {
+        "type": "string",
+        "doc": "User's phone",
+        "nullable": true,
+        "name": "phone"
+      },
+      "identities": {
+        "type": "UserProfileIdentitiesModel[]",
+        "doc": null,
+        "nullable": true,
+        "name": "identities"
+      },
+      "nickname": {
+        "type": "string",
+        "doc": "User's nickname",
+        "nullable": true,
+        "name": "nickname"
+      },
+      "picture": {
+        "type": "string",
+        "doc": "Link to user's avatar",
+        "nullable": true,
+        "name": "picture"
+      },
+      "updated_at": {
+        "type": "string",
+        "doc": "Date user account was updated in iso string format",
+        "nullable": true
+      },
+      "userId": {
+        "type": "string",
+        "doc": "User ID",
+        "nullable": true,
+        "name": "userId"
+      },
+      "stripeCustomerId": {
+        "type": "string",
+        "doc": "User's Stripe Customer ID",
+        "nullable": true,
+        "name": "stripeCustomerId"
+      },
+      "last_ip": {
+        "type": "string",
+        "doc": "User's last login ip",
+        "nullable": true
+      },
+      "last_login": {
+        "type": "string",
+        "doc": "Date user logged in last time in iso string format",
+        "nullable": true
+      },
+      "logins_count": {
+        "type": "integer",
+        "doc": "Count of user's logins",
+        "nullable": true
+      },
+      "given_name": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      },
+      "family_name": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      }
     }
   },
   "UserProfileIdentitiesModel": {
-    "connection": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "connection"
-    },
-    "provider": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "provider"
-    },
-    "user_id": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
-    },
-    "isSocial": {
-      "type": "boolean",
-      "doc": null,
-      "nullable": true,
-      "name": "isSocial"
+    "fields": {
+      "connection": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "connection"
+      },
+      "provider": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "provider"
+      },
+      "user_id": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      },
+      "isSocial": {
+        "type": "boolean",
+        "doc": null,
+        "nullable": true,
+        "name": "isSocial"
+      }
     }
   },
   "UserAddressModel": {
-    "id": {
-      "type": "integer",
-      "doc": "address ID",
-      "nullable": true,
-      "name": "id"
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "address ID",
+        "nullable": true,
+        "name": "id"
+      }
     }
   },
   "UserAddressesModel": {
-    "street_number": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
-    },
-    "route": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "route"
-    },
-    "internal": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "internal"
-    },
-    "postal_code": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
-    },
-    "memo": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "memo"
-    },
-    "region": {
-      "type": "string",
-      "doc": "region name",
-      "nullable": true,
-      "name": "region"
-    },
-    "neighborhood": {
-      "type": "string",
-      "doc": "Neighborhood name",
-      "nullable": true,
-      "name": "neighborhood"
-    },
-    "city": {
-      "type": "string",
-      "doc": "city name",
-      "nullable": true,
-      "name": "city"
-    },
-    "user_address_id": {
-      "type": "integer",
-      "doc": null,
-      "nullable": true
-    },
-    "address_id": {
-      "type": "integer",
-      "doc": null,
-      "nullable": true
-    },
-    "default_address": {
-      "type": "boolean",
-      "doc": null,
-      "nullable": true
-    },
-    "state": {
-      "type": "UserAddressesStateModel",
-      "doc": null,
-      "nullable": true,
-      "name": "state"
-    },
-    "country": {
-      "type": "UserAddressesCountryModel",
-      "doc": null,
-      "nullable": true,
-      "name": "country"
-    },
-    "lng": {
-      "type": "float",
-      "doc": "Address longitude",
-      "nullable": true,
-      "name": "lng"
-    },
-    "lat": {
-      "type": "float",
-      "doc": "Address latitude",
-      "nullable": true,
-      "name": "lat"
-    },
-    "display_short": {
-      "type": "string",
-      "doc": "Shortened address form",
-      "nullable": true
-    },
-    "display_long": {
-      "type": "string",
-      "doc": "Long address form",
-      "nullable": true
+    "fields": {
+      "street_number": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      },
+      "route": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "route"
+      },
+      "internal": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "internal"
+      },
+      "postal_code": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      },
+      "memo": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "memo"
+      },
+      "region": {
+        "type": "string",
+        "doc": "region name",
+        "nullable": true,
+        "name": "region"
+      },
+      "neighborhood": {
+        "type": "string",
+        "doc": "Neighborhood name",
+        "nullable": true,
+        "name": "neighborhood"
+      },
+      "city": {
+        "type": "string",
+        "doc": "city name",
+        "nullable": true,
+        "name": "city"
+      },
+      "user_address_id": {
+        "type": "integer",
+        "doc": null,
+        "nullable": true
+      },
+      "address_id": {
+        "type": "integer",
+        "doc": null,
+        "nullable": true
+      },
+      "default_address": {
+        "type": "boolean",
+        "doc": null,
+        "nullable": true
+      },
+      "state": {
+        "type": "UserAddressesStateModel",
+        "doc": null,
+        "nullable": true,
+        "name": "state"
+      },
+      "country": {
+        "type": "UserAddressesCountryModel",
+        "doc": null,
+        "nullable": true,
+        "name": "country"
+      },
+      "lng": {
+        "type": "float",
+        "doc": "Address longitude",
+        "nullable": true,
+        "name": "lng"
+      },
+      "lat": {
+        "type": "float",
+        "doc": "Address latitude",
+        "nullable": true,
+        "name": "lat"
+      },
+      "display_short": {
+        "type": "string",
+        "doc": "Shortened address form",
+        "nullable": true
+      },
+      "display_long": {
+        "type": "string",
+        "doc": "Long address form",
+        "nullable": true
+      }
     }
   },
   "UserAddressesStateModel": {
-    "short_name": {
-      "type": "string",
-      "doc": "Short state name",
-      "nullable": true
-    },
-    "long_name": {
-      "type": "string",
-      "doc": "Long state name",
-      "nullable": true
+    "fields": {
+      "short_name": {
+        "type": "string",
+        "doc": "Short state name",
+        "nullable": true
+      },
+      "long_name": {
+        "type": "string",
+        "doc": "Long state name",
+        "nullable": true
+      }
     }
   },
   "UserAddressesCountryModel": {
-    "short_name": {
-      "type": "string",
-      "doc": "Short country name",
-      "nullable": true
-    },
-    "long_name": {
-      "type": "string",
-      "doc": "Long country name",
-      "nullable": true
+    "fields": {
+      "short_name": {
+        "type": "string",
+        "doc": "Short country name",
+        "nullable": true
+      },
+      "long_name": {
+        "type": "string",
+        "doc": "Long country name",
+        "nullable": true
+      }
     }
   },
   "UserModel": {
-    "userId": {
-      "type": "string",
-      "doc": "User ID",
-      "nullable": true,
-      "name": "userId"
+    "fields": {
+      "userId": {
+        "type": "string",
+        "doc": "User ID",
+        "nullable": true,
+        "name": "userId"
+      }
     }
   },
-  "WaitlistUserModel": {},
-  "WaitlistRestaurantModel": {},
+  "WaitlistUserModel": {
+    "fields": {}
+  },
+  "WaitlistRestaurantModel": {
+    "fields": {}
+  },
   "StoreAllModel": {
-    "id": {
-      "type": "integer",
-      "doc": "Store ID",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "doc": "Store name",
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "doc": "Description of store",
-      "nullable": true,
-      "name": "description"
-    },
-    "img_url": {
-      "type": "string",
-      "doc": "URL to Store header image",
-      "nullable": true
-    },
-    "active": {
-      "type": "boolean",
-      "doc": "Active status. Inactive stores should not be returned or displayed.",
-      "nullable": true,
-      "name": "active"
-    },
-    "accepting_orders": {
-      "type": "boolean",
-      "doc": "Accepting orders status. Inactive stores should not be returned or displayed.",
-      "nullable": true
-    },
-    "reason_not_accepting": {
-      "type": "string",
-      "doc": "Reason why store is not accepting orders",
-      "nullable": true
-    },
-    "price_range": {
-      "type": "integer",
-      "doc": "Price range in integers. Can be 1-4.",
-      "nullable": true
-    },
-    "prep_time_buffer": {
-      "type": "integer",
-      "doc": "Prep time buffer in minutes.",
-      "nullable": true
-    },
-    "top_banner_text": {
-      "type": "string",
-      "doc": "Optional top banner text.",
-      "nullable": true
-    },
-    "company_id": {
-      "type": "integer",
-      "doc": "Parent company ID",
-      "nullable": true
-    },
-    "company_name": {
-      "type": "string",
-      "doc": "Parent company name",
-      "nullable": true
-    },
-    "kitchen_type": {
-      "type": "string",
-      "doc": "Kitchen type (Vegan, Vegetarian, Mixed)",
-      "nullable": true
-    },
-    "cuisines": {
-      "type": "string[]",
-      "doc": null,
-      "nullable": true,
-      "name": "cuisines"
-    },
-    "created_at": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "Store ID",
+        "nullable": true,
+        "name": "id"
+      },
+      "name": {
+        "type": "string",
+        "doc": "Store name",
+        "nullable": true,
+        "name": "name"
+      },
+      "description": {
+        "type": "string",
+        "doc": "Description of store",
+        "nullable": true,
+        "name": "description"
+      },
+      "img_url": {
+        "type": "string",
+        "doc": "URL to Store header image",
+        "nullable": true
+      },
+      "active": {
+        "type": "boolean",
+        "doc": "Active status. Inactive stores should not be returned or displayed.",
+        "nullable": true,
+        "name": "active"
+      },
+      "accepting_orders": {
+        "type": "boolean",
+        "doc": "Accepting orders status. Inactive stores should not be returned or displayed.",
+        "nullable": true
+      },
+      "reason_not_accepting": {
+        "type": "string",
+        "doc": "Reason why store is not accepting orders",
+        "nullable": true
+      },
+      "price_range": {
+        "type": "integer",
+        "doc": "Price range in integers. Can be 1-4.",
+        "nullable": true
+      },
+      "prep_time_buffer": {
+        "type": "integer",
+        "doc": "Prep time buffer in minutes.",
+        "nullable": true
+      },
+      "top_banner_text": {
+        "type": "string",
+        "doc": "Optional top banner text.",
+        "nullable": true
+      },
+      "company_id": {
+        "type": "integer",
+        "doc": "Parent company ID",
+        "nullable": true
+      },
+      "company_name": {
+        "type": "string",
+        "doc": "Parent company name",
+        "nullable": true
+      },
+      "kitchen_type": {
+        "type": "string",
+        "doc": "Kitchen type (Vegan, Vegetarian, Mixed)",
+        "nullable": true
+      },
+      "cuisines": {
+        "type": "string[]",
+        "doc": null,
+        "nullable": true,
+        "name": "cuisines"
+      },
+      "created_at": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      }
     }
   },
   "StoreNearbyModel": {
-    "id": {
-      "type": "integer",
-      "doc": "Store ID",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "doc": "Store name",
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "doc": "Description of store",
-      "nullable": true,
-      "name": "description"
-    },
-    "img_url": {
-      "type": "string",
-      "doc": "URL to Store header image",
-      "nullable": true
-    },
-    "active": {
-      "type": "boolean",
-      "doc": "Active status. Inactive stores should not be returned or displayed.",
-      "nullable": true,
-      "name": "active"
-    },
-    "accepting_orders": {
-      "type": "boolean",
-      "doc": "Accepting orders status. Inactive stores should not be returned or displayed.",
-      "nullable": true
-    },
-    "reason_not_accepting": {
-      "type": "string",
-      "doc": "Reason why store is not accepting orders",
-      "nullable": true
-    },
-    "price_range": {
-      "type": "integer",
-      "doc": "Price range in integers. Can be 1-4.",
-      "nullable": true
-    },
-    "prep_time_buffer": {
-      "type": "integer",
-      "doc": "Prep time buffer in minutes.",
-      "nullable": true
-    },
-    "top_banner_text": {
-      "type": "string",
-      "doc": "Optional top banner text.",
-      "nullable": true
-    },
-    "company_id": {
-      "type": "integer",
-      "doc": "Parent company ID",
-      "nullable": true
-    },
-    "company_name": {
-      "type": "string",
-      "doc": "Parent company name",
-      "nullable": true
-    },
-    "kitchen_type": {
-      "type": "string",
-      "doc": "Kitchen type (Vegan, Vegetarian, Mixed)",
-      "nullable": true
-    },
-    "cuisines": {
-      "type": "StoreNearbyCuisinesModel[]",
-      "doc": null,
-      "nullable": true,
-      "name": "cuisines"
-    },
-    "created_at": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "Store ID",
+        "nullable": true,
+        "name": "id"
+      },
+      "name": {
+        "type": "string",
+        "doc": "Store name",
+        "nullable": true,
+        "name": "name"
+      },
+      "description": {
+        "type": "string",
+        "doc": "Description of store",
+        "nullable": true,
+        "name": "description"
+      },
+      "img_url": {
+        "type": "string",
+        "doc": "URL to Store header image",
+        "nullable": true
+      },
+      "active": {
+        "type": "boolean",
+        "doc": "Active status. Inactive stores should not be returned or displayed.",
+        "nullable": true,
+        "name": "active"
+      },
+      "accepting_orders": {
+        "type": "boolean",
+        "doc": "Accepting orders status. Inactive stores should not be returned or displayed.",
+        "nullable": true
+      },
+      "reason_not_accepting": {
+        "type": "string",
+        "doc": "Reason why store is not accepting orders",
+        "nullable": true
+      },
+      "price_range": {
+        "type": "integer",
+        "doc": "Price range in integers. Can be 1-4.",
+        "nullable": true
+      },
+      "prep_time_buffer": {
+        "type": "integer",
+        "doc": "Prep time buffer in minutes.",
+        "nullable": true
+      },
+      "top_banner_text": {
+        "type": "string",
+        "doc": "Optional top banner text.",
+        "nullable": true
+      },
+      "company_id": {
+        "type": "integer",
+        "doc": "Parent company ID",
+        "nullable": true
+      },
+      "company_name": {
+        "type": "string",
+        "doc": "Parent company name",
+        "nullable": true
+      },
+      "kitchen_type": {
+        "type": "string",
+        "doc": "Kitchen type (Vegan, Vegetarian, Mixed)",
+        "nullable": true
+      },
+      "cuisines": {
+        "type": "StoreNearbyCuisinesModel[]",
+        "doc": null,
+        "nullable": true,
+        "name": "cuisines"
+      },
+      "created_at": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      }
     }
   },
   "StoreNearbyCuisinesModel": {
-    "cuisine": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "cuisine"
+    "fields": {
+      "cuisine": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "cuisine"
+      }
     }
   },
   "StoreMenuModel": {
-    "id": {
-      "type": "integer",
-      "doc": "ID of the menu",
-      "nullable": true,
-      "name": "id"
-    },
-    "position_index": {
-      "type": "integer",
-      "doc": "Position index of the menu",
-      "nullable": true
-    },
-    "name": {
-      "type": "string",
-      "doc": "Title of the menu category",
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "doc": "Description of the menu category",
-      "nullable": true,
-      "name": "description"
-    },
-    "products": {
-      "type": "StoreMenuProductsModel[]",
-      "doc": null,
-      "nullable": true,
-      "name": "products"
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "ID of the menu",
+        "nullable": true,
+        "name": "id"
+      },
+      "position_index": {
+        "type": "integer",
+        "doc": "Position index of the menu",
+        "nullable": true
+      },
+      "name": {
+        "type": "string",
+        "doc": "Title of the menu category",
+        "nullable": true,
+        "name": "name"
+      },
+      "description": {
+        "type": "string",
+        "doc": "Description of the menu category",
+        "nullable": true,
+        "name": "description"
+      },
+      "products": {
+        "type": "StoreMenuProductsModel[]",
+        "doc": null,
+        "nullable": true,
+        "name": "products"
+      }
     }
   },
   "StoreMenuProductsModel": {
-    "id": {
-      "type": "integer",
-      "doc": "ID of the product",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "doc": "Title of the product",
-      "nullable": true,
-      "name": "name"
-    },
-    "tags": {
-      "type": "StoreMenuProductsTagsModel[]",
-      "doc": null,
-      "nullable": true,
-      "name": "tags"
-    },
-    "price": {
-      "type": "integer",
-      "doc": "Price of the product",
-      "nullable": true,
-      "name": "price"
-    },
-    "active": {
-      "type": "boolean",
-      "doc": "Active status. Inactive products should not be returned or displayed.",
-      "nullable": true,
-      "name": "active"
-    },
-    "img_url": {
-      "type": "string",
-      "doc": "URL to product image",
-      "nullable": true
-    },
-    "description": {
-      "type": "string",
-      "doc": "description of the product",
-      "nullable": true,
-      "name": "description"
-    },
-    "position_index": {
-      "type": "integer",
-      "doc": "Position index of the menu",
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "ID of the product",
+        "nullable": true,
+        "name": "id"
+      },
+      "name": {
+        "type": "string",
+        "doc": "Title of the product",
+        "nullable": true,
+        "name": "name"
+      },
+      "tags": {
+        "type": "StoreMenuProductsTagsModel[]",
+        "doc": null,
+        "nullable": true,
+        "name": "tags"
+      },
+      "price": {
+        "type": "integer",
+        "doc": "Price of the product",
+        "nullable": true,
+        "name": "price"
+      },
+      "active": {
+        "type": "boolean",
+        "doc": "Active status. Inactive products should not be returned or displayed.",
+        "nullable": true,
+        "name": "active"
+      },
+      "img_url": {
+        "type": "string",
+        "doc": "URL to product image",
+        "nullable": true
+      },
+      "description": {
+        "type": "string",
+        "doc": "description of the product",
+        "nullable": true,
+        "name": "description"
+      },
+      "position_index": {
+        "type": "integer",
+        "doc": "Position index of the menu",
+        "nullable": true
+      }
     }
   },
   "StoreMenuProductsTagsModel": {
-    "id": {
-      "type": "integer",
-      "doc": "ID of the product",
-      "nullable": true,
-      "name": "id"
-    },
-    "tag_name": {
-      "type": "string",
-      "doc": "Title of the tag",
-      "nullable": true
-    },
-    "tag_type_id": {
-      "type": "integer",
-      "doc": "ID of the product",
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "ID of the product",
+        "nullable": true,
+        "name": "id"
+      },
+      "tag_name": {
+        "type": "string",
+        "doc": "Title of the tag",
+        "nullable": true
+      },
+      "tag_type_id": {
+        "type": "integer",
+        "doc": "ID of the product",
+        "nullable": true
+      }
     }
   },
   "StoreOperationDaysModel": {
-    "store_regular_hours": {
-      "type": "StoreOperationDaysStoreRegularHoursModel[]",
-      "doc": null,
-      "nullable": true
-    },
-    "store_special_hours": {
-      "type": "StoreOperationDaysStoreSpecialHoursModel[]",
-      "doc": null,
-      "nullable": true
-    },
-    "accepting_orders": {
-      "type": "boolean",
-      "doc": "Accepting orders status. Inactive stores should not be returned or displayed,",
-      "nullable": true
-    },
-    "reason_not_accepting": {
-      "type": "string",
-      "doc": "Reason not accepting orders, should not appear if store is accepting orders",
-      "nullable": true
+    "fields": {
+      "store_regular_hours": {
+        "type": "StoreOperationDaysStoreRegularHoursModel[]",
+        "doc": null,
+        "nullable": true
+      },
+      "store_special_hours": {
+        "type": "StoreOperationDaysStoreSpecialHoursModel[]",
+        "doc": null,
+        "nullable": true
+      },
+      "accepting_orders": {
+        "type": "boolean",
+        "doc": "Accepting orders status. Inactive stores should not be returned or displayed,",
+        "nullable": true
+      },
+      "reason_not_accepting": {
+        "type": "string",
+        "doc": "Reason not accepting orders, should not appear if store is accepting orders",
+        "nullable": true
+      }
     }
   },
   "StoreOperationDaysStoreRegularHoursModel": {
-    "id": {
-      "type": "integer",
-      "doc": "ID of the store regular day",
-      "nullable": true,
-      "name": "id"
-    },
-    "store_id": {
-      "type": "integer",
-      "doc": "ID of the store",
-      "nullable": true
-    },
-    "day": {
-      "type": "integer",
-      "doc": "Day of the week, starting from sunday (0)",
-      "nullable": true,
-      "name": "day"
-    },
-    "open_time": {
-      "type": "datetime",
-      "doc": "Store open time in iso-string format",
-      "nullable": true
-    },
-    "close_time": {
-      "type": "datetime",
-      "doc": "Store close time in iso-string format",
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "ID of the store regular day",
+        "nullable": true,
+        "name": "id"
+      },
+      "store_id": {
+        "type": "integer",
+        "doc": "ID of the store",
+        "nullable": true
+      },
+      "day": {
+        "type": "integer",
+        "doc": "Day of the week, starting from sunday (0)",
+        "nullable": true,
+        "name": "day"
+      },
+      "open_time": {
+        "type": "datetime",
+        "doc": "Store open time in iso-string format",
+        "nullable": true
+      },
+      "close_time": {
+        "type": "datetime",
+        "doc": "Store close time in iso-string format",
+        "nullable": true
+      }
     }
   },
   "StoreOperationDaysStoreSpecialHoursModel": {
-    "id": {
-      "type": "integer",
-      "doc": "ID of the store special date",
-      "nullable": true,
-      "name": "id"
-    },
-    "store_id": {
-      "type": "integer",
-      "doc": "ID of the store",
-      "nullable": true
-    },
-    "date": {
-      "type": "string",
-      "doc": "Date of the week in iso-string format",
-      "nullable": true,
-      "name": "date"
-    },
-    "open_time": {
-      "type": "datetime",
-      "doc": "Store open time in time format",
-      "nullable": true
-    },
-    "close_time": {
-      "type": "datetime",
-      "doc": "Store close time in time format",
-      "nullable": true
-    },
-    "active": {
-      "type": "boolean",
-      "doc": "Active status. Inactive special dates should not be returned or displayed.",
-      "nullable": true,
-      "name": "active"
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "ID of the store special date",
+        "nullable": true,
+        "name": "id"
+      },
+      "store_id": {
+        "type": "integer",
+        "doc": "ID of the store",
+        "nullable": true
+      },
+      "date": {
+        "type": "string",
+        "doc": "Date of the week in iso-string format",
+        "nullable": true,
+        "name": "date"
+      },
+      "open_time": {
+        "type": "datetime",
+        "doc": "Store open time in time format",
+        "nullable": true
+      },
+      "close_time": {
+        "type": "datetime",
+        "doc": "Store close time in time format",
+        "nullable": true
+      },
+      "active": {
+        "type": "boolean",
+        "doc": "Active status. Inactive special dates should not be returned or displayed.",
+        "nullable": true,
+        "name": "active"
+      }
     }
   },
   "StoreEtaModel": {
-    "min": {
-      "type": "integer",
-      "doc": "Minimum required time",
-      "nullable": true,
-      "name": "min"
-    },
-    "max": {
-      "type": "integer",
-      "doc": "Maximum required time",
-      "nullable": true,
-      "name": "max"
+    "fields": {
+      "min": {
+        "type": "integer",
+        "doc": "Minimum required time",
+        "nullable": true,
+        "name": "min"
+      },
+      "max": {
+        "type": "integer",
+        "doc": "Maximum required time",
+        "nullable": true,
+        "name": "max"
+      }
     }
   },
   "StoreDistanceModel": {
-    "meters": {
-      "type": "float",
-      "doc": "Distance in meters",
-      "nullable": true,
-      "name": "meters"
-    },
-    "miles": {
-      "type": "float",
-      "doc": "Distance in miles",
-      "nullable": true,
-      "name": "miles"
+    "fields": {
+      "meters": {
+        "type": "float",
+        "doc": "Distance in meters",
+        "nullable": true,
+        "name": "meters"
+      },
+      "miles": {
+        "type": "float",
+        "doc": "Distance in miles",
+        "nullable": true,
+        "name": "miles"
+      }
     }
   },
   "StoreModel": {
-    "id": {
-      "type": "integer",
-      "doc": "Store ID",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "doc": "Store name",
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "doc": "Description of store",
-      "nullable": true,
-      "name": "description"
-    },
-    "img_url": {
-      "type": "string",
-      "doc": "URL to Store header image",
-      "nullable": true
-    },
-    "active": {
-      "type": "boolean",
-      "doc": "Active status. Inactive stores should not be returned or displayed.",
-      "nullable": true,
-      "name": "active"
-    },
-    "accepting_orders": {
-      "type": "boolean",
-      "doc": "Accepting orders status. Inactive stores should not be returned or displayed.",
-      "nullable": true
-    },
-    "reason_not_accepting": {
-      "type": "string",
-      "doc": "Reason why store is not accepting orders",
-      "nullable": true
-    },
-    "price_range": {
-      "type": "integer",
-      "doc": "Price range in integers. Can be 1-4.",
-      "nullable": true
-    },
-    "prep_time_buffer": {
-      "type": "integer",
-      "doc": "Prep time buffer in minutes.",
-      "nullable": true
-    },
-    "top_banner_text": {
-      "type": "string",
-      "doc": "Optional top banner text.",
-      "nullable": true
-    },
-    "company_id": {
-      "type": "integer",
-      "doc": "Parent company ID",
-      "nullable": true
-    },
-    "company_name": {
-      "type": "string",
-      "doc": "Parent company name",
-      "nullable": true
-    },
-    "kitchen_type": {
-      "type": "string",
-      "doc": "Kitchen type (Vegan, Vegetarian, Mixed)",
-      "nullable": true
-    },
-    "cuisines": {
-      "type": "string[]",
-      "doc": null,
-      "nullable": true,
-      "name": "cuisines"
-    },
-    "created_at": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
-    },
-    "address": {
-      "type": "StoreAddressModel",
-      "doc": null,
-      "nullable": true,
-      "name": "address"
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "Store ID",
+        "nullable": true,
+        "name": "id"
+      },
+      "name": {
+        "type": "string",
+        "doc": "Store name",
+        "nullable": true,
+        "name": "name"
+      },
+      "description": {
+        "type": "string",
+        "doc": "Description of store",
+        "nullable": true,
+        "name": "description"
+      },
+      "img_url": {
+        "type": "string",
+        "doc": "URL to Store header image",
+        "nullable": true
+      },
+      "active": {
+        "type": "boolean",
+        "doc": "Active status. Inactive stores should not be returned or displayed.",
+        "nullable": true,
+        "name": "active"
+      },
+      "accepting_orders": {
+        "type": "boolean",
+        "doc": "Accepting orders status. Inactive stores should not be returned or displayed.",
+        "nullable": true
+      },
+      "reason_not_accepting": {
+        "type": "string",
+        "doc": "Reason why store is not accepting orders",
+        "nullable": true
+      },
+      "price_range": {
+        "type": "integer",
+        "doc": "Price range in integers. Can be 1-4.",
+        "nullable": true
+      },
+      "prep_time_buffer": {
+        "type": "integer",
+        "doc": "Prep time buffer in minutes.",
+        "nullable": true
+      },
+      "top_banner_text": {
+        "type": "string",
+        "doc": "Optional top banner text.",
+        "nullable": true
+      },
+      "company_id": {
+        "type": "integer",
+        "doc": "Parent company ID",
+        "nullable": true
+      },
+      "company_name": {
+        "type": "string",
+        "doc": "Parent company name",
+        "nullable": true
+      },
+      "kitchen_type": {
+        "type": "string",
+        "doc": "Kitchen type (Vegan, Vegetarian, Mixed)",
+        "nullable": true
+      },
+      "cuisines": {
+        "type": "string[]",
+        "doc": null,
+        "nullable": true,
+        "name": "cuisines"
+      },
+      "created_at": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      },
+      "address": {
+        "type": "StoreAddressModel",
+        "doc": null,
+        "nullable": true,
+        "name": "address"
+      }
     }
   },
   "StoreAddressModel": {
-    "id": {
-      "type": "integer",
-      "doc": "Address ID",
-      "nullable": true,
-      "name": "id"
-    },
-    "street_number": {
-      "type": "string",
-      "doc": "Street number",
-      "nullable": true
-    },
-    "route": {
-      "type": "string",
-      "doc": "Street name",
-      "nullable": true,
-      "name": "route"
-    },
-    "city": {
-      "type": "string",
-      "doc": "City",
-      "nullable": true,
-      "name": "city"
-    },
-    "state": {
-      "type": "string",
-      "doc": "State",
-      "nullable": true,
-      "name": "state"
-    },
-    "country": {
-      "type": "string",
-      "doc": "Country",
-      "nullable": true,
-      "name": "country"
-    },
-    "postal_code": {
-      "type": "string",
-      "doc": "Postal code",
-      "nullable": true
-    },
-    "display_short": {
-      "type": "string",
-      "doc": "Display short address",
-      "nullable": true
-    },
-    "display_long": {
-      "type": "string",
-      "doc": "Display long address",
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "Address ID",
+        "nullable": true,
+        "name": "id"
+      },
+      "street_number": {
+        "type": "string",
+        "doc": "Street number",
+        "nullable": true
+      },
+      "route": {
+        "type": "string",
+        "doc": "Street name",
+        "nullable": true,
+        "name": "route"
+      },
+      "city": {
+        "type": "string",
+        "doc": "City",
+        "nullable": true,
+        "name": "city"
+      },
+      "state": {
+        "type": "string",
+        "doc": "State",
+        "nullable": true,
+        "name": "state"
+      },
+      "country": {
+        "type": "string",
+        "doc": "Country",
+        "nullable": true,
+        "name": "country"
+      },
+      "postal_code": {
+        "type": "string",
+        "doc": "Postal code",
+        "nullable": true
+      },
+      "display_short": {
+        "type": "string",
+        "doc": "Display short address",
+        "nullable": true
+      },
+      "display_long": {
+        "type": "string",
+        "doc": "Display long address",
+        "nullable": true
+      }
     }
   },
   "MenuProductModel": {
-    "id": {
-      "type": "integer",
-      "doc": "Menu Product ID",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "description"
-    },
-    "img_url": {
-      "type": "string",
-      "doc": null,
-      "nullable": true
-    },
-    "price": {
-      "type": "integer",
-      "doc": "Price in cents",
-      "nullable": true,
-      "name": "price"
-    },
-    "active": {
-      "type": "boolean",
-      "doc": "Active status. Inactive products should not be returned or displayed.",
-      "nullable": true,
-      "name": "active"
-    },
-    "tags": {
-      "type": "MenuProductTagsModel[]",
-      "doc": null,
-      "nullable": true,
-      "name": "tags"
+    "fields": {
+      "id": {
+        "type": "integer",
+        "doc": "Menu Product ID",
+        "nullable": true,
+        "name": "id"
+      },
+      "name": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "name"
+      },
+      "description": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "description"
+      },
+      "img_url": {
+        "type": "string",
+        "doc": null,
+        "nullable": true
+      },
+      "price": {
+        "type": "integer",
+        "doc": "Price in cents",
+        "nullable": true,
+        "name": "price"
+      },
+      "active": {
+        "type": "boolean",
+        "doc": "Active status. Inactive products should not be returned or displayed.",
+        "nullable": true,
+        "name": "active"
+      },
+      "tags": {
+        "type": "MenuProductTagsModel[]",
+        "doc": null,
+        "nullable": true,
+        "name": "tags"
+      }
     }
   },
   "MenuProductTagsModel": {
-    "tag": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "tag"
+    "fields": {
+      "tag": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "tag"
+      }
     }
   },
   "PaymentIntentModel": {
-    "paymentIntent": {
-      "type": "PaymentIntentPaymentIntentModel",
-      "doc": "Identifiers for the Payment Intent that was created / updated",
-      "nullable": true,
-      "name": "paymentIntent"
-    },
-    "stripeCustomerId": {
-      "type": "string",
-      "doc": "The user's Stripe Customer ID",
-      "nullable": true,
-      "name": "stripeCustomerId"
-    },
-    "orderSummary": {
-      "type": "PaymentIntentOrderSummaryModel",
-      "doc": "Order summary - line item breakdown",
-      "nullable": true,
-      "name": "orderSummary"
+    "fields": {
+      "paymentIntent": {
+        "type": "PaymentIntentPaymentIntentModel",
+        "doc": "Identifiers for the Payment Intent that was created / updated",
+        "nullable": true,
+        "name": "paymentIntent"
+      },
+      "stripeCustomerId": {
+        "type": "string",
+        "doc": "The user's Stripe Customer ID",
+        "nullable": true,
+        "name": "stripeCustomerId"
+      },
+      "orderSummary": {
+        "type": "PaymentIntentOrderSummaryModel",
+        "doc": "Order summary - line item breakdown",
+        "nullable": true,
+        "name": "orderSummary"
+      }
     }
   },
   "PaymentIntentPaymentIntentModel": {
-    "id": {
-      "type": "string",
-      "doc": "Payment Intent ID. Used to retrieve the Payment Intent. Should be stored in client.",
-      "nullable": true,
-      "name": "id"
-    },
-    "client_secret": {
-      "type": "string",
-      "doc": "Payment Intent client secret",
-      "nullable": true
+    "fields": {
+      "id": {
+        "type": "string",
+        "doc": "Payment Intent ID. Used to retrieve the Payment Intent. Should be stored in client.",
+        "nullable": true,
+        "name": "id"
+      },
+      "client_secret": {
+        "type": "string",
+        "doc": "Payment Intent client secret",
+        "nullable": true
+      }
     }
   },
   "PaymentIntentOrderSummaryModel": {
-    "items": {
-      "type": "PaymentIntentOrderSummaryItemsModel[]",
-      "doc": "Order items",
-      "nullable": true,
-      "name": "items"
-    },
-    "subtotal": {
-      "type": "integer",
-      "doc": "Order subtotal - in cents",
-      "nullable": true,
-      "name": "subtotal"
-    },
-    "discountRate": {
-      "type": "string",
-      "doc": "Order discount rate - percentage | false if no discount rate",
-      "nullable": true,
-      "name": "discountRate"
-    },
-    "discount": {
-      "type": "integer",
-      "doc": "Order discount - in cents | false if code not valid",
-      "nullable": true,
-      "name": "discount"
-    },
-    "tax": {
-      "type": "integer",
-      "doc": "Order tax - in cents",
-      "nullable": true,
-      "name": "tax"
-    },
-    "delivery_cost": {
-      "type": "integer",
-      "doc": "Order delivery cost - in cents",
-      "nullable": true
-    },
-    "delivery_tip": {
-      "type": "integer",
-      "doc": "Order delivery tip - in cents",
-      "nullable": true
-    },
-    "total": {
-      "type": "integer",
-      "doc": "Order total - in cents",
-      "nullable": true,
-      "name": "total"
+    "fields": {
+      "items": {
+        "type": "PaymentIntentOrderSummaryItemsModel[]",
+        "doc": "Order items",
+        "nullable": true,
+        "name": "items"
+      },
+      "subtotal": {
+        "type": "integer",
+        "doc": "Order subtotal - in cents",
+        "nullable": true,
+        "name": "subtotal"
+      },
+      "discountRate": {
+        "type": "string",
+        "doc": "Order discount rate - percentage | false if no discount rate",
+        "nullable": true,
+        "name": "discountRate"
+      },
+      "discount": {
+        "type": "integer",
+        "doc": "Order discount - in cents | false if code not valid",
+        "nullable": true,
+        "name": "discount"
+      },
+      "tax": {
+        "type": "integer",
+        "doc": "Order tax - in cents",
+        "nullable": true,
+        "name": "tax"
+      },
+      "delivery_cost": {
+        "type": "integer",
+        "doc": "Order delivery cost - in cents",
+        "nullable": true
+      },
+      "delivery_tip": {
+        "type": "integer",
+        "doc": "Order delivery tip - in cents",
+        "nullable": true
+      },
+      "total": {
+        "type": "integer",
+        "doc": "Order total - in cents",
+        "nullable": true,
+        "name": "total"
+      }
     }
   },
   "PaymentIntentOrderSummaryItemsModel": {
-    "id": {
-      "type": "integer",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "nullable": true,
-      "name": "description"
-    },
-    "img_url": {
-      "type": "string",
-      "nullable": true
-    },
-    "price": {
-      "type": "integer",
-      "nullable": true,
-      "name": "price"
-    },
-    "price_total": {
-      "type": "integer",
-      "nullable": true
-    },
-    "quantity": {
-      "type": "integer",
-      "nullable": true,
-      "name": "quantity"
-    }
-  },
-  "PaymentIntentPriceModel": {
-    "paymentIntent": {
-      "type": "PaymentIntentPricePaymentIntentModel",
-      "doc": "Identifiers for the Payment Intent that was created / updated",
-      "nullable": true,
-      "name": "paymentIntent"
-    },
-    "stripeCustomerId": {
-      "type": "string",
-      "doc": "The user's Stripe Customer ID",
-      "nullable": true,
-      "name": "stripeCustomerId"
-    },
-    "orderSummary": {
-      "type": "PaymentIntentPriceOrderSummaryModel",
-      "doc": "Order summary - line item breakdown",
-      "nullable": true,
-      "name": "orderSummary"
-    }
-  },
-  "PaymentIntentPricePaymentIntentModel": {
-    "id": {
-      "type": "string",
-      "doc": "Payment Intent ID. Used to retrieve the Payment Intent. Should be stored in client.",
-      "nullable": true,
-      "name": "id"
-    },
-    "client_secret": {
-      "type": "string",
-      "doc": "Payment Intent client secret",
-      "nullable": true
-    }
-  },
-  "PaymentIntentPriceOrderSummaryModel": {
-    "items": {
-      "type": "PaymentIntentPriceOrderSummaryItemsModel[]",
-      "doc": "Order items",
-      "nullable": true,
-      "name": "items"
-    },
-    "subtotal": {
-      "type": "integer",
-      "doc": "Order subtotal - in cents",
-      "nullable": true,
-      "name": "subtotal"
-    },
-    "discountRate": {
-      "type": "string",
-      "doc": "Order discount rate - percentage | false if no discount rate",
-      "nullable": true,
-      "name": "discountRate"
-    },
-    "discount": {
-      "type": "integer",
-      "doc": "Order discount - in cents | false if code not valid",
-      "nullable": true,
-      "name": "discount"
-    },
-    "tax": {
-      "type": "integer",
-      "doc": "Order tax - in cents",
-      "nullable": true,
-      "name": "tax"
-    },
-    "delivery_cost": {
-      "type": "integer",
-      "doc": "Order delivery cost - in cents",
-      "nullable": true
-    },
-    "delivery_tip": {
-      "type": "integer",
-      "doc": "Order delivery tip - in cents",
-      "nullable": true
-    },
-    "total": {
-      "type": "integer",
-      "doc": "Order total - in cents",
-      "nullable": true,
-      "name": "total"
-    }
-  },
-  "PaymentIntentPriceOrderSummaryItemsModel": {
-    "id": {
-      "type": "integer",
-      "nullable": true,
-      "name": "id"
-    },
-    "name": {
-      "type": "string",
-      "nullable": true,
-      "name": "name"
-    },
-    "description": {
-      "type": "string",
-      "nullable": true,
-      "name": "description"
-    },
-    "img_url": {
-      "type": "string",
-      "nullable": true
-    },
-    "price": {
-      "type": "integer",
-      "nullable": true,
-      "name": "price"
-    },
-    "price_total": {
-      "type": "integer",
-      "nullable": true
-    },
-    "quantity": {
-      "type": "integer",
-      "nullable": true,
-      "name": "quantity"
+    "fields": {
+      "id": {
+        "type": "integer",
+        "nullable": true,
+        "name": "id"
+      },
+      "name": {
+        "type": "string",
+        "nullable": true,
+        "name": "name"
+      },
+      "description": {
+        "type": "string",
+        "nullable": true,
+        "name": "description"
+      },
+      "img_url": {
+        "type": "string",
+        "nullable": true
+      },
+      "price": {
+        "type": "integer",
+        "nullable": true,
+        "name": "price"
+      },
+      "price_total": {
+        "type": "integer",
+        "nullable": true
+      },
+      "quantity": {
+        "type": "integer",
+        "nullable": true,
+        "name": "quantity"
+      }
     }
   },
   "DeliveryValidateModel": {
-    "status": {
-      "type": "string",
-      "doc": null,
-      "nullable": true,
-      "name": "status"
-    },
-    "provider": {
-      "type": "string",
-      "doc": "Delivery service name",
-      "nullable": true,
-      "name": "provider"
-    },
-    "providerId": {
-      "type": "string",
-      "doc": "ID of the store",
-      "nullable": true,
-      "name": "providerId"
-    },
-    "deliveryInfo": {
-      "type": "DeliveryValidateDeliveryInfoModel",
-      "doc": null,
-      "nullable": true,
-      "name": "deliveryInfo"
+    "fields": {
+      "status": {
+        "type": "string",
+        "doc": null,
+        "nullable": true,
+        "name": "status"
+      },
+      "provider": {
+        "type": "string",
+        "doc": "Delivery service name",
+        "nullable": true,
+        "name": "provider"
+      },
+      "providerId": {
+        "type": "string",
+        "doc": "ID of the store",
+        "nullable": true,
+        "name": "providerId"
+      },
+      "deliveryInfo": {
+        "type": "DeliveryValidateDeliveryInfoModel",
+        "doc": null,
+        "nullable": true,
+        "name": "deliveryInfo"
+      }
     }
   },
   "DeliveryValidateDeliveryInfoModel": {
-    "fee": {
-      "type": "string",
-      "doc": "Cost of the delivery in dollars",
-      "nullable": true,
-      "name": "fee"
-    },
-    "pickupTimeEstimated": {
-      "type": "string",
-      "doc": "Pickup date string in iso format",
-      "nullable": true,
-      "name": "pickupTimeEstimated"
-    },
-    "dropoffTimeEstimated": {
-      "type": "string",
-      "doc": "Dropoff date string in iso format",
-      "nullable": true,
-      "name": "dropoffTimeEstimated"
+    "fields": {
+      "fee": {
+        "type": "string",
+        "doc": "Cost of the delivery in dollars",
+        "nullable": true,
+        "name": "fee"
+      },
+      "pickupTimeEstimated": {
+        "type": "string",
+        "doc": "Pickup date string in iso format",
+        "nullable": true,
+        "name": "pickupTimeEstimated"
+      },
+      "dropoffTimeEstimated": {
+        "type": "string",
+        "doc": "Dropoff date string in iso format",
+        "nullable": true,
+        "name": "dropoffTimeEstimated"
+      }
     }
   },
   "DeliveryModel": {
-    "success": {
-      "type": "boolean",
-      "doc": null,
-      "nullable": true,
-      "name": "success"
-    },
-    "deliveryId": {
-      "type": "integer",
-      "doc": "ID of the delivery to access its status",
-      "nullable": true,
-      "name": "deliveryId"
-    },
-    "deliveryFee": {
-      "type": "integer",
-      "doc": "Price of the order in dollars",
-      "nullable": true,
-      "name": "deliveryFee"
-    },
-    "deliveryTip": {
-      "type": "integer",
-      "doc": null,
-      "nullable": true,
-      "name": "deliveryTip"
-    },
-    "quotedPickupTime": {
-      "type": "string",
-      "doc": "Pickup time iso-string",
-      "nullable": true,
-      "name": "quotedPickupTime"
-    },
-    "estimatedDeliveryTime": {
-      "type": "string",
-      "doc": "Delivery time iso-string",
-      "nullable": true,
-      "name": "estimatedDeliveryTime"
-    },
-    "trackingLink": {
-      "type": "string",
-      "doc": "Tracking link of the delivery",
-      "nullable": true,
-      "name": "trackingLink"
+    "fields": {
+      "success": {
+        "type": "boolean",
+        "doc": null,
+        "nullable": true,
+        "name": "success"
+      },
+      "deliveryId": {
+        "type": "integer",
+        "doc": "ID of the delivery to access its status",
+        "nullable": true,
+        "name": "deliveryId"
+      },
+      "deliveryFee": {
+        "type": "integer",
+        "doc": "Price of the order in dollars",
+        "nullable": true,
+        "name": "deliveryFee"
+      },
+      "deliveryTip": {
+        "type": "integer",
+        "doc": null,
+        "nullable": true,
+        "name": "deliveryTip"
+      },
+      "quotedPickupTime": {
+        "type": "string",
+        "doc": "Pickup time iso-string",
+        "nullable": true,
+        "name": "quotedPickupTime"
+      },
+      "estimatedDeliveryTime": {
+        "type": "string",
+        "doc": "Delivery time iso-string",
+        "nullable": true,
+        "name": "estimatedDeliveryTime"
+      },
+      "trackingLink": {
+        "type": "string",
+        "doc": "Tracking link of the delivery",
+        "nullable": true,
+        "name": "trackingLink"
+      }
     }
   }
 }

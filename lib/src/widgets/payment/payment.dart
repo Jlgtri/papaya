@@ -184,14 +184,14 @@ class PaymentScreen extends HookConsumerWidget {
           ).future,
         );
         print(paymentIntent);
-        if (paymentIntent != null && paymentIntent.paymentIntent != null) {
+        if (paymentIntent != null && paymentIntent.paymentIntent?.id != null) {
           final String note = ref.read(noteProvider);
           final order = await ref.read(
             orderProvider(
               OrderRequestModel(
                 saveCard: true,
                 memo: note.isEmpty ? null : note,
-                paymentIntentId: paymentIntent.paymentIntent!.id,
+                paymentIntentId: paymentIntent.paymentIntent!.id!,
                 paymentMethodId: 'pm_card_mastercard',
                 address: address.value,
                 handoffTypeId: initialDeliveryType.index + 1,

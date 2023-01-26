@@ -17,6 +17,9 @@ class CartStore {
   /// The products in this store.
   List<CartStoreProduct> products = <CartStoreProduct>[];
 
+  /// The assigned payment intent of this store.
+  String? paymentIntent;
+
   /// The store that the [id] references.
   @ignore
   StoreModel? store;

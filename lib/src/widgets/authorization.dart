@@ -38,7 +38,7 @@ class AuthorizationScreen extends HookConsumerWidget {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
+        statusBarColor: theme.colorScheme.onBackground,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
         systemNavigationBarIconBrightness: Brightness.light,
@@ -49,7 +49,7 @@ class AuthorizationScreen extends HookConsumerWidget {
         backgroundColor: theme.colorScheme.onBackground,
         appBar: AppBar(
           systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
+            statusBarColor: theme.colorScheme.onBackground,
             statusBarIconBrightness: Brightness.light,
             statusBarBrightness: Brightness.dark,
             systemNavigationBarIconBrightness: Brightness.light,

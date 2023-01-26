@@ -303,7 +303,6 @@ orders:
   card:
     more: More
     less: Less
-
     status:
       current: Current
       completed: Completed
@@ -323,3 +322,16 @@ orders:
       number: Order Number
       support: Contact Support
       repeat: Repeat Order
+
+  screen:
+    title: Current
+    track_title: 'You can track your order here:'
+    number: Order number
+    status:
+      accepted(final String by): Order accepted by $by
+      preparing: Order is being prepared
+      delivering: Courier is on the way
+      arrived: Courier arrived
+      delivered: Order delivered
+    support: Support
+    tip: Add a Tip

@@ -18,6 +18,7 @@ import 'widgets/navigation/map.dart';
 import 'widgets/navigation/modal/address.dart';
 import 'widgets/navigation/modal/profile_edit.dart';
 import 'widgets/navigation/navigation.dart';
+import 'widgets/navigation/order.dart';
 import 'widgets/navigation/tabs/cart.dart';
 import 'widgets/onboarding.dart';
 import 'widgets/payment/modal/payment_method.dart';
@@ -215,7 +216,12 @@ enum Routes {
   /// The screen that allows user to select delivery address for the order.
   ///
   /// **Can** be provided with [PaymentAddressScreen] as an argument.
-  paymentAddress('/payment/address');
+  paymentAddress('/payment/address'),
+
+  /// The screen that displays an ongoing [order].
+  ///
+  /// **Must** be provided with [OrderScreen] as an argument.
+  order('/order');
 
   /// The route in the app.
   const Routes(this.name);
@@ -542,6 +548,17 @@ enum Routes {
               : const PaymentAddressScreen(),
           duration: const Duration(milliseconds: 500),
           animationCurve: Curves.easeOutQuad,
+        );
+
+      case order:
+        return PageTransition<T>(
+          settings: settings,
+          alignment: Alignment.center,
+          type: PageTransitionType.scale,
+          duration: const Duration(milliseconds: 500),
+          reverseDuration: const Duration(milliseconds: 500),
+          curve: Curves.easeOutQuad,
+          child: arguments! as OrderScreen,
         );
     }
   }

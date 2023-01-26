@@ -27,6 +27,7 @@ dependencies:
   flutter_multi_formatter: ^2.9.11
   flutter_native_splash: ^2.2.16
   flutter_riverpod: *riverpod_version
+  flutter_stripe: ^7.0.0
   geocoding: ^2.0.5
   geolocator: ^9.0.2
   hooks_riverpod: *riverpod_version

@@ -46,9 +46,10 @@ class StoreInformationScreen extends HookConsumerWidget {
             : animationController.reverse(),
       ),
     );
-    final String address = store.address?.displayLong ?? '';
     final AsyncValue<Iterable<LatLng>>? storeLocation =
-        address.isEmpty ? null : ref.watch(locationProvider(address));
+        store.address?.displayLong?.isNotEmpty ?? true
+            ? null
+            : ref.watch(locationProvider(store.address!.displayLong!));
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,

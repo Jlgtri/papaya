@@ -162,11 +162,11 @@ extension CustomThemeData on ThemeData {
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
           systemOverlayStyle: SystemUiOverlayStyle(
-            systemNavigationBarIconBrightness: Brightness.dark,
-            systemNavigationBarColor: colorScheme.surface,
-            statusBarColor: Colors.transparent,
+            statusBarColor: colorScheme.surface,
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light,
+            systemNavigationBarIconBrightness: Brightness.dark,
+            systemNavigationBarColor: colorScheme.surface,
           ),
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(

@@ -109,7 +109,7 @@ class OnboardingScreen extends HookConsumerWidget {
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
+        statusBarColor: theme.colorScheme.surface,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
         systemNavigationBarIconBrightness: Brightness.dark,
