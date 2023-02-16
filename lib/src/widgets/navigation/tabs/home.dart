@@ -68,7 +68,10 @@ class HomeScreen extends HookConsumerWidget {
       ),
     );
     return ScrollConfiguration(
-      behavior: const ScrollBehavior().copyWith(overscroll: false),
+      behavior: const ScrollBehavior().copyWith(
+        overscroll: false,
+        physics: const ClampingScrollPhysics(),
+      ),
       child: CustomScrollView(
         slivers: <Widget>[
           if (isDelivery &&

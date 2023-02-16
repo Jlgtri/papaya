@@ -240,177 +240,187 @@ class PaymentScreen extends HookConsumerWidget {
         ),
         child: KeyboardDismissOnTap(
           child: Material(
-            child: CustomScrollView(
-              slivers: <Widget>[
-                /// Back Button
-                SliverAppBar(
-                  systemOverlayStyle: SystemUiOverlayStyle(
-                    statusBarColor: modalOpened
-                        ? Colors.transparent
-                        : theme.colorScheme.surface,
-                    statusBarIconBrightness: Brightness.dark,
-                    statusBarBrightness: Brightness.light,
-                    systemNavigationBarIconBrightness: Brightness.dark,
-                    systemNavigationBarColor: modalOpened
-                        ? Colors.transparent
-                        : theme.colorScheme.surface,
-                  ),
-                  leadingWidth: double.infinity,
-                  leading: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: TextButton(
-                        onPressed: () async => syncCallback(navigator.maybePop),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(icons.arrow.left, size: 14),
-                              const SizedBox(width: 12),
-                              Flexible(child: Text($.payment.back))
-                            ],
+            child: SafeArea(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  /// Back Button
+                  SliverAppBar(
+                    systemOverlayStyle: SystemUiOverlayStyle(
+                      statusBarColor: modalOpened
+                          ? Colors.transparent
+                          : theme.colorScheme.surface,
+                      statusBarIconBrightness: Brightness.dark,
+                      statusBarBrightness: Brightness.light,
+                      systemNavigationBarIconBrightness: Brightness.dark,
+                      systemNavigationBarColor: modalOpened
+                          ? Colors.transparent
+                          : theme.colorScheme.surface,
+                    ),
+                    leadingWidth: double.infinity,
+                    leading: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: TextButton(
+                          onPressed: () async =>
+                              syncCallback(navigator.maybePop),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(icons.arrow.left, size: 14),
+                                const SizedBox(width: 12),
+                                Flexible(child: Text($.payment.back))
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                /// Title
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      $.payment.title,
-                      style: theme.textTheme.displayMedium,
-                      maxLines: 1,
+                  /// Title
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    sliver: SliverToBoxAdapter(
+                      child: Text(
+                        $.payment.title,
+                        style: theme.textTheme.displayMedium,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
-                ),
 
-                /// Cart Information
-                if (initialDeliveryType == null ||
-                    calculate == null ||
-                    unauthorized == null ||
-                    profile.isLoading)
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator.adaptive()),
-                  )
-                else
-                  SliverSafeArea(
-                    top: false,
-                    minimum: mediaQuery.viewInsets.copyWith(top: 0),
-                    sliver: SliverToBoxAdapter(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          /// Payment Summary
-                          ColoredBox(
-                            color: const Color(0xffF6F6F6),
-                            child: Padding(
+                  /// Cart Information
+                  if (initialDeliveryType == null ||
+                      calculate == null ||
+                      unauthorized == null ||
+                      profile.isLoading)
+                    const SliverFillRemaining(
+                      child:
+                          Center(child: CircularProgressIndicator.adaptive()),
+                    )
+                  else
+                    SliverSafeArea(
+                      top: false,
+                      minimum: mediaQuery.viewInsets.copyWith(top: 0),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            /// Payment Summary
+                            ColoredBox(
+                              color: const Color(0xffF6F6F6),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 24,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    for (final CartStore store in cart.value!)
+                                      PaymentStoreLoader(store),
+                                    PaymentSummary(calculate),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            /// Customer Information
+                            Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 24,
                               ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  for (final CartStore store in cart.value!)
-                                    PaymentStoreLoader(store),
-                                  PaymentSummary(calculate),
-                                ],
+                              child: PaymentCustomerInformation(
+                                profile.valueOrNull,
+                                authorize: unauthorized,
+                                focused: customer.value == null &&
+                                        paymentStep.value !=
+                                            PaymentStep.customer
+                                    ? null
+                                    : paymentStep.value == PaymentStep.customer,
+                                onPressed: (final UserProfileModel $customer) {
+                                  if (paymentStep.value !=
+                                      PaymentStep.customer) {
+                                    customer.value = null;
+                                    paymentStep.value = PaymentStep.customer;
+                                  } else {
+                                    customer.value = $customer;
+                                    paymentStep.value =
+                                        PaymentStep.deliveryType;
+                                  }
+                                },
                               ),
                             ),
-                          ),
 
-                          /// Customer Information
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 24,
+                            /// Order Details
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: PaymentOrderDetails(
+                                initialDeliveryType,
+                                deliveryEta?.valueOrNull,
+                                pickupEta?.valueOrNull,
+                                focused: customer.value == null ||
+                                        deliveryType.value == null &&
+                                            paymentStep.value !=
+                                                PaymentStep.deliveryType
+                                    ? null
+                                    : paymentStep.value ==
+                                        PaymentStep.deliveryType,
+                                onPressed: (
+                                  final DeliveryType $deliveryType,
+                                  final UserAddressesModel? $address,
+                                ) {
+                                  if (paymentStep.value !=
+                                      PaymentStep.deliveryType) {
+                                    paymentStep.value =
+                                        PaymentStep.deliveryType;
+                                  } else {
+                                    deliveryType.value = $deliveryType;
+                                    address.value = $address;
+                                    paymentStep.value = PaymentStep.payment;
+                                  }
+                                },
+                              ),
                             ),
-                            child: PaymentCustomerInformation(
-                              profile.valueOrNull,
-                              authorize: unauthorized,
-                              focused: customer.value == null &&
-                                      paymentStep.value != PaymentStep.customer
-                                  ? null
-                                  : paymentStep.value == PaymentStep.customer,
-                              onPressed: (final UserProfileModel $customer) {
-                                if (paymentStep.value != PaymentStep.customer) {
-                                  customer.value = null;
-                                  paymentStep.value = PaymentStep.customer;
-                                } else {
-                                  customer.value = $customer;
-                                  paymentStep.value = PaymentStep.deliveryType;
-                                }
-                              },
-                            ),
-                          ),
 
-                          /// Order Details
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: PaymentOrderDetails(
-                              initialDeliveryType,
-                              deliveryEta?.valueOrNull,
-                              pickupEta?.valueOrNull,
-                              focused: customer.value == null ||
-                                      deliveryType.value == null &&
-                                          paymentStep.value !=
-                                              PaymentStep.deliveryType
-                                  ? null
-                                  : paymentStep.value ==
-                                      PaymentStep.deliveryType,
-                              onPressed: (
-                                final DeliveryType $deliveryType,
-                                final UserAddressesModel? $address,
-                              ) {
-                                if (paymentStep.value !=
-                                    PaymentStep.deliveryType) {
-                                  paymentStep.value = PaymentStep.deliveryType;
-                                } else {
-                                  deliveryType.value = $deliveryType;
-                                  address.value = $address;
-                                  paymentStep.value = PaymentStep.payment;
-                                }
-                              },
+                            /// Payment
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 24,
+                              ),
+                              child: PaymentPayment(
+                                calculate,
+                                focused: customer.value == null ||
+                                        deliveryType.value == null ||
+                                        paymentStep.value != PaymentStep.payment
+                                    ? null
+                                    : paymentStep.value == PaymentStep.payment,
+                                onPressed: () async => syncCallback(() async {
+                                  if (paymentStep.value !=
+                                      PaymentStep.payment) {
+                                    paymentStep.value = PaymentStep.payment;
+                                  } else {
+                                    await payment();
+                                  }
+                                }),
+                              ),
                             ),
-                          ),
-
-                          /// Payment
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 24,
-                            ),
-                            child: PaymentPayment(
-                              calculate,
-                              focused: customer.value == null ||
-                                      deliveryType.value == null ||
-                                      paymentStep.value != PaymentStep.payment
-                                  ? null
-                                  : paymentStep.value == PaymentStep.payment,
-                              onPressed: () async => syncCallback(() async {
-                                if (paymentStep.value != PaymentStep.payment) {
-                                  paymentStep.value = PaymentStep.payment;
-                                } else {
-                                  await payment();
-                                }
-                              }),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
+                            const SizedBox(height: 24),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

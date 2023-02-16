@@ -113,7 +113,10 @@ class NavigationScreen extends HookConsumerWidget {
                       padding: EdgeInsets.only(left: 24),
                       child: SizedBox(height: 40, child: SearchField()),
                     )
-                  : const DeliveryPickerField(),
+                  : const Align(
+                      alignment: Alignment.centerLeft,
+                      child: DeliveryPickerField(),
+                    ),
               actions: <Widget>[
                 Align(
                   child: Padding(
@@ -194,6 +197,7 @@ class NavigationScreen extends HookConsumerWidget {
                     unselectedFontSize: theme.bottomNavigationBarTheme
                             .unselectedLabelStyle?.fontSize ??
                         12,
+                    elevation: 0,
                     type: BottomNavigationBarType.fixed,
                     currentIndex: currentPage.value,
                     onTap: (final int index) async =>

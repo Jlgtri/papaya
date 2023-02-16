@@ -126,25 +126,26 @@ class MapScreen extends HookConsumerWidget {
         (final LatLng latLng) async {
           animateStreamSubscription.pause();
           await Future.wait(<Future<void>>[
-            (ref.read(placemarksProvider(latLng).future)).then(
-              (final Iterable<Placemark> placemarks) async {
-                final UserAddressesModel? address =
-                    placemarks.firstOrNull?.convert().convert();
-                if (address?.state?.shortName?.isEmpty ?? true) {
-                  await navigator.pushNamed(
-                    Routes.mapLocationInvalid.name,
-                    arguments: MapLocationInvalidScreen(address),
-                  );
+            (ref.read(placemarksProvider(latLng).future))
+                .then((final Iterable<Placemark> placemarks) async {
+              final UserAddressesModel? address =
+                  placemarks.firstOrNull?.convert().convert();
+              if (address?.state?.shortName?.isEmpty ??
+                  address?.state?.longName?.isEmpty ??
+                  true) {
+                await navigator.pushNamed(
+                  Routes.mapLocationInvalid.name,
+                  arguments: MapLocationInvalidScreen(address),
+                );
 
-                  if (customLatLng.value != null) {
-                    animateStream.add(customLatLng.value!);
-                  }
-                } else {
-                  customLatLng.value = latLng;
-                  addressController.text = address?.displayLong ?? '';
+                if (customLatLng.value != null) {
+                  animateStream.add(customLatLng.value!);
                 }
-              },
-            ),
+              } else {
+                customLatLng.value = latLng;
+                addressController.text = address?.displayLong ?? '';
+              }
+            }),
             animateTo(latLng),
           ]).then((final _) => animateStreamSubscription.resume());
         },

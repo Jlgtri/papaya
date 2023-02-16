@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -62,47 +63,52 @@ class StoreScreen extends HookConsumerWidget {
           systemNavigationBarIconBrightness: Brightness.dark,
           systemNavigationBarColor: theme.colorScheme.surface,
         ),
-        child: MediaQuery.removePadding(
-          context: context,
-          removeBottom: true,
-          child: Material(
-            color: theme.colorScheme.onBackground,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                /// Background Image
-                CachedNetworkImage(
-                  imageUrl: store.imgUrl ?? '',
-                  imageBuilder:
-                      (final _, final ImageProvider<Object> imageProvider) =>
+        child: Material(
+          color: theme.colorScheme.surface,
+          child: SafeArea(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: Material(
+                color: theme.colorScheme.onBackground,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    /// Background Image
+                    CachedNetworkImage(
+                      imageUrl: store.imgUrl ?? '',
+                      imageBuilder: (final _,
+                              final ImageProvider<Object> imageProvider) =>
                           DecoratedBox(
-                    position: DecorationPosition.foreground,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        transform: const GradientRotation(0.096516707635),
-                        stops: const <double>[
-                          0,
-                          715 / 375 * 0.2223,
-                          715 / 375 * 0.9488
-                        ],
-                        colors: <Color>[
-                          Colors.black.withOpacity(0.68),
-                          Colors.black.withOpacity(0.73),
-                          Colors.black.withOpacity(0)
-                        ],
+                        position: DecorationPosition.foreground,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            transform: const GradientRotation(0.096516707635),
+                            stops: const <double>[
+                              0,
+                              715 / 375 * 0.2223,
+                              715 / 375 * 0.9488
+                            ],
+                            colors: <Color>[
+                              Colors.black.withOpacity(0.68),
+                              Colors.black.withOpacity(0.73),
+                              Colors.black.withOpacity(0)
+                            ],
+                          ),
+                        ),
+                        child: Image(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                          filterQuality: FilterQuality.high,
+                        ),
                       ),
+                      errorWidget: (final _, final __, final ___) =>
+                          const SizedBox.shrink(),
                     ),
-                    child: Image(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.high,
-                    ),
-                  ),
-                  errorWidget: (final _, final __, final ___) =>
-                      const SizedBox.shrink(),
+                    StoreContent(store),
+                  ],
                 ),
-                StoreContent(store),
-              ],
+              ),
             ),
           ),
         ),
@@ -1038,7 +1044,12 @@ class StoreProductCard extends HookConsumerWidget {
                               children: <Widget>[
                                 Padding(
                                   padding: const EdgeInsets.only(top: 1),
-                                  child: Icon(icons.plus, size: 8),
+                                  child: Icon(
+                                    Platform.isIOS
+                                        ? icons.plusCircle
+                                        : icons.plus,
+                                    size: 8,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
                                 Flexible(

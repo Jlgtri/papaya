@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
@@ -393,7 +394,10 @@ class CartProductCounter extends StatelessWidget {
                 ),
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: Icon(icons.minusCircle, size: 24),
+                  child: Icon(
+                    Platform.isIOS ? icons.minus : icons.minusCircle,
+                    size: 24,
+                  ),
                 ),
                 onPressed: onPressed != null && amount > 1
                     ? () async => onPressed?.call(product..amount -= 1)
@@ -428,7 +432,10 @@ class CartProductCounter extends StatelessWidget {
                 ),
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: Icon(icons.plusCircle, size: 24),
+                  child: Icon(
+                    Platform.isIOS ? icons.plus : icons.plusCircle,
+                    size: 24,
+                  ),
                 ),
                 onPressed: onPressed != null && amount < 99
                     ? () async => onPressed?.call(product..amount += 1)

@@ -33,7 +33,7 @@ final StreamProvider<LatLng> latLngProvider = StreamProvider<LatLng>(
 final FutureProviderFamily<Iterable<LatLng>, String> locationProvider =
     FutureProvider.family<Iterable<LatLng>, String>(
   (final FutureProviderRef<Iterable<LatLng>> ref, final String address) async =>
-      (await locationFromAddress(address))
+      (await locationFromAddress(address, localeIdentifier: 'en_US'))
           .map((final _) => LatLng(_.latitude, _.longitude)),
 );
 
@@ -41,5 +41,9 @@ final FutureProviderFamily<Iterable<LatLng>, String> locationProvider =
 final FutureProviderFamily<Iterable<Placemark>, LatLng> placemarksProvider =
     FutureProvider.family<Iterable<Placemark>, LatLng>(
   (final FutureProviderRef<Iterable<Placemark>> ref, final LatLng latLng) =>
-      placemarkFromCoordinates(latLng.latitude, latLng.longitude),
+      placemarkFromCoordinates(
+    latLng.latitude,
+    latLng.longitude,
+    localeIdentifier: 'en_US',
+  ),
 );

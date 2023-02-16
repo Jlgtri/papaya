@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart';
@@ -401,7 +402,10 @@ class ProductCounter extends HookConsumerWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
               ),
             ),
-            icon: Icon(icons.minus, size: 12),
+            icon: Icon(
+              Platform.isIOS ? icons.minusCircle : icons.minus,
+              size: 12,
+            ),
             onPressed: amount.value > min && onPressed != null
                 ? () async => onPressed!(amount.value -= 1)
                 : null,
@@ -442,7 +446,8 @@ class ProductCounter extends HookConsumerWidget {
                 ),
               ),
             ),
-            icon: Icon(icons.plus, size: 12),
+            icon:
+                Icon(Platform.isIOS ? icons.plusCircle : icons.plus, size: 12),
             onPressed: amount.value < max && onPressed != null
                 ? () async => onPressed!(amount.value += 1)
                 : null,

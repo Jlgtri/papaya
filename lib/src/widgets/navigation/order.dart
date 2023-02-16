@@ -68,270 +68,278 @@ class OrderScreen extends HookConsumerWidget {
         ),
         child: ColoredBox(
           color: theme.colorScheme.surface,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                AppBar(
-                  systemOverlayStyle: SystemUiOverlayStyle(
-                    statusBarColor: theme.colorScheme.surface,
-                    statusBarIconBrightness: Brightness.dark,
-                    statusBarBrightness: Brightness.light,
-                    systemNavigationBarIconBrightness: Brightness.dark,
-                    systemNavigationBarColor: theme.colorScheme.surface,
-                  ),
-                  leadingWidth: double.infinity,
-                  leading: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: TextButton(
-                        onPressed: () async => syncCallback(navigator.maybePop),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(icons.arrow.left, size: 14),
-                              const SizedBox(width: 12),
-                              Flexible(child: Text($.store.back))
-                            ],
-                          ),
-                        ),
-                      ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  AppBar(
+                    systemOverlayStyle: SystemUiOverlayStyle(
+                      statusBarColor: theme.colorScheme.surface,
+                      statusBarIconBrightness: Brightness.dark,
+                      statusBarBrightness: Brightness.light,
+                      systemNavigationBarIconBrightness: Brightness.dark,
+                      systemNavigationBarColor: theme.colorScheme.surface,
                     ),
-                  ),
-                ),
-
-                /// Title
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16)
-                      .copyWith(bottom: 24, top: 8),
-                  child: Text(
-                    $.orders.screen.title,
-                    style: theme.textTheme.displayMedium,
-                  ),
-                ),
-
-                /// Card
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    child: ColoredBox(
-                      color: theme.colorScheme.surfaceTint,
+                    leadingWidth: double.infinity,
+                    leading: Align(
+                      alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            /// Store Name
-                            const SizedBox(height: 24),
-                            if (store?.name?.isNotEmpty ?? false) ...<Widget>[
-                              Text(
-                                store!.name!,
-                                style: theme.textTheme.titleLarge,
-                              ),
-                              const SizedBox(height: 4),
-                            ],
-
-                            /// Order Number
-                            Row(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: TextButton(
+                          onPressed: () async =>
+                              syncCallback(navigator.maybePop),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
-                                /// Title
-                                Text(
-                                  $.orders.screen.number,
-                                  style: theme.textTheme.bodyLarge,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '#12345',
-                                  style: theme.textTheme.titleMedium,
-                                )
+                                Icon(icons.arrow.left, size: 14),
+                                const SizedBox(width: 12),
+                                Flexible(child: Text($.store.back))
                               ],
                             ),
-
-                            /// Delivery Time
-                            Text(
-                              () {
-                                final String time =
-                                    DateFormat('h:mm a').format(DateTime.now());
-                                switch (deliveryType) {
-                                  case DeliveryType.delivery:
-                                    return $.orders.card.estimate
-                                        .delivery(time);
-                                  case DeliveryType.pickup:
-                                    return $.orders.card.estimate.pickup(time);
-                                }
-                              }(),
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-
-                            Divider(
-                              height: 32,
-                              color: theme.colorScheme.outline,
-                            ),
-                            if (storeLocation is AsyncLoading)
-                              const Center(
-                                child: CircularProgressIndicator.adaptive(),
-                              )
-                            else if (storeLocation?.valueOrNull?.firstOrNull ==
-                                null)
-                              ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(8)),
-                                child: SizedBox(
-                                  height: 232,
-                                  child: CachedNetworkImage(
-                                    imageUrl: store?.imgUrl ?? '',
-                                    fit: BoxFit.cover,
-                                    filterQuality: FilterQuality.high,
-                                    errorWidget:
-                                        (final _, final __, final ___) =>
-                                            Image.asset(
-                                      assets.logo,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            else
-                              ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(8)),
-                                child: FlutterMap(
-                                  options: MapOptions(
-                                    keepAlive: true,
-                                    zoom: 14,
-                                    center: storeLocation!.value!.first,
-                                    interactiveFlags: InteractiveFlag.none,
-                                  ),
-                                  children: <Widget>[
-                                    TileLayer(
-                                      urlTemplate: mapTileUrl,
-                                      minZoom: 4,
-                                    ),
-                                    MarkerLayer(
-                                      markers: <Marker>[
-                                        Marker(
-                                          point: storeLocation.value!.first,
-                                          rotate: false,
-                                          builder: (final _) => Icon(
-                                            icons.location,
-                                            color: theme.colorScheme.primary,
-                                            size: 40,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            const SizedBox(height: 16),
-                            Text(
-                              $.orders.screen.trackTitle,
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: <Widget>[
-                                Text(
-                                  'delivery.com/order123456',
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                IconButton(
-                                  style: IconButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    fixedSize: const Size.square(28),
-                                    foregroundColor: theme.colorScheme.primary,
-                                  ),
-                                  onPressed: () async => FlutterClipboard.copy(
-                                    'delivery.com/order123456',
-                                  ),
-                                  icon: Padding(
-                                    padding: const EdgeInsets.only(bottom: 1),
-                                    child: Icon(icons.copy, size: 16),
-                                  ),
-                                  padding: const EdgeInsets.all(6),
-                                )
-                              ],
-                            ),
-
-                            /// Support / Add a Tip
-                            const SizedBox(height: 16),
-                            Row(
-                              children: <Widget>[
-                                /// Support
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () {},
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text($.orders.screen.support),
-                                    ),
-                                  ),
-                                ),
-
-                                /// Add a Tip
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: ElevatedButton(
-                                    onPressed: () {},
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text($.orders.screen.tip),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            Divider(
-                              height: 48,
-                              color: theme.colorScheme.outline,
-                            ),
-                            const SizedBox(height: 8),
-                            const OrderDetails(),
-                            Divider(
-                              height: 32,
-                              color: theme.colorScheme.outline,
-                            ),
-
-                            /// Total Price
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                /// Title
-                                Text(
-                                  $.orders.card.details.total,
-                                  style: theme.textTheme.titleLarge,
-                                ),
-                                const SizedBox(width: 16),
-                                Text(
-                                  r'$59.80',
-                                  style: theme.textTheme.titleLarge,
-                                )
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: mediaQuery.padding.bottom + 150),
-              ],
+
+                  /// Title
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16)
+                        .copyWith(bottom: 24, top: 8),
+                    child: Text(
+                      $.orders.screen.title,
+                      style: theme.textTheme.displayMedium,
+                    ),
+                  ),
+
+                  /// Card
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(8)),
+                      child: ColoredBox(
+                        color: theme.colorScheme.surfaceTint,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              /// Store Name
+                              const SizedBox(height: 24),
+                              if (store?.name?.isNotEmpty ?? false) ...<Widget>[
+                                Text(
+                                  store!.name!,
+                                  style: theme.textTheme.titleLarge,
+                                ),
+                                const SizedBox(height: 4),
+                              ],
+
+                              /// Order Number
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  /// Title
+                                  Text(
+                                    $.orders.screen.number,
+                                    style: theme.textTheme.bodyLarge,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '#12345',
+                                    style: theme.textTheme.titleMedium,
+                                  )
+                                ],
+                              ),
+
+                              /// Delivery Time
+                              Text(
+                                () {
+                                  final String time = DateFormat('h:mm a')
+                                      .format(DateTime.now());
+                                  switch (deliveryType) {
+                                    case DeliveryType.delivery:
+                                      return $.orders.card.estimate
+                                          .delivery(time);
+                                    case DeliveryType.pickup:
+                                      return $.orders.card.estimate
+                                          .pickup(time);
+                                  }
+                                }(),
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+
+                              Divider(
+                                height: 32,
+                                color: theme.colorScheme.outline,
+                              ),
+                              if (storeLocation is AsyncLoading)
+                                const Center(
+                                  child: CircularProgressIndicator.adaptive(),
+                                )
+                              else if (storeLocation
+                                      ?.valueOrNull?.firstOrNull ==
+                                  null)
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(8)),
+                                  child: SizedBox(
+                                    height: 232,
+                                    child: CachedNetworkImage(
+                                      imageUrl: store?.imgUrl ?? '',
+                                      fit: BoxFit.cover,
+                                      filterQuality: FilterQuality.high,
+                                      errorWidget:
+                                          (final _, final __, final ___) =>
+                                              Image.asset(
+                                        assets.logo,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(8)),
+                                  child: FlutterMap(
+                                    options: MapOptions(
+                                      keepAlive: true,
+                                      zoom: 14,
+                                      center: storeLocation!.value!.first,
+                                      interactiveFlags: InteractiveFlag.none,
+                                    ),
+                                    children: <Widget>[
+                                      TileLayer(
+                                        urlTemplate: mapTileUrl,
+                                        minZoom: 4,
+                                      ),
+                                      MarkerLayer(
+                                        markers: <Marker>[
+                                          Marker(
+                                            point: storeLocation.value!.first,
+                                            rotate: false,
+                                            builder: (final _) => Icon(
+                                              icons.location,
+                                              color: theme.colorScheme.primary,
+                                              size: 40,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 16),
+                              Text(
+                                $.orders.screen.trackTitle,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: <Widget>[
+                                  Text(
+                                    'delivery.com/order123456',
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  IconButton(
+                                    style: IconButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      fixedSize: const Size.square(28),
+                                      foregroundColor:
+                                          theme.colorScheme.primary,
+                                    ),
+                                    onPressed: () async =>
+                                        FlutterClipboard.copy(
+                                      'delivery.com/order123456',
+                                    ),
+                                    icon: Padding(
+                                      padding: const EdgeInsets.only(bottom: 1),
+                                      child: Icon(icons.copy, size: 16),
+                                    ),
+                                    padding: const EdgeInsets.all(6),
+                                  )
+                                ],
+                              ),
+
+                              /// Support / Add a Tip
+                              const SizedBox(height: 16),
+                              Row(
+                                children: <Widget>[
+                                  /// Support
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () {},
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Text($.orders.screen.support),
+                                      ),
+                                    ),
+                                  ),
+
+                                  /// Add a Tip
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () {},
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Text($.orders.screen.tip),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Divider(
+                                height: 48,
+                                color: theme.colorScheme.outline,
+                              ),
+                              const SizedBox(height: 8),
+                              const OrderDetails(),
+                              Divider(
+                                height: 32,
+                                color: theme.colorScheme.outline,
+                              ),
+
+                              /// Total Price
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  /// Title
+                                  Text(
+                                    $.orders.card.details.total,
+                                    style: theme.textTheme.titleLarge,
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Text(
+                                    r'$59.80',
+                                    style: theme.textTheme.titleLarge,
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: mediaQuery.padding.bottom + 150),
+                ],
+              ),
             ),
           ),
         ),

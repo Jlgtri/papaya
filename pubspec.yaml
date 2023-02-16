@@ -32,14 +32,14 @@ dependencies:
   geolocator: ^9.0.2
   hooks_riverpod: *riverpod_version
   internet_connection_checker: ^1.0.0+1
-  intl: ^0.17.0
+  intl: ^0.18.0
   isar: *isar_version
   isar_flutter_libs: *isar_version
   json_converters_lite: ^1.0.2+1
   latlong2: ^0.8.1
   logging: ^1.1.0
-  meta: ^1.8.0
-  modal_bottom_sheet: ^2.1.2
+  meta: ^1.9.0
+  modal_bottom_sheet: ^3.0.0-pre
   ntp: ^2.0.0
   page_transition: ^2.0.9
   path_provider: ^2.0.11
@@ -59,6 +59,8 @@ dev_dependencies:
 dependency_overrides:
   collection: ^1.17.0
   ffi: ^2.0.1
+  intl: ^0.18.0
+  meta: ^1.9.0
 
 flutter:
   assets:

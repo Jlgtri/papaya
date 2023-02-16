@@ -54,15 +54,15 @@ class _SyncCallbackHookState
         _callbacks.stream.listen((final Future<void> future) async {
       _callbacksSubscription.pause();
       try {
+        final Completer<void> completer = Completer<void>();
         if (hook.postFrame) {
-          final Completer<void> completer = Completer<void>();
           WidgetsBinding.instance.addPostFrameCallback(
             (final _) => future.then(completer.complete),
           );
-          await completer.future;
         } else {
-          await future;
+          unawaited(future.then(completer.complete));
         }
+        await completer.future;
       } finally {
         _callbacksSubscription.resume();
       }
