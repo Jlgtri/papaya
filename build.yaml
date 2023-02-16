@@ -14,19 +14,19 @@ targets:
           include:
             - lib/src/models/**
 
-      generators|assets:
+      generators_lite|assets:
         enabled: true
         options:
           import_path: source/assets/
           export_path: lib/src/generated/assets.g.dart
 
-      generators|i18n:
+      generators_lite|i18n:
         enabled: true
         options:
           import_path: source/i18n/
           export_path: lib/src/generated/i18n.g.dart
 
-      generators|models:
+      generators_lite|models:
         enabled: true
         options:
           import_path: source/models/
@@ -34,7 +34,7 @@ targets:
           convert_class_names: false
           include_null_fields: false
 
-      generators|icons:
+      generators_lite|icons:
         enabled: true
         options:
           import_path: source/icons/
