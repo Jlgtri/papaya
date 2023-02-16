@@ -1,4 +1,5 @@
 {
+  // Runs automatic tasks on startup.
   "task.allowAutomaticTasks": "on",
   // Causes the debug view to automatically appear when a breakpoint is hit. This
   // setting is global and not configurable per-language.

@@ -43,10 +43,9 @@ class RoutesApp extends StatelessWidget {
         title: 'Papaya',
         debugShowCheckedModeBanner: false,
         navigatorKey: Catcher.navigatorKey,
-        locale: I18NLocale.enUS.locale,
         supportedLocales: I18NLocale.values.map((final _) => _.locale),
         localizationsDelegates: const <LocalizationsDelegate<Object?>>[
-          I18NLocalizations.delegate,
+          I18NLocalizations.delegate
         ],
         theme: ThemeData.from(
           useMaterial3: true,

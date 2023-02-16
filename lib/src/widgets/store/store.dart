@@ -283,7 +283,7 @@ class StoreContent extends HookConsumerWidget {
                               menuKey?.currentContext?.findRenderObject();
                           if (object != null) {
                             final ScrollableState scrollable =
-                                Scrollable.of(menuKey!.currentContext!)!;
+                                Scrollable.of(menuKey!.currentContext!);
                             await scrollable.position.ensureVisible(
                               object,
                               duration: const Duration(milliseconds: 333),
